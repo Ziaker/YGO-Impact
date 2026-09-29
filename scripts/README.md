@@ -2,58 +2,79 @@
 
 ## Downloader de artes
 
-`scripts/baixar_artes.py` seleciona e baixa artes `image_url_cropped` do YGOPRODeck usando somente a biblioteca padrão do Python.
+`scripts/baixar_artes.py` contém o downloader genérico de artes `image_url_cropped` do YGOPRODeck usando somente a biblioteca padrão do Python.
+
+A política oficial do pool do primeiro protótipo é aplicada por `scripts/sync_prototype_pool.py`.
 
 ### Pool automático do primeiro protótipo
 
 O modo oficial atual é:
 
 ```bash
-python scripts/baixar_artes.py --prototype-pool
+python scripts/sync_prototype_pool.py --prototype-pool
 ```
 
-Ele seleciona deterministicamente por **nome + ID** e exige `image_url_cropped` disponível.
+A seleção exige `image_url_cropped` disponível e usa regras determinísticas.
 
-Pool atual:
+Pool atual de monstros:
 
-- 15 Beast;
-- 15 Psychic;
-- 18 Fiend;
-- 18 Spellcaster;
-- somente monstros Normal, Efeito, Ritual e Fusion;
-- 20 Magias:
-  - 2 Field;
-  - 2 Ritual;
-  - 5 Equip;
-  - 11 entre Normal, Quick-Play e Continuous;
-- 10 Armadilhas de qualquer subtipo.
+- RACE ativas: Beast, Psychic, Fiend e Spellcaster;
+- tipos permitidos: Normal, Efeito, Ritual e Fusion;
+- nenhum monstro com `archetype` preenchido na API;
+- slots não-Normal preservados:
+  - 15 Beast;
+  - 15 Psychic;
+  - 18 Fiend;
+  - 18 Spellcaster;
+- mais **10 Normal Monsters por RACE**, todos de **Nível 2 a 4**.
 
-Total: **96 cartas**, sendo **66 monstros, 20 Magias e 10 Armadilhas**.
+Isso resulta em:
 
-O Nível **não influencia a escolha**. Ele é preservado como metadado e contabilizado no catálogo gerado.
+- 25 Beast;
+- 25 Psychic;
+- 28 Fiend;
+- 28 Spellcaster;
+- **106 monstros** no total.
 
-A execução cria:
+Beast, Fiend e Spellcaster reservam 1 Ritual Monster sem arquétipo dentro de seus slots não-Normal. Psychic, por não possuir Ritual compatível com a política atual, reserva 2 slots não-Normal para os dois candidatos sem arquétipo de maior Nível.
+
+Magias:
+
+- 20 no total;
+- 2 Field;
+- 2 Ritual;
+- 5 Equip;
+- 11 entre Normal, Quick-Play e Continuous.
+
+Armadilhas:
+
+- 10 no total;
+- qualquer subtipo.
+
+Total atual: **136 cartas**, sendo **106 monstros, 20 Magias e 10 Armadilhas**.
+
+A execução cria/atualiza:
 
 ```text
 assets-local/card-art/selection.json
 assets-local/card-art/manifest.json
 ```
 
-`selection.json` registra nome, ID, RACE, tipo retornado pela API, tipo normalizado do protótipo, Nível e `image_url_cropped`, além de resumos por RACE, tipo, Nível e subtipo de Magia/Armadilha.
+`selection.json` registra nome, ID, RACE, tipo retornado pela API, tipo normalizado do protótipo, Nível, `archetype` e `image_url_cropped`, além de resumos das cotas selecionadas.
 
-`manifest.json` registra os arquivos efetivamente baixados, SHA-256, tamanho e os mesmos metadados relevantes.
+`manifest.json` registra os arquivos efetivamente baixados, SHA-256, tamanho e os mesmos metadados relevantes disponíveis no downloader.
 
 ### Dry-run
 
 ```bash
-python scripts/baixar_artes.py --prototype-pool --dry-run
+python scripts/sync_prototype_pool.py --prototype-pool --dry-run
 ```
 
 O dry-run mostra a distribuição por Nível e o plano de download sem criar arquivos.
 
 ### Coleta manual
 
-Os modos antigos continuam disponíveis para inspeção e coleta pontual:
+O downloader-base continua disponível para inspeção e coleta pontual:
 
 ```bash
 python scripts/baixar_artes.py --name "Dark Magician" --dry-run
@@ -63,7 +84,7 @@ python scripts/baixar_artes.py --race Beast --dry-run
 python scripts/baixar_artes.py --all-compatible --dry-run
 ```
 
-Nos modos manuais, monstros continuam limitados às quatro RACE ativas e aos quatro tipos de monstro do protótipo.
+Nos modos manuais, monstros continuam limitados às quatro RACE ativas e aos quatro tipos de monstro suportados pelo downloader; a política ampliada de cotas/arquétipos pertence a `sync_prototype_pool.py`.
 
 `--all-artworks` baixa artes alternativas. `--pre-2010` permanece como filtro opcional e não faz parte da regra padrão do pool.
 
@@ -82,4 +103,4 @@ assets-local/card-art/
 └── manifest.json
 ```
 
-O workflow `.github/workflows/sync-card-art.yml` executa `--prototype-pool` e versiona as artes, a seleção e o manifesto quando houver alterações.
+O workflow `.github/workflows/sync-card-art.yml` executa `scripts/sync_prototype_pool.py --prototype-pool` e versiona as artes, a seleção e o manifesto quando houver alterações.
