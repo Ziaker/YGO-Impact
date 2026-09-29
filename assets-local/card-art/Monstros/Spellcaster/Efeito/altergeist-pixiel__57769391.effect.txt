@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Altergeist Pixiel
+ID: 57769391
+RACE: Spellcaster
+Nível: 1
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+You can Tribute this card; excavate the top 3 cards of your Deck, add 1 excavated "Altergeist" card to your hand, also send the rest to the GY. You can only use this effect of "Altergeist Pixiel" once per turn.

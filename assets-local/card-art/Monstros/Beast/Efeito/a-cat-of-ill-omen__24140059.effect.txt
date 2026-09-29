@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: A Cat of Ill Omen
+ID: 24140059
+RACE: Beast
+Nível: 2
+Tipo da API: Flip Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+FLIP: Choose 1 Trap from your Deck and place it on top of your Deck, or, if "Necrovalley" is on the field, you can add that Trap to your hand instead.

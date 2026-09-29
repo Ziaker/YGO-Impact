@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Allure Queen LV5
+ID: 23756165
+RACE: Spellcaster
+Nível: 5
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+Once per turn, during your Main Phase, if this card was Special Summoned by the effect of "Allure Queen LV3", you can select 1 Level 5 or lower monster on your opponent's side of the field and equip it to this card. (Only 1 card at a time can be equipped due to this effect.) If this card would be destroyed by battle, the equipped monster is destroyed instead. During your Standby Phase, by sending this card to the Graveyard while it's equipped due to its effect, Special Summon 1 "Allure Queen LV7" from your hand or Deck.

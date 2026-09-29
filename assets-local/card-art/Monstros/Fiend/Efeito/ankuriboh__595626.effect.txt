@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Ankuriboh
+ID: 595626
+RACE: Fiend
+Nível: 1
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+When an opponent's monster declares an attack: You can discard this card, then target 1 monster in either GY, except this card; Special Summon it to your field, but send it to the GY during the End Phase. If this card is destroyed by battle or card effect and sent to the GY: You can add 1 "Monster Reborn" from your Deck or GY to your hand during the End Phase of this turn. You can only use each effect of "Ankuriboh" once per turn.

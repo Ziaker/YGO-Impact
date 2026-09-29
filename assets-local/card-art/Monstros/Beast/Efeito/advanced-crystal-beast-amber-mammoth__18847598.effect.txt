@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Advanced Crystal Beast Amber Mammoth
+ID: 18847598
+RACE: Beast
+Nível: 4
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+If "Advanced Dark" is not in a Field Zone, send this monster to the GY. Once per turn, when your opponent activates a card or effect that targets your "Advanced Crystal Beast" card(s) or "Advanced Dark" (Quick Effect): You can negate the activation. Once per turn, when your "Advanced Crystal Beast" monster is targeted for an attack: You can negate that attack. If this face-up card is destroyed in a Monster Zone, you can place it face-up in your Spell & Trap Zone as a Continuous Spell, instead of sending it to the GY.

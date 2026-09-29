@@ -1,0 +1,14 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Alpacaribou, Mystical Beast of the Forest
+ID: 77797992
+RACE: Beast
+Nível: 7
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+● While in Attack Position: Attack Position Winged Beast, Insect, and Plant-Type monsters you control cannot be destroyed by battle.
+● While in Defense Position: Defense Position Winged Beast, Insect, and Plant-Type monsters you control cannot be targeted by, or be destroyed by, card effects.

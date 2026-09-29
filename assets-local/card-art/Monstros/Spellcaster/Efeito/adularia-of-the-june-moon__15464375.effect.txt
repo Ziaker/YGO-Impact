@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Adularia of the June Moon
+ID: 15464375
+RACE: Spellcaster
+Nível: 5
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+If you control a face-up card in your Spell & Trap Zone, you can Special Summon this card (from your hand). You can only Special Summon "Adularia of the June Moon" once per turn this way. Gains 600 ATK/DEF for each face-up Spell/Trap on the field. You can send 2 face-up cards from your Spell & Trap Zone to the GY; send 1 Level 4 or lower monster from your Deck to the GY. You can only use this effect of "Adularia of the June Moon" once per turn.

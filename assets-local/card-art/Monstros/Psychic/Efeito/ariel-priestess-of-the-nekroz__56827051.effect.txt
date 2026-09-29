@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Ariel, Priestess of the Nekroz
+ID: 56827051
+RACE: Psychic
+Nível: 4
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+Once per turn: You can reveal any number of "Nekroz" cards in your hand; increase or reduce this card's Level by the number of revealed cards until the end of this turn. If this card is Tributed by a card effect: You can add 1 "Nekroz" monster from your Deck to your hand, except a Ritual Monster. You can only use this effect of "Ariel, Priestess of the Nekroz" once per turn.

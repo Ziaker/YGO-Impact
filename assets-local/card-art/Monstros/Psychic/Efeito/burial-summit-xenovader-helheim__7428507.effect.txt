@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Burial Summit Xenovader△ Helheim
+ID: 7428507
+RACE: Psychic
+Nível: 6
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+During the Main Phase (Quick Effect): You can reveal this card in your hand; banish it (face-down), and if you do, Special Summon 1 of your face-down banished "Xenovader△" monsters, except a Level 6 monster. You can only use this effect of "Burial Summit Xenovader△ Helheim" once per turn. If this card is Normal or Special Summoned: Banish (face-down) the top 6 cards of your Deck. Other "Xenovader△" cards you control cannot be destroyed by your opponent's card effects, also your opponent cannot target them with card effects.

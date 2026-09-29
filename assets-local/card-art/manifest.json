@@ -1,4 +1,9 @@
 {
+  "effect_reference_summary": {
+    "effect_monsters": 51,
+    "policy": "sidecar-next-to-art-reference-only-gdd-prevails",
+    "reference_files": 51
+  },
   "files": {
     "Armadilhas/Continuous/a.i.-challenge-you__28645123.jpg": {
       "api_type": "Trap Card",
@@ -360,6 +365,19 @@
       "sha256": "5f7999b4fee0db37badd5b7caa903c8ba1722b53c104ce0222993abaae4d08cc",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/46052429.jpg"
     },
+    "Monstros/Beast/Efeito/3-hump-lacooda__86988864.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 530,
+      "card_id": 86988864,
+      "kind": "official-effect-reference",
+      "level": 3,
+      "name": "3-Hump Lacooda",
+      "paired_art": "Monstros/Beast/Efeito/3-hump-lacooda__86988864.jpg",
+      "prototype_type": "Efeito",
+      "race": "Beast",
+      "sha256": "765c10321d011b6985dee70cf175b8b96c770b6d8a7dd183b9d471aa037e9cba",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Beast/Efeito/3-hump-lacooda__86988864.jpg": {
       "api_type": "Effect Monster",
       "bytes": 98104,
@@ -371,6 +389,19 @@
       "race": "Beast",
       "sha256": "6c90ca63145c82a4d2604e966a54cec0225764e670c33d4bbc760a40069269fa",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/86988864.jpg"
+    },
+    "Monstros/Beast/Efeito/a-cat-of-ill-omen__24140059.effect.txt": {
+      "api_type": "Flip Effect Monster",
+      "bytes": 581,
+      "card_id": 24140059,
+      "kind": "official-effect-reference",
+      "level": 2,
+      "name": "A Cat of Ill Omen",
+      "paired_art": "Monstros/Beast/Efeito/a-cat-of-ill-omen__24140059.jpg",
+      "prototype_type": "Efeito",
+      "race": "Beast",
+      "sha256": "d5d3cbf556ed1f986e2dbdeca427acb158d0983c7dfe9d2714890959b5808725",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Beast/Efeito/a-cat-of-ill-omen__24140059.jpg": {
       "api_type": "Flip Effect Monster",
@@ -384,6 +415,19 @@
       "sha256": "46a0e5dbef30f9d49c67461a358c4bc600e5aec345b7741be36d6d92784ed086",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/24140059.jpg"
     },
+    "Monstros/Beast/Efeito/advanced-crystal-beast-amber-mammoth__18847598.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 967,
+      "card_id": 18847598,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Advanced Crystal Beast Amber Mammoth",
+      "paired_art": "Monstros/Beast/Efeito/advanced-crystal-beast-amber-mammoth__18847598.jpg",
+      "prototype_type": "Efeito",
+      "race": "Beast",
+      "sha256": "f7be674f31d1edd4ed74f7ab679b7aabf65468fb45d5867595d5f0e75027e3ab",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Beast/Efeito/advanced-crystal-beast-amber-mammoth__18847598.jpg": {
       "api_type": "Effect Monster",
       "bytes": 171297,
@@ -395,6 +439,19 @@
       "race": "Beast",
       "sha256": "47a6e75c09def63ceabb986cb5a45b665988fd288e835ef3abd829633b344c3b",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/18847598.jpg"
+    },
+    "Monstros/Beast/Efeito/advanced-crystal-beast-amethyst-cat__19963185.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 830,
+      "card_id": 19963185,
+      "kind": "official-effect-reference",
+      "level": 3,
+      "name": "Advanced Crystal Beast Amethyst Cat",
+      "paired_art": "Monstros/Beast/Efeito/advanced-crystal-beast-amethyst-cat__19963185.jpg",
+      "prototype_type": "Efeito",
+      "race": "Beast",
+      "sha256": "3cf5ed9b9b76ceaf3dd5575f61c83740a14c7600a961c4d64c4d24b9a802fa1a",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Beast/Efeito/advanced-crystal-beast-amethyst-cat__19963185.jpg": {
       "api_type": "Effect Monster",
@@ -408,6 +465,19 @@
       "sha256": "60824b5ea6a929eedc7753831b58ca55a19687730ce19d55389e6b112dc27eea",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/19963185.jpg"
     },
+    "Monstros/Beast/Efeito/advanced-crystal-beast-sapphire-pegasus__71620241.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 868,
+      "card_id": 71620241,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Advanced Crystal Beast Sapphire Pegasus",
+      "paired_art": "Monstros/Beast/Efeito/advanced-crystal-beast-sapphire-pegasus__71620241.jpg",
+      "prototype_type": "Efeito",
+      "race": "Beast",
+      "sha256": "1f4f31ab87b6fd2ecd3609b3785d88bd9b0c0ab77d546eee8199b90b7ad024ec",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Beast/Efeito/advanced-crystal-beast-sapphire-pegasus__71620241.jpg": {
       "api_type": "Effect Monster",
       "bytes": 193518,
@@ -419,6 +489,19 @@
       "race": "Beast",
       "sha256": "be6fccdae637fba4d62dce4ef8a439e3d46d3d16531c64f1ade16536bce73138",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/71620241.jpg"
+    },
+    "Monstros/Beast/Efeito/advanced-crystal-beast-topaz-tiger__72843899.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 797,
+      "card_id": 72843899,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Advanced Crystal Beast Topaz Tiger",
+      "paired_art": "Monstros/Beast/Efeito/advanced-crystal-beast-topaz-tiger__72843899.jpg",
+      "prototype_type": "Efeito",
+      "race": "Beast",
+      "sha256": "ea6a128901ff1448db2c4f214f61524092c4b73be4b77db06aa9a34e2d210f48",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Beast/Efeito/advanced-crystal-beast-topaz-tiger__72843899.jpg": {
       "api_type": "Effect Monster",
@@ -432,6 +515,19 @@
       "sha256": "1b8726b8f87df7b20864439aadbc9eb332a2c2c08abe9b07e14298f8c3c315e8",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/72843899.jpg"
     },
+    "Monstros/Beast/Efeito/aloof-lupine__92998610.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 813,
+      "card_id": 92998610,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Aloof Lupine",
+      "paired_art": "Monstros/Beast/Efeito/aloof-lupine__92998610.jpg",
+      "prototype_type": "Efeito",
+      "race": "Beast",
+      "sha256": "23163a9593315cad377d79ad4ba1b4a16de7644c5283e241ee948eb23b6f7fce",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Beast/Efeito/aloof-lupine__92998610.jpg": {
       "api_type": "Effect Monster",
       "bytes": 109728,
@@ -443,6 +539,19 @@
       "race": "Beast",
       "sha256": "0112c91aa37776628b7835c47aa9d4e6f5f724340e7ebf6db01ad379020d5297",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/92998610.jpg"
+    },
+    "Monstros/Beast/Efeito/alpacaribou-mystical-beast-of-the-forest__77797992.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 747,
+      "card_id": 77797992,
+      "kind": "official-effect-reference",
+      "level": 7,
+      "name": "Alpacaribou, Mystical Beast of the Forest",
+      "paired_art": "Monstros/Beast/Efeito/alpacaribou-mystical-beast-of-the-forest__77797992.jpg",
+      "prototype_type": "Efeito",
+      "race": "Beast",
+      "sha256": "1de6fafd5e3b478f049c3cede85c1a39aabe808fbb704f4a6362832dfdaf2789",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Beast/Efeito/alpacaribou-mystical-beast-of-the-forest__77797992.jpg": {
       "api_type": "Effect Monster",
@@ -456,6 +565,19 @@
       "sha256": "206c88b826c5fc918d5b761b6d71d222d446669c419f7229985cc9a14009fca9",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/77797992.jpg"
     },
+    "Monstros/Beast/Efeito/alpha-the-master-of-beasts__73304257.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 1034,
+      "card_id": 73304257,
+      "kind": "official-effect-reference",
+      "level": 8,
+      "name": "Alpha, the Master of Beasts",
+      "paired_art": "Monstros/Beast/Efeito/alpha-the-master-of-beasts__73304257.jpg",
+      "prototype_type": "Efeito",
+      "race": "Beast",
+      "sha256": "be23b59babc02b2ed7b8fabb6986f08441b7f39d6242b3fd73b638e430872b5f",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Beast/Efeito/alpha-the-master-of-beasts__73304257.jpg": {
       "api_type": "Effect Monster",
       "bytes": 132917,
@@ -468,6 +590,19 @@
       "sha256": "adb769386482820cca4b9af10999535ee4917ff318bbc10cf2218d12c10602ac",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/73304257.jpg"
     },
+    "Monstros/Beast/Efeito/amazement-ambassador-bufo__30829071.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 853,
+      "card_id": 30829071,
+      "kind": "official-effect-reference",
+      "level": 3,
+      "name": "Amazement Ambassador Bufo",
+      "paired_art": "Monstros/Beast/Efeito/amazement-ambassador-bufo__30829071.jpg",
+      "prototype_type": "Efeito",
+      "race": "Beast",
+      "sha256": "d04801a992a790c490ed93875ea01ad25d273cb52459bea8039dd97b1fedd370",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Beast/Efeito/amazement-ambassador-bufo__30829071.jpg": {
       "api_type": "Effect Monster",
       "bytes": 141737,
@@ -479,6 +614,19 @@
       "race": "Beast",
       "sha256": "3331e0d84a31175341e21946606253ad294cb5f8b43acc96064c68298b2c3b03",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/30829071.jpg"
+    },
+    "Monstros/Beast/Efeito/amazoness-baby-tiger__10928224.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 769,
+      "card_id": 10928224,
+      "kind": "official-effect-reference",
+      "level": 2,
+      "name": "Amazoness Baby Tiger",
+      "paired_art": "Monstros/Beast/Efeito/amazoness-baby-tiger__10928224.jpg",
+      "prototype_type": "Efeito",
+      "race": "Beast",
+      "sha256": "a85adac59658d324f7c74ef9e0e9a9894486914a0256aa567d96d4f8cb5444f4",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Beast/Efeito/amazoness-baby-tiger__10928224.jpg": {
       "api_type": "Effect Monster",
@@ -540,6 +688,19 @@
       "sha256": "9f4a19aade554ed3997485088ec6fc7cdce6ed13903148c8ea5331fcd76a0bc3",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/33951077.jpg"
     },
+    "Monstros/Fiend/Efeito/abaki__12694768.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 508,
+      "card_id": 12694768,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Abaki",
+      "paired_art": "Monstros/Fiend/Efeito/abaki__12694768.jpg",
+      "prototype_type": "Efeito",
+      "race": "Fiend",
+      "sha256": "9327a875b294289a6b6f7be1fd3731e333926d63e06f9f592edf2bb4fee7cc93",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Fiend/Efeito/abaki__12694768.jpg": {
       "api_type": "Effect Monster",
       "bytes": 96747,
@@ -551,6 +712,19 @@
       "race": "Fiend",
       "sha256": "8b18d1e1b453072bc7e55f1333029547ad1f09c8f50987b8a2319615f632cee8",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/12694768.jpg"
+    },
+    "Monstros/Fiend/Efeito/abominable-unchained-soul__1966438.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 932,
+      "card_id": 1966438,
+      "kind": "official-effect-reference",
+      "level": 8,
+      "name": "Abominable Unchained Soul",
+      "paired_art": "Monstros/Fiend/Efeito/abominable-unchained-soul__1966438.jpg",
+      "prototype_type": "Efeito",
+      "race": "Fiend",
+      "sha256": "1669c1e5edf243cb99a197cba940d60bed1e2b3df2ab47285f2abb0006bdf48e",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Fiend/Efeito/abominable-unchained-soul__1966438.jpg": {
       "api_type": "Effect Monster",
@@ -564,6 +738,19 @@
       "sha256": "3186e8bb04e29bcdbd93a45b1dd86c0db6b1b90a1519e3a3f6331daa18441dcb",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/1966438.jpg"
     },
+    "Monstros/Fiend/Efeito/absolute-king-back-jack__60990740.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 887,
+      "card_id": 60990740,
+      "kind": "official-effect-reference",
+      "level": 1,
+      "name": "Absolute King Back Jack",
+      "paired_art": "Monstros/Fiend/Efeito/absolute-king-back-jack__60990740.jpg",
+      "prototype_type": "Efeito",
+      "race": "Fiend",
+      "sha256": "65c4db3a068ed46bb3df9ff7b74ce5970565fb2830400ee8662d9a94f2aae84f",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Fiend/Efeito/absolute-king-back-jack__60990740.jpg": {
       "api_type": "Effect Monster",
       "bytes": 118014,
@@ -575,6 +762,19 @@
       "race": "Fiend",
       "sha256": "d7646cd411bb147aa5223b6e39166f0b344d619ee30c696e4f128fbd8edac272",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/60990740.jpg"
+    },
+    "Monstros/Fiend/Efeito/ahrima-the-wicked-warden__86377375.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 802,
+      "card_id": 86377375,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Ahrima, the Wicked Warden",
+      "paired_art": "Monstros/Fiend/Efeito/ahrima-the-wicked-warden__86377375.jpg",
+      "prototype_type": "Efeito",
+      "race": "Fiend",
+      "sha256": "aa4cf53469105efe5ae589b099e75c2e10c0883eb95174e89dd5183b79418513",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Fiend/Efeito/ahrima-the-wicked-warden__86377375.jpg": {
       "api_type": "Effect Monster",
@@ -588,6 +788,19 @@
       "sha256": "91c72dd7058da4097b1543e750def9e35003ce19a02e25f66020e03dcda7a160",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/86377375.jpg"
     },
+    "Monstros/Fiend/Efeito/aiwass-divine-spirit-of-the-law__84288367.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 1045,
+      "card_id": 84288367,
+      "kind": "official-effect-reference",
+      "level": 8,
+      "name": "Aiwass, Divine Spirit of the Law",
+      "paired_art": "Monstros/Fiend/Efeito/aiwass-divine-spirit-of-the-law__84288367.jpg",
+      "prototype_type": "Efeito",
+      "race": "Fiend",
+      "sha256": "965d95088f9c65686c02d7078f70a2222805d520cac684c4a99f47ecbfd3b164",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Fiend/Efeito/aiwass-divine-spirit-of-the-law__84288367.jpg": {
       "api_type": "Effect Monster",
       "bytes": 145634,
@@ -599,6 +812,19 @@
       "race": "Fiend",
       "sha256": "fe213feed4dab3490bcbe47b76744be36f096a5ef617d12eafd267fff26e7333",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/84288367.jpg"
+    },
+    "Monstros/Fiend/Efeito/akasuna-the-battle-ashtra__38331244.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 994,
+      "card_id": 38331244,
+      "kind": "official-effect-reference",
+      "level": 8,
+      "name": "Akasuna the Battle Ashtra",
+      "paired_art": "Monstros/Fiend/Efeito/akasuna-the-battle-ashtra__38331244.jpg",
+      "prototype_type": "Efeito",
+      "race": "Fiend",
+      "sha256": "57553c1974c23d871ea0e78a90d1b3f046c5c3d17da0b9de5bffbaf170c9fbd4",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Fiend/Efeito/akasuna-the-battle-ashtra__38331244.jpg": {
       "api_type": "Effect Monster",
@@ -612,6 +838,19 @@
       "sha256": "06e2de47a5bae863f7d59285a62cc98d2be3e78ff753e18f87a527f43d41f53a",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/38331244.jpg"
     },
+    "Monstros/Fiend/Efeito/alice-lady-of-lament__14504454.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 940,
+      "card_id": 14504454,
+      "kind": "official-effect-reference",
+      "level": 3,
+      "name": "Alice, Lady of Lament",
+      "paired_art": "Monstros/Fiend/Efeito/alice-lady-of-lament__14504454.jpg",
+      "prototype_type": "Efeito",
+      "race": "Fiend",
+      "sha256": "50c9260974a3844bdb076080229f816bf36b964093d2e7239bba0537342d8324",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Fiend/Efeito/alice-lady-of-lament__14504454.jpg": {
       "api_type": "Effect Monster",
       "bytes": 160116,
@@ -623,6 +862,19 @@
       "race": "Fiend",
       "sha256": "c7e1b6d20f1675b13e0df5400c74d9469ef81ebbe8e5007a85f12ee11e3e5ce0",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/14504454.jpg"
+    },
+    "Monstros/Fiend/Efeito/alich-malebranche-of-the-burning-abyss__47728740.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 872,
+      "card_id": 47728740,
+      "kind": "official-effect-reference",
+      "level": 3,
+      "name": "Alich, Malebranche of the Burning Abyss",
+      "paired_art": "Monstros/Fiend/Efeito/alich-malebranche-of-the-burning-abyss__47728740.jpg",
+      "prototype_type": "Efeito",
+      "race": "Fiend",
+      "sha256": "e66caa8a2bc24d617816ed0f78e727155bc48a96031f26468ebc45c47476b2aa",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Fiend/Efeito/alich-malebranche-of-the-burning-abyss__47728740.jpg": {
       "api_type": "Effect Monster",
@@ -636,6 +888,19 @@
       "sha256": "c172ae3ff974bd3653ba11b6a2eeaed2491c186acf0fed1a2986a018a0c0b706",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/47728740.jpg"
     },
+    "Monstros/Fiend/Efeito/ambitious-gofer__41224658.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 607,
+      "card_id": 41224658,
+      "kind": "official-effect-reference",
+      "level": 6,
+      "name": "Ambitious Gofer",
+      "paired_art": "Monstros/Fiend/Efeito/ambitious-gofer__41224658.jpg",
+      "prototype_type": "Efeito",
+      "race": "Fiend",
+      "sha256": "3a2a23426fe2a0ac59ceb2a55b10b32c9f2ce123e1f1735b8f576a1015f9841d",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Fiend/Efeito/ambitious-gofer__41224658.jpg": {
       "api_type": "Effect Monster",
       "bytes": 158630,
@@ -647,6 +912,19 @@
       "race": "Fiend",
       "sha256": "769b95d4c2cd966b4eb6e2f971a8d68d1ea8503c5a73837f0b55dfc73836be8b",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/41224658.jpg"
+    },
+    "Monstros/Fiend/Efeito/angmarl-the-fiendish-monarch__65612386.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 607,
+      "card_id": 65612386,
+      "kind": "official-effect-reference",
+      "level": 6,
+      "name": "Angmarl the Fiendish Monarch",
+      "paired_art": "Monstros/Fiend/Efeito/angmarl-the-fiendish-monarch__65612386.jpg",
+      "prototype_type": "Efeito",
+      "race": "Fiend",
+      "sha256": "3bda9a11cefc82445ac29067e7d783e78ebf719794870fd971f090d4bceca181",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Fiend/Efeito/angmarl-the-fiendish-monarch__65612386.jpg": {
       "api_type": "Effect Monster",
@@ -660,6 +938,19 @@
       "sha256": "1e7987835aa5bbf312de8096db6b06d7ffaee2dfe725e42b6ecd55182e4e081b",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/65612386.jpg"
     },
+    "Monstros/Fiend/Efeito/ankuriboh__595626.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 850,
+      "card_id": 595626,
+      "kind": "official-effect-reference",
+      "level": 1,
+      "name": "Ankuriboh",
+      "paired_art": "Monstros/Fiend/Efeito/ankuriboh__595626.jpg",
+      "prototype_type": "Efeito",
+      "race": "Fiend",
+      "sha256": "33355d3fe5a6a7c20eca460486a65b5aaab91ea289ded104f0d84be576eb3644",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Fiend/Efeito/ankuriboh__595626.jpg": {
       "api_type": "Effect Monster",
       "bytes": 95020,
@@ -671,6 +962,19 @@
       "race": "Fiend",
       "sha256": "238d79d2627cc2fda9e9f8200698c5a615d480343dc874debfa2a5cdd97bc35a",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/595626.jpg"
+    },
+    "Monstros/Fiend/Efeito/annihilator-archfiend__29603180.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 746,
+      "card_id": 29603180,
+      "kind": "official-effect-reference",
+      "level": 9,
+      "name": "Annihilator Archfiend",
+      "paired_art": "Monstros/Fiend/Efeito/annihilator-archfiend__29603180.jpg",
+      "prototype_type": "Efeito",
+      "race": "Fiend",
+      "sha256": "356257ddc9f74cca168359b5670ea9dcbaab5a81bb1d8f4e177ff19208fb9512",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Fiend/Efeito/annihilator-archfiend__29603180.jpg": {
       "api_type": "Effect Monster",
@@ -756,6 +1060,19 @@
       "sha256": "7c9d301c6e675883c85d93f9037d4edef7cb8808dd323743ede5639392baef55",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/95825679.jpg"
     },
+    "Monstros/Psychic/Efeito/amazement-abomination-arlekino__31600845.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 970,
+      "card_id": 31600845,
+      "kind": "official-effect-reference",
+      "level": 7,
+      "name": "Amazement Abomination Arlekino",
+      "paired_art": "Monstros/Psychic/Efeito/amazement-abomination-arlekino__31600845.jpg",
+      "prototype_type": "Efeito",
+      "race": "Psychic",
+      "sha256": "17eccf1ae56df5d634956132c8e52987e10270f9272d8c50579330dd461db76f",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Psychic/Efeito/amazement-abomination-arlekino__31600845.jpg": {
       "api_type": "Effect Monster",
       "bytes": 243158,
@@ -767,6 +1084,19 @@
       "race": "Psychic",
       "sha256": "07e5324321d67ae5f13ac56cc0c6b538b7a6083e870cf3d12970a179876cede2",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/31600845.jpg"
+    },
+    "Monstros/Psychic/Efeito/amazement-administrator-arlekino__94821366.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 998,
+      "card_id": 94821366,
+      "kind": "official-effect-reference",
+      "level": 7,
+      "name": "Amazement Administrator Arlekino",
+      "paired_art": "Monstros/Psychic/Efeito/amazement-administrator-arlekino__94821366.jpg",
+      "prototype_type": "Efeito",
+      "race": "Psychic",
+      "sha256": "13d5b4b7c4b23c18f8108b89a8f75c5121eb016ea0fa401f54ebd3edb3aca896",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Psychic/Efeito/amazement-administrator-arlekino__94821366.jpg": {
       "api_type": "Effect Monster",
@@ -780,6 +1110,19 @@
       "sha256": "79a12f6d325a161bc8545775ba1e54047f4fbd8955adfceae9b5e893634b9a16",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/94821366.jpg"
     },
+    "Monstros/Psychic/Efeito/ariel-priestess-of-the-nekroz__56827051.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 818,
+      "card_id": 56827051,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Ariel, Priestess of the Nekroz",
+      "paired_art": "Monstros/Psychic/Efeito/ariel-priestess-of-the-nekroz__56827051.jpg",
+      "prototype_type": "Efeito",
+      "race": "Psychic",
+      "sha256": "1a05da2d7ef20d9b8b9e097f359d64d4a09aca37343393616d3a058218d7a9be",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Psychic/Efeito/ariel-priestess-of-the-nekroz__56827051.jpg": {
       "api_type": "Effect Monster",
       "bytes": 126149,
@@ -791,6 +1134,19 @@
       "race": "Psychic",
       "sha256": "9e1ce9943a9046416a15464e723ffd74e66f5844d1509bc9e11c00b1fed6b938",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/56827051.jpg"
+    },
+    "Monstros/Psychic/Efeito/armored-axon-kicker__62742651.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 752,
+      "card_id": 62742651,
+      "kind": "official-effect-reference",
+      "level": 6,
+      "name": "Armored Axon Kicker",
+      "paired_art": "Monstros/Psychic/Efeito/armored-axon-kicker__62742651.jpg",
+      "prototype_type": "Efeito",
+      "race": "Psychic",
+      "sha256": "8df01e5aab92040f1a8f61d6181824e64dcbec44c12d609862dec417bb053c9b",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Psychic/Efeito/armored-axon-kicker__62742651.jpg": {
       "api_type": "Effect Monster",
@@ -804,6 +1160,19 @@
       "sha256": "b5627687b0c420b3d3f37cfb24b35692752a80b82e6b63fef850d04163945c02",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/62742651.jpg"
     },
+    "Monstros/Psychic/Efeito/burial-summit-xenovader-helheim__7428507.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 979,
+      "card_id": 7428507,
+      "kind": "official-effect-reference",
+      "level": 6,
+      "name": "Burial Summit Xenovader△ Helheim",
+      "paired_art": "Monstros/Psychic/Efeito/burial-summit-xenovader-helheim__7428507.jpg",
+      "prototype_type": "Efeito",
+      "race": "Psychic",
+      "sha256": "840252d4d9ca4dee31a68c7e9bb170aa40b36f73c02cd2b85dc7d8fa58fa8748",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Psychic/Efeito/burial-summit-xenovader-helheim__7428507.jpg": {
       "api_type": "Effect Monster",
       "bytes": 175172,
@@ -815,6 +1184,19 @@
       "race": "Psychic",
       "sha256": "1ecae657602891ba3e945de696b855c951b19b1674a82641877ac9b1a1a0b764",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/7428507.jpg"
+    },
+    "Monstros/Psychic/Efeito/caam-serenity-of-gusto__91449144.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 536,
+      "card_id": 91449144,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Caam, Serenity of Gusto",
+      "paired_art": "Monstros/Psychic/Efeito/caam-serenity-of-gusto__91449144.jpg",
+      "prototype_type": "Efeito",
+      "race": "Psychic",
+      "sha256": "2f375b4cbf8dcfe69b8d5f1f55f9cfd28574a09f9922f60796baa5d4ac662335",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Psychic/Efeito/caam-serenity-of-gusto__91449144.jpg": {
       "api_type": "Effect Monster",
@@ -828,6 +1210,19 @@
       "sha256": "3de0c4302ba96afe3274ca0e1c718dceda2aa78183c0b0002aada578a2f64be3",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/91449144.jpg"
     },
+    "Monstros/Psychic/Efeito/crusadia-maximus__81524756.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 880,
+      "card_id": 81524756,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Crusadia Maximus",
+      "paired_art": "Monstros/Psychic/Efeito/crusadia-maximus__81524756.jpg",
+      "prototype_type": "Efeito",
+      "race": "Psychic",
+      "sha256": "e8f2ac36a9c4906673f8af1b0e69a77a7ef1eb8b82500b84d9ac9a5e11993608",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Psychic/Efeito/crusadia-maximus__81524756.jpg": {
       "api_type": "Effect Monster",
       "bytes": 108148,
@@ -839,6 +1234,19 @@
       "race": "Psychic",
       "sha256": "9591247f2afd0ce457411b20bf5f53bafcf314172493066e6db9ccd4ac5a114a",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/81524756.jpg"
+    },
+    "Monstros/Psychic/Efeito/d.d.-seeker__89015998.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 592,
+      "card_id": 89015998,
+      "kind": "official-effect-reference",
+      "level": 3,
+      "name": "D.D. Seeker",
+      "paired_art": "Monstros/Psychic/Efeito/d.d.-seeker__89015998.jpg",
+      "prototype_type": "Efeito",
+      "race": "Psychic",
+      "sha256": "a4db15e96e14ef82e009c71b36ca7b2fd74cf7811dd424f049a8c1a3f1cac432",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Psychic/Efeito/d.d.-seeker__89015998.jpg": {
       "api_type": "Effect Monster",
@@ -852,6 +1260,19 @@
       "sha256": "c99a2dfa97e6b3bb04f0b1d6a6b0f4a0e59529bf8dea7d7f9d79f52092f7cfa0",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/89015998.jpg"
     },
+    "Monstros/Psychic/Efeito/d.d.-telepon__51701885.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 667,
+      "card_id": 51701885,
+      "kind": "official-effect-reference",
+      "level": 2,
+      "name": "D.D. Telepon",
+      "paired_art": "Monstros/Psychic/Efeito/d.d.-telepon__51701885.jpg",
+      "prototype_type": "Efeito",
+      "race": "Psychic",
+      "sha256": "669a2c1e744093dd8098582ba0fcb60c0c6d4f45205c7ce407a1f30849e28893",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Psychic/Efeito/d.d.-telepon__51701885.jpg": {
       "api_type": "Effect Monster",
       "bytes": 115722,
@@ -863,6 +1284,19 @@
       "race": "Psychic",
       "sha256": "f5bedfe05832661ac650d2a1f29a79bef3d527b68c48129e4154cfcd8b4cf0cb",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/51701885.jpg"
+    },
+    "Monstros/Psychic/Efeito/destructotron__11232355.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 616,
+      "card_id": 11232355,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Destructotron",
+      "paired_art": "Monstros/Psychic/Efeito/destructotron__11232355.jpg",
+      "prototype_type": "Efeito",
+      "race": "Psychic",
+      "sha256": "bcecd8ae4f5d6d91a4ccd6239c39964864b47ebd79cfa9792390649acf5fff66",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Psychic/Efeito/destructotron__11232355.jpg": {
       "api_type": "Effect Monster",
@@ -876,6 +1310,19 @@
       "sha256": "93cebaf10509cf650c5d09b69b32d590c39382fd49b32771f5d371cf515c3533",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/11232355.jpg"
     },
+    "Monstros/Psychic/Efeito/doctor-cranium__22171591.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 576,
+      "card_id": 22171591,
+      "kind": "official-effect-reference",
+      "level": 1,
+      "name": "Doctor Cranium",
+      "paired_art": "Monstros/Psychic/Efeito/doctor-cranium__22171591.jpg",
+      "prototype_type": "Efeito",
+      "race": "Psychic",
+      "sha256": "f5dce531f88925f5ef80bb10b0a1f56f50851626f42842ea0d0a17247569e205",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Psychic/Efeito/doctor-cranium__22171591.jpg": {
       "api_type": "Effect Monster",
       "bytes": 129976,
@@ -887,6 +1334,19 @@
       "race": "Psychic",
       "sha256": "aa47c2a69348a1392780abafb0787fbd397c0654b82b92cb12c2795287ebaee3",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/22171591.jpg"
+    },
+    "Monstros/Psychic/Efeito/hyper-psychic-blaster-assault-mode__37169670.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 837,
+      "card_id": 37169670,
+      "kind": "official-effect-reference",
+      "level": 11,
+      "name": "Hyper Psychic Blaster/Assault Mode",
+      "paired_art": "Monstros/Psychic/Efeito/hyper-psychic-blaster-assault-mode__37169670.jpg",
+      "prototype_type": "Efeito",
+      "race": "Psychic",
+      "sha256": "de488a04f398f37912c1c7e64bd4d6456c68ceff5252e5a2a4d83a7637b62495",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Psychic/Efeito/hyper-psychic-blaster-assault-mode__37169670.jpg": {
       "api_type": "Effect Monster",
@@ -936,6 +1396,19 @@
       "sha256": "21698551b6008ff0e8f5c62b5ebb132a4dfc340be4687f1aa09a63c92cc59fdc",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/22916281.jpg"
     },
+    "Monstros/Spellcaster/Efeito/a-man-with-wdjat__51351302.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 628,
+      "card_id": 51351302,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "A Man with Wdjat",
+      "paired_art": "Monstros/Spellcaster/Efeito/a-man-with-wdjat__51351302.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "b3bafafd29bdd34e934b7b7dc94dafc42ff7b873f675467e539f99ba1df158b8",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Spellcaster/Efeito/a-man-with-wdjat__51351302.jpg": {
       "api_type": "Effect Monster",
       "bytes": 92716,
@@ -947,6 +1420,19 @@
       "race": "Spellcaster",
       "sha256": "b2c01aae69c79b19ac38352f8b3c618b9e1181c43f8df506237217998da957e4",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/51351302.jpg"
+    },
+    "Monstros/Spellcaster/Efeito/adularia-of-the-june-moon__15464375.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 888,
+      "card_id": 15464375,
+      "kind": "official-effect-reference",
+      "level": 5,
+      "name": "Adularia of the June Moon",
+      "paired_art": "Monstros/Spellcaster/Efeito/adularia-of-the-june-moon__15464375.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "ed39aff3e6192bd5fb8bdc752a754dca46e83fb351dcdb201760ad7f1352279c",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Spellcaster/Efeito/adularia-of-the-june-moon__15464375.jpg": {
       "api_type": "Effect Monster",
@@ -960,6 +1446,19 @@
       "sha256": "ea1bc92af48298c2384d6c4deb27a5d91390a48b68710f90dcb72b27b149885c",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/15464375.jpg"
     },
+    "Monstros/Spellcaster/Efeito/alchemist-of-black-spells__78121572.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 638,
+      "card_id": 78121572,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Alchemist of Black Spells",
+      "paired_art": "Monstros/Spellcaster/Efeito/alchemist-of-black-spells__78121572.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "aa4e5876af1b99677cb3bdcd93701486a146efdb2308d120dc558a70c0033123",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Spellcaster/Efeito/alchemist-of-black-spells__78121572.jpg": {
       "api_type": "Effect Monster",
       "bytes": 152382,
@@ -971,6 +1470,19 @@
       "race": "Spellcaster",
       "sha256": "9c4113643308f40bd72b3e061a581843d6757dee01ce7338d94b51738528ac59",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/78121572.jpg"
+    },
+    "Monstros/Spellcaster/Efeito/aleister-the-invoker__86120751.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 699,
+      "card_id": 86120751,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Aleister the Invoker",
+      "paired_art": "Monstros/Spellcaster/Efeito/aleister-the-invoker__86120751.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "83188c6ae8f22de9e28d136dfc6893a3ab3e13a1c5d803794d7e068f690515a5",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Spellcaster/Efeito/aleister-the-invoker__86120751.jpg": {
       "api_type": "Effect Monster",
@@ -984,6 +1496,19 @@
       "sha256": "ca732783e676f4f22593d23846ee506c3f6f5dec1b8ebcd4268562f5c9e81236",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/86120751.jpg"
     },
+    "Monstros/Spellcaster/Efeito/aleister-the-reminiscent__57294268.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 917,
+      "card_id": 57294268,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Aleister the Reminiscent",
+      "paired_art": "Monstros/Spellcaster/Efeito/aleister-the-reminiscent__57294268.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "53ee78e7f5cd5958671698d31961aeb766fa351af50a7e953e482d590e77761d",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Spellcaster/Efeito/aleister-the-reminiscent__57294268.jpg": {
       "api_type": "Effect Monster",
       "bytes": 140435,
@@ -995,6 +1520,19 @@
       "race": "Spellcaster",
       "sha256": "818fe61cd837009544ba499e9afdbc48e557da59a98ef6c9211bab4e243b9c35",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/57294268.jpg"
+    },
+    "Monstros/Spellcaster/Efeito/allure-queen-lv3__87257460.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 885,
+      "card_id": 87257460,
+      "kind": "official-effect-reference",
+      "level": 3,
+      "name": "Allure Queen LV3",
+      "paired_art": "Monstros/Spellcaster/Efeito/allure-queen-lv3__87257460.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "166f9d7a13f7bc8016f8ffcc8dcfc4095893a8bdde7d37d851256a142a3deb64",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Spellcaster/Efeito/allure-queen-lv3__87257460.jpg": {
       "api_type": "Effect Monster",
@@ -1008,6 +1546,19 @@
       "sha256": "fe9df9b59bd6c8edf6f1ed1474f01862bbdd5b6646ad5002a83a820a10cac2df",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/87257460.jpg"
     },
+    "Monstros/Spellcaster/Efeito/allure-queen-lv5__23756165.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 956,
+      "card_id": 23756165,
+      "kind": "official-effect-reference",
+      "level": 5,
+      "name": "Allure Queen LV5",
+      "paired_art": "Monstros/Spellcaster/Efeito/allure-queen-lv5__23756165.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "47b990020584449605f3fc8190d1dc5e26bb5325ea26475a1ac44f1fbeaa4fbc",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Spellcaster/Efeito/allure-queen-lv5__23756165.jpg": {
       "api_type": "Effect Monster",
       "bytes": 125403,
@@ -1019,6 +1570,19 @@
       "race": "Spellcaster",
       "sha256": "4a9a17e5b29c3ace2d15aa7c2f08cd002cf128fd0fb466d1e272cc6601a16db9",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/23756165.jpg"
+    },
+    "Monstros/Spellcaster/Efeito/allure-queen-lv7__50140163.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 775,
+      "card_id": 50140163,
+      "kind": "official-effect-reference",
+      "level": 7,
+      "name": "Allure Queen LV7",
+      "paired_art": "Monstros/Spellcaster/Efeito/allure-queen-lv7__50140163.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "fa83aa5826d7f266e9d4e8c08e56258e6592c276c066442cd940ba440cb09dac",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Spellcaster/Efeito/allure-queen-lv7__50140163.jpg": {
       "api_type": "Effect Monster",
@@ -1032,6 +1596,19 @@
       "sha256": "e3b2325a8c3a622b92dc6a8f051ff805b9e25062a9939920cf6ae733f94d51c7",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/50140163.jpg"
     },
+    "Monstros/Spellcaster/Efeito/altergeist-fijialert__85673903.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 818,
+      "card_id": 85673903,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Altergeist Fijialert",
+      "paired_art": "Monstros/Spellcaster/Efeito/altergeist-fijialert__85673903.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "19d0114411aa6080dc67eaf8ff82bf9898cbde43aa852b0d7669c7fcdbb00bfc",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Spellcaster/Efeito/altergeist-fijialert__85673903.jpg": {
       "api_type": "Effect Monster",
       "bytes": 133259,
@@ -1043,6 +1620,19 @@
       "race": "Spellcaster",
       "sha256": "335f79c8531fea232b4f59f8d3bad9b2ddf20a47467074222afa1d3052e738ad",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/85673903.jpg"
+    },
+    "Monstros/Spellcaster/Efeito/altergeist-kunquery__52927340.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 773,
+      "card_id": 52927340,
+      "kind": "official-effect-reference",
+      "level": 5,
+      "name": "Altergeist Kunquery",
+      "paired_art": "Monstros/Spellcaster/Efeito/altergeist-kunquery__52927340.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "1ed03fc0439bc2b89312fa536861bbdf1d535f1aa8ba8638f7895326fb548778",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Spellcaster/Efeito/altergeist-kunquery__52927340.jpg": {
       "api_type": "Effect Monster",
@@ -1056,6 +1646,19 @@
       "sha256": "66003a790ddab7a4993dfe3fd9dc0d9b3c658e23b6faa522c4b11d04bf37cd58",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/52927340.jpg"
     },
+    "Monstros/Spellcaster/Efeito/altergeist-marionetter__53143898.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 814,
+      "card_id": 53143898,
+      "kind": "official-effect-reference",
+      "level": 4,
+      "name": "Altergeist Marionetter",
+      "paired_art": "Monstros/Spellcaster/Efeito/altergeist-marionetter__53143898.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "0b4aa95e466ad294630d709204f99cd76a26a0e1b06b96f098633066ceedd986",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Spellcaster/Efeito/altergeist-marionetter__53143898.jpg": {
       "api_type": "Effect Monster",
       "bytes": 138311,
@@ -1067,6 +1670,19 @@
       "race": "Spellcaster",
       "sha256": "368c8942bd7088a6cd006c730c74c6e17212b1eeb17249a23740a334cd64b096",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/53143898.jpg"
+    },
+    "Monstros/Spellcaster/Efeito/altergeist-meluseek__25533642.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 795,
+      "card_id": 25533642,
+      "kind": "official-effect-reference",
+      "level": 1,
+      "name": "Altergeist Meluseek",
+      "paired_art": "Monstros/Spellcaster/Efeito/altergeist-meluseek__25533642.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "deafe75524075a5318a6b8fe1e83048950b6a3dec499238f41e5b9ea5954db7a",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Spellcaster/Efeito/altergeist-meluseek__25533642.jpg": {
       "api_type": "Effect Monster",
@@ -1080,6 +1696,19 @@
       "sha256": "0f3afcaf10919d4d5297e0954878a1c11405d81319152343c553684fe75fa325",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/25533642.jpg"
     },
+    "Monstros/Spellcaster/Efeito/altergeist-multifaker__42790071.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 864,
+      "card_id": 42790071,
+      "kind": "official-effect-reference",
+      "level": 3,
+      "name": "Altergeist Multifaker",
+      "paired_art": "Monstros/Spellcaster/Efeito/altergeist-multifaker__42790071.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "86d2efc3e63bad248fae06f0d1d1970ae496ad03de57f41dea64caaaa62cdb0b",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Spellcaster/Efeito/altergeist-multifaker__42790071.jpg": {
       "api_type": "Effect Monster",
       "bytes": 148529,
@@ -1091,6 +1720,19 @@
       "race": "Spellcaster",
       "sha256": "3a5b286b84e9e64109aae32d0a1321ddca1e3955ae1f0426b1fc5c5faf32e490",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/42790071.jpg"
+    },
+    "Monstros/Spellcaster/Efeito/altergeist-peritrator__54126514.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 794,
+      "card_id": 54126514,
+      "kind": "official-effect-reference",
+      "level": 1,
+      "name": "Altergeist Peritrator",
+      "paired_art": "Monstros/Spellcaster/Efeito/altergeist-peritrator__54126514.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "0c17385d7d05116c7c6ec179639dfbf5ed254fc7cf63e566041aa48cf6032986",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Spellcaster/Efeito/altergeist-peritrator__54126514.jpg": {
       "api_type": "Effect Monster",
@@ -1104,6 +1746,19 @@
       "sha256": "7cea791079bce42f89e5be9a6dd86db88e76cf0cc2e7f175591d207d9105147c",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/54126514.jpg"
     },
+    "Monstros/Spellcaster/Efeito/altergeist-pixiel__57769391.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 642,
+      "card_id": 57769391,
+      "kind": "official-effect-reference",
+      "level": 1,
+      "name": "Altergeist Pixiel",
+      "paired_art": "Monstros/Spellcaster/Efeito/altergeist-pixiel__57769391.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "4c1861183bb14916d3dd5b8d8d9e976aa2d92a90b44b9321b232c4ce0a672492",
+      "source": "YGOPRODeck cardinfo.desc"
+    },
     "Monstros/Spellcaster/Efeito/altergeist-pixiel__57769391.jpg": {
       "api_type": "Effect Monster",
       "bytes": 88961,
@@ -1115,6 +1770,19 @@
       "race": "Spellcaster",
       "sha256": "a4f4a2dc216b27f7b44d493c4956ae1c8713ff53ee659ef710b1cbc37f3c33c0",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/57769391.jpg"
+    },
+    "Monstros/Spellcaster/Efeito/altergeist-pookuery__59185998.effect.txt": {
+      "api_type": "Effect Monster",
+      "bytes": 886,
+      "card_id": 59185998,
+      "kind": "official-effect-reference",
+      "level": 1,
+      "name": "Altergeist Pookuery",
+      "paired_art": "Monstros/Spellcaster/Efeito/altergeist-pookuery__59185998.jpg",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster",
+      "sha256": "258723800476675eed94b8ad0516f0faf1a53b2676266f857e4882fe8a07fac2",
+      "source": "YGOPRODeck cardinfo.desc"
     },
     "Monstros/Spellcaster/Efeito/altergeist-pookuery__59185998.jpg": {
       "api_type": "Effect Monster",
