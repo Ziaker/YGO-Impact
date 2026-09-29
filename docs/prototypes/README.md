@@ -2,6 +2,8 @@
 
 Toda decisão visual relevante que ainda não esteja aprovada deve ser comparada em três opções: A, B e C.
 
+Consulte `INDEX.md` para o inventário atual, estado de aprovação e grupos ainda pendentes. O primeiro experimento é `VIS-001-hud-layout.md`, com executável em `../../prototypes/visual-001-hud-layout/index.html`.
+
 Cada experimento deve registrar, no mínimo:
 
 - identificador e data;
