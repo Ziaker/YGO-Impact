@@ -6,6 +6,7 @@ on:
     paths:
       - "scripts/baixar_artes.py"
       - "scripts/sync_prototype_pool.py"
+      - "scripts/sync_prototype_pool_curated.py"
       - "tests/test_baixar_artes.py"
       - "tests/test_sync_prototype_pool.py"
       - ".github/workflows/sync-card-art.yml"
@@ -34,12 +35,12 @@ jobs:
 
       - name: Validate downloader and pool policy
         run: |
-          python -m py_compile scripts/baixar_artes.py scripts/sync_prototype_pool.py
+          python -m py_compile scripts/baixar_artes.py scripts/sync_prototype_pool.py scripts/sync_prototype_pool_curated.py
           python -m unittest discover -s tests -p "test_*.py" -v
 
       - name: Select and download prototype card art
         run: |
-          python scripts/sync_prototype_pool.py \
+          python scripts/sync_prototype_pool_curated.py \
             --prototype-pool \
             --output assets-local/card-art
 
