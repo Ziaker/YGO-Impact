@@ -1,15 +1,9 @@
-# Núcleo e implementação
+# Código do jogo
 
-A implementação do jogo ficará sob `src/` quando o primeiro módulo executável for iniciado.
+`src/` abriga a implementação do Monster Impact.
 
-Contrato arquitetural já definido pelo GDD:
+O núcleo autoritativo fica reservado em `src/core/`. Antes de implementar regras, consulte o GDD canônico em `docs/context/` e o contrato de `src/core/README.md`.
 
-- um único núcleo autoritativo controla regras e estado;
-- simulação fixa a 20 Hz (50 ms por passo lógico);
-- interface, renderização, animação, IA e telemetria não alteram diretamente o estado;
-- humanos e IA enviam comandos pela mesma interface pública;
-- aleatoriedade usa seed e fluxos registrados;
-- lógica autoritativa usa inteiros ou ponto fixo;
-- replay, headless e web devem produzir resultados e hashes equivalentes para as mesmas entradas.
+A arquitetura exige uma única simulação autoritativa. Interface, renderização, animação, IA e telemetria não modificam estado diretamente; recebem snapshots somente para leitura ou enviam comandos pela interface pública.
 
-Subdiretórios de implementação só devem ser criados quando houver código real para eles.
+A tecnologia final do núcleo ainda não foi escolhida. Não transformar protótipos visuais ou ferramentas Python em decisão arquitetural implícita.
