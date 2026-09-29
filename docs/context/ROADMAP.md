@@ -57,7 +57,7 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 ### Web e publicação
 
 - Protótipo HTML VIS-001: **Implementado localmente no repositório**.
-- Protótipo HTML autossuficiente VIS-002: **Implementado localmente no repositório**.
+- Protótipo web modular VIS-002 (`index.html` + CSS + JS): **Implementado localmente no repositório**.
 - Build jogável: **Pendente**.
 - GitHub Pages: **Pendente / não publicado**.
 
