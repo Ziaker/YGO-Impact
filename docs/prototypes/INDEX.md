@@ -9,6 +9,7 @@ Este índice acompanha o inventário visual obrigatório do GDD v0.42. **Existir
 | VIS-001 | Composição do campo e HUD principal | HTML estático/interativo para alternância A/B/C + revisão melhorada | **Aprovado — versão melhorada pelo autor em 2026-09-29** | `VIS-001-hud-layout.md`; o executável A/B/C em `../../prototypes/visual-001-hud-layout/index.html` permanece como comparador histórico |
 | VIS-002 | Mapa, orientação 2D/3D e sistema de câmera | HTML interativo, 2D/3D sincronizados, câmera livre e foco traseiro | **Aprovado — 2D e 3D selecionáveis in-game** | `VIS-002-map-camera-2d-3d.md` + `../../prototypes/visual-002-map-camera-2d-3d/index.html` |
 | VIS-003 | Planejamento e movimento tático — Parte 1/5 | Protótipo executável com 2D/3D, planejamento, confirmação e execução bloco a bloco | **Aprovado — opção A (Área cheia)** | `VIS-003-movement-part1.md`; evidência validada em 25/25 Node, 25/25 embutidos e 14/14 Chromium/Playwright |
+| VIS-004 | Terreno, SPD e movimento avançado — Parte 2/5 | Protótipo executável em validação com custo ponderado, impassáveis, recuperação e harness de Reação | **Em teste — A/B/C de leitura de terreno aguardam aprovação** | `VIS-004-terrain-spd-movement.md`; evidência atual 30/30 Node, 30/30 embutidos e 16/16 Chromium/Playwright |
 
 ## VIS-001
 
@@ -67,26 +68,40 @@ Resultado aprovado pelo autor em 2026-09-29:
 
 A ordem experimental de desempate `N,E,S,W,NE,SE,SW,NW` continua **provisória** e não se torna regra canônica por causa desta aprovação.
 
+## VIS-004
+
+Pergunta: como comunicar custos especiais de movimento, impassáveis, SPD negativo, recuperação e movimento como Reação sem perder a leitura já aprovada do VIS-003?
+
+Estado atual:
+
+- herda **A — Área cheia** para alcançabilidade e 2D/3D selecionáveis;
+- compara três opções novas somente para **leitura de terreno/custo**: A badge persistente, B custo só no caminho e C mapa sutil/painel;
+- nenhuma das três está aprovada;
+- custo numérico do Campo A é fixture QA configurável, padrão 1, e não regra universal de terreno;
+- terreno impassável e GLIDER são exercitados;
+- entrada em terreno especial pode levar SPD a negativo quando a regra do GDD se aplica;
+- recuperação usa +2 após 8 s/160 ticks de ociosidade, com cap no máximo;
+- movimento como Reação é exercitado por harness QA de 1 Reação + SPD, sem fingir implementar Corrente completa.
+
 ## Inventário ainda pendente
 
 O GDD exige prototipagem antes da implementação final para, entre outros grupos ainda não encerrados por aprovação específica:
 
 - identidade visual geral;
-- terrenos e geografia visual definitiva;
+- aprovação da leitura de terreno/custo do VIS-004 e geografia visual definitiva;
 - monstros no mapa e arte/silhuetas finais;
 - cartas e molduras;
 - iconografia;
 - efeitos visuais;
-- terreno/custos especiais, SPD negativo, recuperação e movimento como Reação;
 - inspeção de unidades/cartas além da composição aprovada do HUD;
 - zonas e áreas;
 - alcance e alvos autoritativos;
 - Invocações;
 - combate;
 - Correntes e Cross Chains;
-- recursos e timers além da camada de movimento já validada;
+- recursos/timers fora do recorte exercitado por VIS-004;
 - estados e Fog of War além das representações-base já exercitadas;
-- Armadilhas e Campos;
+- Armadilhas e Campos finais;
 - feedback e logs além da composição estática do HUD;
 - menus, tutorial e controles gerais;
 - acessibilidade além da redução de movimento validada;
