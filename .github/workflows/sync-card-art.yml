@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "scripts/card_art_targets.txt"
       - "scripts/baixar_artes.py"
+      - "tests/test_baixar_artes.py"
       - ".github/workflows/sync-card-art.yml"
+      - "docs/context/DEC-001-initial-card-pool.md"
 
 permissions:
   contents: write
@@ -34,21 +35,21 @@ jobs:
           python -m py_compile scripts/baixar_artes.py
           python -m unittest discover -s tests -p "test_*.py" -v
 
-      - name: Download selected cropped artwork
+      - name: Select and download prototype card art
         run: |
           python scripts/baixar_artes.py \
-            --input scripts/card_art_targets.txt \
+            --prototype-pool \
             --output assets-local/card-art
 
-      - name: Commit synchronized artwork
+      - name: Commit synchronized artwork and selection
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -f assets-local/card-art
           if git diff --cached --quiet; then
-            echo "Nenhuma alteração de arte para versionar."
+            echo "Nenhuma alteração de arte/seleção para versionar."
             exit 0
           fi
-          git commit -m "assets: sync selected card artwork"
+          git commit -m "assets: sync prototype card pool"
           git push origin "HEAD:${GITHUB_REF_NAME}"

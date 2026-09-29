@@ -2,69 +2,84 @@
 
 ## Downloader de artes
 
-`scripts/baixar_artes.py` adapta o script inicial de coleta ao contrato do GDD v0.42 e usa somente a biblioteca padrão do Python.
+`scripts/baixar_artes.py` seleciona e baixa artes `image_url_cropped` do YGOPRODeck usando somente a biblioteca padrão do Python.
 
-As imagens são obtidas de `image_url_cropped` da API do YGOPRODeck e gravadas por padrão em `assets-local/card-art/`. Por decisão explícita atual do autor, a seleção aprovada de artes e seu manifesto podem ser versionados no repositório.
+### Pool automático do primeiro protótipo
 
-### Seleção versionada
+O modo oficial atual é:
 
-A lista usada para a sincronização automática fica em:
+```bash
+python scripts/baixar_artes.py --prototype-pool
+```
+
+Ele seleciona deterministicamente por **nome + ID** e exige `image_url_cropped` disponível.
+
+Pool atual:
+
+- 15 Beast;
+- 15 Psychic;
+- 18 Fiend;
+- 18 Spellcaster;
+- somente monstros Normal, Efeito, Ritual e Fusion;
+- 20 Magias:
+  - 2 Field;
+  - 2 Ritual;
+  - 5 Equip;
+  - 11 entre Normal, Quick-Play e Continuous;
+- 10 Armadilhas de qualquer subtipo.
+
+Total: **96 cartas**, sendo **66 monstros, 20 Magias e 10 Armadilhas**.
+
+O Nível **não influencia a escolha**. Ele é preservado como metadado e contabilizado no catálogo gerado.
+
+A execução cria:
 
 ```text
-scripts/card_art_targets.txt
+assets-local/card-art/selection.json
+assets-local/card-art/manifest.json
 ```
 
-`card_art_targets.example.txt` permanece apenas como exemplo de formato.
+`selection.json` registra nome, ID, RACE, tipo retornado pela API, tipo normalizado do protótipo, Nível e `image_url_cropped`, além de resumos por RACE, tipo, Nível e subtipo de Magia/Armadilha.
 
-### Exemplos
+`manifest.json` registra os arquivos efetivamente baixados, SHA-256, tamanho e os mesmos metadados relevantes.
 
-Dry-run por nomes exatos:
+### Dry-run
 
 ```bash
-python scripts/baixar_artes.py \
-  --name "Dark Magician" \
-  --name "Blue-Eyes White Dragon" \
-  --dry-run
+python scripts/baixar_artes.py --prototype-pool --dry-run
 ```
 
-Por ID:
+O dry-run mostra a distribuição por Nível e o plano de download sem criar arquivos.
+
+### Coleta manual
+
+Os modos antigos continuam disponíveis para inspeção e coleta pontual:
 
 ```bash
-python scripts/baixar_artes.py --id 46986414
-```
-
-Arquivo de seleção versionado:
-
-```bash
+python scripts/baixar_artes.py --name "Dark Magician" --dry-run
+python scripts/baixar_artes.py --id 46986414 --dry-run
 python scripts/baixar_artes.py --input scripts/card_art_targets.txt --dry-run
-```
-
-Uma RACE prioritária inteira:
-
-```bash
-python scripts/baixar_artes.py --race Dragon --dry-run
-```
-
-Todas as cartas compatíveis, de forma explícita:
-
-```bash
+python scripts/baixar_artes.py --race Beast --dry-run
 python scripts/baixar_artes.py --all-compatible --dry-run
 ```
 
-Artes alternativas:
+Nos modos manuais, monstros continuam limitados às quatro RACE ativas e aos quatro tipos de monstro do protótipo.
 
-```bash
-python scripts/baixar_artes.py --name "Dark Magician" --all-artworks --dry-run
+`--all-artworks` baixa artes alternativas. `--pre-2010` permanece como filtro opcional e não faz parte da regra padrão do pool.
+
+### Organização
+
+```text
+assets-local/card-art/
+├── Monstros/
+│   ├── Beast/
+│   ├── Psychic/
+│   ├── Fiend/
+│   └── Spellcaster/
+├── Magias/
+├── Armadilhas/
+├── selection.json
+└── manifest.json
 ```
 
-Filtro histórico opcional (consulta `cardsets.php` para as datas TCG atuais):
-
-```bash
-python scripts/baixar_artes.py --all-compatible --pre-2010 --dry-run
-```
-
-Remova `--dry-run` somente depois de revisar a seleção. Downloads concluídos são registrados em `assets-local/card-art/manifest.json`; arquivos já existentes são ignorados por padrão e podem ser substituídos com `--force`.
-
-O workflow `.github/workflows/sync-card-art.yml` executa o downloader para `scripts/card_art_targets.txt` e commita as artes selecionadas e o manifesto quando houver alterações.
-
-O downloader nunca inclui Synchro, Xyz, Pendulum ou Link no escopo atual.
+O workflow `.github/workflows/sync-card-art.yml` executa `--prototype-pool` e versiona as artes, a seleção e o manifesto quando houver alterações.
