@@ -8,6 +8,7 @@ Este índice acompanha o inventário visual obrigatório do GDD v0.42. **Existir
 | --- | --- | --- | --- | --- |
 | VIS-001 | Composição do campo e HUD principal | HTML estático/interativo para alternância A/B/C + revisão melhorada | **Aprovado — versão melhorada pelo autor em 2026-09-29** | `VIS-001-hud-layout.md`; o executável A/B/C em `../../prototypes/visual-001-hud-layout/index.html` permanece como comparador histórico |
 | VIS-002 | Mapa, orientação 2D/3D e sistema de câmera | HTML interativo, 2D/3D sincronizados, câmera livre e foco traseiro | **Aprovado — 2D e 3D selecionáveis in-game** | `VIS-002-map-camera-2d-3d.md` + `../../prototypes/visual-002-map-camera-2d-3d/index.html` |
+| VIS-003 | Planejamento e movimento tático — Parte 1/5 | Protótipo executável com 2D/3D, planejamento, confirmação e execução bloco a bloco | **Aprovado — opção A (Área cheia)** | `VIS-003-movement-part1.md`; evidência validada em 25/25 Node, 25/25 embutidos e 14/14 Chromium/Playwright |
 
 ## VIS-001
 
@@ -49,6 +50,23 @@ Evidência registrada no executável:
 - picking 3D por raycast contra o plano lógico;
 - redução de movimento sem alteração de timing lógico.
 
+## VIS-003
+
+Pergunta: como planejar, confirmar e executar movimento de forma legível, determinística e equivalente entre 2D e 3D?
+
+Resultado aprovado pelo autor em 2026-09-29:
+
+- **A — Área cheia:** apresentação padrão de movimento em gameplay;
+- **B/C:** preservadas apenas como alternativas históricas/comparativas no modo QA;
+- **orientação 2D/3D:** seletor deve permanecer disponível ao jogador;
+- a troca 2D ↔ 3D preserva seleção, destino, caminho, movimento em andamento e estado lógico;
+- botão/`Enter` e duplo clique em destino livre/legal são gestos equivalentes de confirmação;
+- duplo clique em monstro continua reservado à seleção + foco traseiro;
+- câmera/orientação/overlays não alteram regras nem hash;
+- movimento é revalidado bloco a bloco e não depende de `requestAnimationFrame`.
+
+A ordem experimental de desempate `N,E,S,W,NE,SE,SW,NW` continua **provisória** e não se torna regra canônica por causa desta aprovação.
+
 ## Inventário ainda pendente
 
 O GDD exige prototipagem antes da implementação final para, entre outros grupos ainda não encerrados por aprovação específica:
@@ -59,21 +77,21 @@ O GDD exige prototipagem antes da implementação final para, entre outros grupo
 - cartas e molduras;
 - iconografia;
 - efeitos visuais;
-- movimento e animação de gameplay além do contrato de câmera aprovado;
+- terreno/custos especiais, SPD negativo, recuperação e movimento como Reação;
 - inspeção de unidades/cartas além da composição aprovada do HUD;
 - zonas e áreas;
-- movimento e alvos autoritativos;
+- alcance e alvos autoritativos;
 - Invocações;
 - combate;
 - Correntes e Cross Chains;
-- recursos e timers;
+- recursos e timers além da camada de movimento já validada;
 - estados e Fog of War além das representações-base já exercitadas;
 - Armadilhas e Campos;
 - feedback e logs além da composição estática do HUD;
 - menus, tutorial e controles gerais;
-- acessibilidade além da redução de movimento validada em VIS-002;
+- acessibilidade além da redução de movimento validada;
 - GitHub Pages;
 - replay e telemetria;
 - self-play, QA e ferramentas de conteúdo.
 
-Cada novo experimento deve registrar pergunta, opções quando aplicável, cenário reproduzível, resolução/dispositivo, pior caso relevante, critérios mensuráveis, evidências, resultado e decisão do autor. Mudanças materiais nos contratos aprovados de VIS-001 ou VIS-002 devem reabrir o experimento correspondente ou criar sucessor explícito.
+Cada novo experimento deve registrar pergunta, opções quando aplicável, cenário reproduzível, resolução/dispositivo, pior caso relevante, critérios mensuráveis, evidências, resultado e decisão do autor. Mudanças materiais nos contratos aprovados de VIS-001, VIS-002 ou VIS-003 devem reabrir o experimento correspondente ou criar sucessor explícito.
