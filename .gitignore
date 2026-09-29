@@ -1,0 +1,38 @@
+# Dependências e ambientes
+node_modules/
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Builds e cobertura
+dist/
+build/
+coverage/
+.coverage
+htmlcov/
+
+# Assets locais: artes oficiais baixadas não entram no Git
+assets-local/
+
+# Saídas locais e diagnósticos volumosos
+reports/
+artifacts/
+*.log
+*.part
+*.tmp
+
+# Replays/telemetria gerados localmente
+replays-local/
+telemetry-local/
+
+# Sistema/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

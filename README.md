@@ -2,34 +2,40 @@
 
 > **YGO Impact / Monster Impact** é um fangame pessoal e não comercial de Yu-Gi-Oh! que adapta cartas oficiais para um sistema próprio de combate tático 2D top-down.
 
-O projeto combina estratégia em tempo real, RPG tático, deckbuilding, movimentação espacial e interações por Correntes. A referência de legibilidade do campo é a série **Fire Emblem de GBA**, sem obrigação de reproduzir sua direção de arte ou utilizar pixel art.
+O projeto combina estratégia em tempo real, RPG tático, deckbuilding, movimentação espacial e interações por Correntes. A referência de legibilidade do campo é **Fire Emblem de GBA**, sem obrigação de reproduzir sua direção de arte ou utilizar pixel art.
 
-Monster Impact **não tenta reproduzir automaticamente as regras tradicionais de Yu-Gi-Oh!**. Cartas, efeitos, Invocações e conceitos são reinterpretados para um sistema próprio, mantendo a identidade dos monstros e das cartas quando isso for compatível com gameplay, balanceamento e clareza.
+Monster Impact **não reproduz automaticamente as regras tradicionais de Yu-Gi-Oh!**. Cartas, efeitos, Invocações e conceitos são reinterpretados segundo o GDD do projeto.
 
 ## Estado do projeto
 
-**Fase atual: pré-implementação / estruturação do primeiro protótipo.**
+**Fase atual: estruturação e pré-implementação do primeiro protótipo.**
 
-O GDD-base do primeiro protótipo está concluído em sua versão **0.42**, com **25 de 25 fases finalizadas e nenhuma pendência P0 ativa**.
+O GDD-base está concluído na versão **0.42**, com **25 de 25 fases finalizadas e nenhuma pendência P0 ativa**. `docs/context/GDD_SOURCE.md` fixa a versão e o SHA-256 do arquivo canônico efetivamente lido nesta etapa; o binário `.docx` ainda será incorporado ao repositório em uma etapa própria.
 
-O repositório, porém, ainda está no início da implementação. Neste momento:
+Já estão versionados:
 
-- o GDD e as decisões de projeto estão definidos;
-- a arquitetura autoritativa e os requisitos de determinismo estão especificados;
-- o escopo de prototipagem visual está definido;
-- os requisitos de IA, telemetria, replay, self-play e QA estão definidos;
-- o código do jogo ainda não está versionado neste repositório;
-- ainda não há suíte de testes versionada;
-- ainda não há build jogável;
-- ainda não há GitHub Pages publicado;
-- os protótipos visuais ainda precisam ser produzidos e aprovados;
-- o downloader de artes existente ainda precisa ser adaptado ao contrato atual antes de ser incorporado ao repositório.
+- referência verificável do GDD v0.42 em `docs/context/`;
+- documentação inicial de contexto e prototipagem;
+- contrato arquitetural inicial em `src/README.md`;
+- downloader de artes em `scripts/baixar_artes.py`;
+- testes automatizados do downloader;
+- workflow inicial de CI para compilar e testar as ferramentas Python;
+- `.gitignore` para assets, builds, caches, logs e telemetria locais.
+
+Ainda não estão implementados:
+
+- núcleo autoritativo do jogo;
+- interface e renderização;
+- IA competitiva e IA de QA;
+- conteúdo jogável completo;
+- replay e telemetria do motor;
+- protótipos visuais aprovados;
+- build web jogável;
+- publicação em GitHub Pages.
 
 Não confundir **definido no GDD** com **implementado**.
 
 ## Conceito
-
-Monster Impact é um jogo tático de estratégia e ação utilizando monstros de Yu-Gi-Oh! em um campo espacial.
 
 Características centrais do primeiro protótipo:
 
@@ -38,7 +44,7 @@ Características centrais do primeiro protótipo:
 - mapa inicial de **31 × 17 blocos**;
 - até **5 monstros por jogador** simultaneamente;
 - Duelista não aparece fisicamente no mapa;
-- cada jogador possui uma base física de 1 bloco;
+- cada jogador possui uma base física sólida de 1 bloco;
 - não existem Life Points tradicionais;
 - vitória ao causar **5 impactos válidos** à base adversária;
 - movimento baseado em **SPD**;
@@ -50,19 +56,15 @@ Características centrais do primeiro protótipo:
 - Invocação Normal, Tributo, Ritual e Fusion;
 - IA sujeita às mesmas regras e informações disponíveis ao jogador.
 
-## Regras fundamentais
+## Regras críticas
 
 ### Correntes
 
 Uma Corrente somente é aberta quando uma ativação possui **pelo menos um alvo inimigo**.
 
-A existência de uma Ação, Reação, custo, movimento, carta ou habilidade não é suficiente por si só.
+Ações voltadas apenas para o próprio usuário ou aliados não abrem Corrente isoladamente. Reações defensivas sem alvo inimigo podem integrar uma Corrente inimiga quando forem legalmente provocadas por ela.
 
-Ações voltadas apenas para o próprio usuário ou aliados normalmente resolvem diretamente.
-
-Uma Reação defensiva sem alvo inimigo pode integrar uma Corrente inimiga que a provocou quando for legal, mas não abre uma Corrente isoladamente.
-
-Correntes normais resolvem em **LIFO**.
+Correntes normais resolvem em **LIFO**. Alvos e elementos são revalidados individualmente.
 
 ### IMEDIATO
 
@@ -70,42 +72,32 @@ Correntes normais resolvem em **LIFO**.
 
 Um efeito IMEDIATO:
 
-- ativa e resolve atomicamente;
+- ativa e resolve no mesmo instante;
 - não abre Corrente;
 - não entra na pilha;
 - não recebe elementos entre ativação e resolução;
-- não gera efeitos adicionais a partir de seu resultado;
-- ainda aplica verificações obrigatórias de estado.
+- não gera efeitos adicionais a partir do resultado;
+- continua sujeito às verificações obrigatórias de estado.
 
 ### Armadilhas
 
 Setar uma Armadilha:
 
 - não abre Corrente;
-- não consome Ação ou Reação;
-- não paga custo de ativação.
+- não integra Corrente;
+- não consome o custo de ativação.
 
-O custo correspondente é pago somente quando a Armadilha é ativada.
+O custo é pago somente quando a Armadilha é ativada.
 
-### Determinismo
+## Determinismo e arquitetura
 
-A lógica do jogo será executada por um único núcleo autoritativo.
+O jogo terá um único núcleo autoritativo.
 
-A simulação opera em **20 Hz**, equivalentes a passos lógicos de **50 ms**.
+A simulação opera em **20 Hz**, equivalentes a passos lógicos de **50 ms**. Renderização, interface, animação, IA e telemetria não modificam diretamente o estado autoritativo.
 
-Interface, renderização, animação, IA e telemetria não modificam diretamente o estado do jogo.
+Com os mesmos dados, Decks, seed, comandos, ordem de entrada, configuração e versão das regras, o motor deve produzir os mesmos estados, eventos, hashes e resultado.
 
-Com os mesmos:
-
-- dados;
-- Decks;
-- seed;
-- comandos;
-- ordem de entrada;
-- configuração;
-- versão das regras;
-
-o motor deve produzir os mesmos estados, eventos, hashes e resultado.
+Lógica autoritativa usa inteiros ou ponto fixo. Ponto flutuante fica restrito à apresentação.
 
 ## Decks
 
@@ -148,7 +140,7 @@ Fora da direção atual:
 - Pendulum;
 - Link.
 
-Regras específicas de materiais, posicionamento, custos e resolução são definidas pelo GDD e não devem ser inferidas das regras oficiais de Yu-Gi-Oh!.
+Regras específicas de materiais, posicionamento, custos e resolução vêm do GDD e não devem ser inferidas das regras oficiais de Yu-Gi-Oh!.
 
 ## RACE prioritárias
 
@@ -156,202 +148,196 @@ O primeiro escopo prioriza 17 RACE:
 
 `Aqua`, `Beast`, `Dragon`, `Fairy`, `Fiend`, `Fish`, `Insect`, `Machine`, `Plant`, `Psychic`, `Pyro`, `Rock`, `Spellcaster`, `Thunder`, `Warrior`, `Winged Beast` e `Zombie`.
 
-Cada RACE possui bônus estruturais e uma identidade mecânica própria definida pelo GDD.
-
 Outras RACE ficam fora do escopo inicial até decisão posterior.
 
-## Arquitetura planejada
-
-A estrutura prevista para o projeto é:
+## Estrutura do repositório
 
 ```text
 YGO-Impact/
 ├── docs/
-│   ├── context/          # GDD, decisões e contratos
-│   └── prototypes/       # experimentos e aprovações visuais
+│   ├── context/          # GDD, decisões, contratos e contexto
+│   └── prototypes/       # registros de experimentos e aprovações
 ├── prototypes/           # protótipos executáveis
-├── src/                  # implementação do jogo
-├── tests/                # testes e regressões
-├── scripts/              # ferramentas e downloader
-├── assets-local/         # artes e arquivos locais não versionados
-├── public/               # assets da build web, quando aplicável
-├── reports/              # relatórios e evidências temporárias
+├── src/                  # núcleo e implementação do jogo
+├── tests/                # testes automatizados
+├── scripts/              # ferramentas de projeto
+├── assets-local/         # artes baixadas localmente; ignorado pelo Git
 └── .github/
-    └── workflows/        # CI, testes, build e Pages
+    └── workflows/        # CI e, futuramente, build/Pages
 ```
 
-Esses diretórios representam a arquitetura planejada. Eles só devem ser criados quando tiverem utilidade real.
+Pastas sem utilidade imediata não são criadas apenas para preencher a árvore. `public/`, relatórios, artefatos e demais diretórios surgirão quando houver consumidores reais.
+
+## GDD e fonte de verdade
+
+Antes de implementar ou modificar regras, leia o GDD mais recente em `docs/context/`.
+
+Em conflito, a precedência é:
+
+1. instrução explícita atual do autor;
+2. correções expressas mais recentes;
+3. regras de precedência do GDD;
+4. regra específica do GDD;
+5. regra geral do GDD;
+6. decisões arquiteturais versionadas;
+7. testes de regressão aprovados;
+8. implementação existente;
+9. convenções técnicas.
+
+Não preencher lacunas com regras oficiais de Yu-Gi-Oh! nem inventar custos, limites ou interações.
 
 ## Prototipagem visual
 
-Decisões visuais relevantes precisam ser validadas antes da implementação definitiva.
+Toda decisão visual relevante precisa de validação antes da implementação definitiva.
 
-Quando ainda não existir uma solução aprovada, devem ser apresentadas **três opções comparáveis: A, B e C**.
+Quando ainda não houver solução aprovada, devem ser comparadas **três opções: A, B e C**.
 
-Aparência puramente estática pode ser avaliada com protótipos estáticos.
+Aparência pode usar protótipo estático. Interação, movimento, timing, Correntes, animação, Fog of War, densidade de informação e feedback exigem protótipo executável.
 
-Interação, movimento, timing, Correntes, animação, Fog of War e outros comportamentos precisam de protótipos executáveis.
-
-As decisões e evidências serão registradas em `docs/prototypes/`.
-
-## IA
-
-Existirão duas funções distintas.
-
-### IA competitiva
-
-É o adversário normal.
-
-Ela:
-
-- utiliza as mesmas regras do jogador;
-- não recebe bônus artificiais;
-- respeita Fog of War;
-- não conhece cartas ocultas;
-- não conhece posições atualmente invisíveis;
-- não conhece a distribuição secreta de Ações/Reações;
-- não conhece resultados aleatórios futuros;
-- envia comandos pela mesma interface pública usada pelo jogador.
-
-### IA de QA
-
-É separada da IA competitiva e busca falhas através de:
-
-- self-play;
-- políticas variadas;
-- exploração de estados raros;
-- testes de invariantes;
-- fuzzing isolado;
-- testes metamórficos;
-- testes diferenciais;
-- minimização e deduplicação de bugs;
-- geração de regressões.
-
-## Telemetria e replay
-
-A telemetria técnica será local e estruturada.
-
-Entre os dados previstos estão:
-
-- seed;
-- passo lógico;
-- comandos;
-- custos;
-- alvos;
-- causalidade;
-- Correntes;
-- Cross Chains;
-- aleatoriedade;
-- hashes de estado;
-- invariantes.
-
-Replays serão baseados em dados, seed e comandos, e deverão reproduzir os mesmos hashes da execução original.
+Registros ficam em `docs/prototypes/`; executáveis em `prototypes/`.
 
 ## Artes das cartas
 
 O projeto pessoal utiliza ilustrações oficiais de cartas.
 
-As artes devem ser baixadas previamente e armazenadas localmente; o jogo não deve fazer hotlink durante a execução.
+O jogo não deve fazer hotlink durante a execução. As artes são baixadas previamente e armazenadas localmente em `assets-local/`, que não é versionado.
 
-A fonte prevista é o campo `image_url_cropped` da API do YGOPRODeck, que fornece a ilustração da carta separada da moldura, nome, atributos e texto da carta montada.
+O downloader utiliza o campo `image_url_cropped` da API do YGOPRODeck, que fornece a ilustração separada da moldura e do texto da carta montada.
 
 ### Downloader
 
-Existe atualmente um script experimental de downloader, mas ele **ainda não representa o contrato final do projeto e ainda não está versionado neste repositório**.
+Ferramenta: `scripts/baixar_artes.py`
 
-A versão final deverá, entre outros requisitos:
+Características já implementadas:
 
-- aceitar nomes exatos ou IDs;
-- aceitar artes alternativas;
-- suportar dry-run;
-- retomar downloads;
-- evitar duplicatas;
-- usar arquivos temporários antes de substituir o destino;
-- organizar conteúdo por categoria/RACE/tipo;
-- excluir Synchro, Xyz, Pendulum e Link;
-- tornar o filtro pré-2010 opcional, e não obrigatório.
+- nomes exatos e IDs;
+- arquivo de seleção;
+- filtro pelas 17 RACE prioritárias;
+- Monstros compatíveis, Ritual, Fusion, Magias e Armadilhas;
+- exclusão de Synchro, Xyz, Pendulum e Link;
+- artes alternativas com `--all-artworks`;
+- dry-run;
+- retomada por arquivos existentes;
+- deduplicação por carta/arte;
+- gravação temporária `.part` seguida de substituição atômica;
+- manifesto local com hash SHA-256;
+- organização por categoria/RACE/tipo;
+- filtro pré-2010 opcional;
+- somente biblioteca padrão do Python.
 
-Até esse script ser incorporado ao repositório, não existe um comando oficial de downloader.
+Dry-run por nomes:
 
-## Como executar
+```bash
+python scripts/baixar_artes.py \
+  --name "Dark Magician" \
+  --name "Blue-Eyes White Dragon" \
+  --dry-run
+```
+
+Por ID:
+
+```bash
+python scripts/baixar_artes.py --id 46986414 --dry-run
+```
+
+Por arquivo:
+
+```bash
+python scripts/baixar_artes.py \
+  --input scripts/card_art_targets.example.txt \
+  --dry-run
+```
+
+Uma RACE prioritária:
+
+```bash
+python scripts/baixar_artes.py --race Dragon --dry-run
+```
+
+Todo o acervo compatível, somente quando solicitado explicitamente:
+
+```bash
+python scripts/baixar_artes.py --all-compatible --dry-run
+```
+
+Artes alternativas:
+
+```bash
+python scripts/baixar_artes.py \
+  --name "Dark Magician" \
+  --all-artworks \
+  --dry-run
+```
+
+Filtro pré-2010 opcional:
+
+```bash
+python scripts/baixar_artes.py --all-compatible --pre-2010 --dry-run
+```
+
+Remova `--dry-run` somente depois de revisar a seleção.
+
+Saída padrão:
+
+```text
+assets-local/card-art/
+```
+
+## Testes
+
+A suíte atual cobre o downloader de artes e suas regras de escopo.
+
+Execute:
+
+```bash
+python -m unittest discover -s tests -p "test_*.py" -v
+```
+
+Também é possível verificar a sintaxe diretamente:
+
+```bash
+python -m py_compile scripts/baixar_artes.py
+```
+
+O workflow `.github/workflows/ci.yml` executa essas verificações em push e pull request.
+
+A suíte completa do jogo ainda será construída junto com o núcleo autoritativo e deverá cobrir unidade, integração, propriedades, invariantes, conteúdo, determinismo, replay, regressão, testes metamórficos, diferenciais, fuzzing, self-play, smoke e endurance.
+
+## Como executar o jogo
 
 **Ainda não aplicável.**
 
-Não existe neste repositório uma build executável ou protótipo versionado neste momento.
+Não existe build jogável nem protótipo de gameplay versionado neste momento.
 
-Esta seção será atualizada assim que o primeiro protótipo executável for incorporado.
+## Como abrir protótipos
 
-## Como executar os testes
+Consulte `prototypes/` para executáveis e `docs/prototypes/` para registros e aprovações. No momento há apenas a estrutura documental inicial; nenhum protótipo visual foi aprovado ainda.
 
-**Ainda não aplicável.**
+## Build e GitHub Pages
 
-A arquitetura prevê testes de:
+A build web planejada será estática, reproduzível, sem segredos e sem backend privado obrigatório.
 
-- unidade;
-- integração;
-- propriedades;
-- invariantes;
-- conteúdo;
-- determinismo;
-- replay;
-- regressão;
-- metamórficos;
-- diferenciais;
-- fuzzing;
-- self-play;
-- smoke;
-- endurance.
+A publicação só poderá ocorrer depois de validação de conteúdo, tipos, testes, build e smoke test.
 
-Nenhuma suíte está versionada no repositório ainda.
+**Ainda não existe versão publicada em GitHub Pages.**
 
-## Como abrir os protótipos
+## IA, telemetria e replay
 
-**Ainda não aplicável.**
+O GDD já define os contratos para:
 
-Protótipos executáveis serão mantidos em `prototypes/`, enquanto seus objetivos, evidências, comparações A/B/C e aprovações serão registrados em `docs/prototypes/`.
+- IA competitiva sujeita à mesma informação do jogador;
+- IA de QA separada da IA competitiva;
+- self-play headless usando o mesmo núcleo;
+- telemetria estruturada com seed, causalidade e hashes;
+- replay determinístico por dados, seed e comandos;
+- minimização, deduplicação e regressão permanente de bugs.
 
-## Como gerar a build
-
-**Ainda não aplicável.**
-
-A build web planejada será:
-
-- estática;
-- reproduzível;
-- sem segredos;
-- sem backend privado obrigatório;
-- compatível com GitHub Pages.
-
-A publicação só poderá ocorrer depois que validações, testes, build e smoke tests forem aprovados.
-
-## GitHub Pages
-
-O objetivo é disponibilizar uma versão jogável no GitHub Pages utilizando o mesmo núcleo autoritativo da execução local ou demonstrando equivalência lógica através dos mesmos dados, seeds, comandos, eventos e hashes.
-
-**Ainda não há versão publicada.**
-
-## Fonte de verdade
-
-Quando houver conflito entre implementação, testes e documentação, não assuma que o código existente está correto.
-
-A precedência é, de forma resumida:
-
-1. instrução explícita mais recente do autor;
-2. correções mais recentes;
-3. GDD e suas regras de precedência;
-4. decisões específicas;
-5. decisões gerais;
-6. decisões arquiteturais;
-7. testes aprovados;
-8. implementação existente.
-
-O conhecimento das regras oficiais de Yu-Gi-Oh! não deve ser usado para preencher lacunas automaticamente.
+Esses sistemas ainda não estão implementados.
 
 ## Objetivo técnico
 
-O objetivo final é construir um protótipo de Monster Impact que seja:
+O objetivo final é construir um protótipo que seja:
 
-- jogável;
 - fiel ao GDD;
 - determinístico;
 - testável;
@@ -361,8 +347,7 @@ O objetivo final é construir um protótipo de Monster Impact que seja:
 - jogável contra IA;
 - capaz de IA vs. IA;
 - capaz de self-play headless;
-- equipado com telemetria;
-- equipado com replay;
+- equipado com telemetria e replay;
 - protegido por testes de regressão;
 - capaz de caça automatizada a bugs;
 - publicável de forma reproduzível no GitHub Pages.
