@@ -1,0 +1,7 @@
+# Seleção inicial versionada de artes do Monster Impact.
+# Um alvo por linha. Nomes são exatos.
+# Formatos aceitos: name:<nome>, id:<id>, nome simples ou ID simples.
+
+name:Dark Magician
+name:Blue-Eyes White Dragon
+id:46986414
