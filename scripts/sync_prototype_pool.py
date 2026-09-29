@@ -2,13 +2,15 @@
 """Aplica a política de conteúdo do primeiro protótipo ao downloader de artes.
 
 Escopo atual:
-- mantém os 66 slots não-Normal anteriores por RACE (15 Beast, 15 Psychic,
-  18 Fiend, 18 Spellcaster);
+- preserva 66 slots não-Normal por RACE (15 Beast, 15 Psychic, 18 Fiend,
+  18 Spellcaster);
 - adiciona 10 Normal Monsters por RACE, somente Níveis 2 a 4;
-- exclui qualquer MONSTRO cujo campo `archetype` da API esteja preenchido;
-- Beast, Fiend e Spellcaster reservam 1 Ritual Monster sem arquétipo;
-- Psychic reserva 2 monstros não-Normal sem arquétipo de maior Nível;
-- cartas marcadas como Rush Duel podem complementar SOMENTE os slots Normal Nível 2-4;
+- prefere monstros sem arquétipo e permite no máximo 1 monstro por arquétipo
+  nomeado em todo o pool;
+- Beast, Fiend e Spellcaster reservam 1 Ritual Monster;
+- Psychic reserva 2 monstros não-Normal de maior Nível;
+- cartas marcadas como Rush Duel podem complementar SOMENTE os slots Normal
+  Nível 2-4;
 - Ritual Spells permanecem genéricas no Monster Impact.
 
 Magias e Armadilhas não são filtradas por arquétipo nesta etapa.
@@ -35,7 +37,7 @@ PSYCHIC_HIGH_LEVEL_TARGET = 2
 RITUAL_TARGET_PER_RACE = 1
 RITUAL_TARGET_RACES = ("Beast", "Fiend", "Spellcaster")
 RITUAL_SPELL_COMPATIBILITY = "generic-any-ritual-monster"
-MONSTER_ARCHETYPE_POLICY = "exclude-any-monster-with-nonempty-api-archetype"
+MONSTER_ARCHETYPE_POLICY = "prefer-no-archetype-max-one-monster-per-named-archetype"
 NORMAL_SOURCE_POLICY = "standard-catalog-plus-rush-duel-normal-only-supplement"
 MISC_CATALOG_URL = f"{base.API_URL}?misc=yes"
 
@@ -50,8 +52,13 @@ _ORIGINAL_BUILD_SELECTION_DOCUMENT = base.build_selection_document
 _ORIGINAL_FETCH_ALL_CARDS = base.fetch_all_cards
 
 
+def archetype_name(card: dict[str, Any]) -> str | None:
+    value = str(card.get("archetype") or "").strip()
+    return value or None
+
+
 def has_named_archetype(card: dict[str, Any]) -> bool:
-    return bool(str(card.get("archetype") or "").strip())
+    return archetype_name(card) is not None
 
 
 def is_normal_slot_candidate(card: dict[str, Any], race: str | None = None) -> bool:
@@ -63,8 +70,6 @@ def is_normal_slot_candidate(card: dict[str, Any], race: str | None = None) -> b
     if race is not None and card_race != race:
         return False
     if card_race not in CORE_NON_NORMAL_QUOTAS:
-        return False
-    if has_named_archetype(card):
         return False
     level = card.get("level")
     return (
@@ -83,19 +88,14 @@ def card_formats(card: dict[str, Any]) -> set[str]:
         if not isinstance(item, dict):
             continue
         formats = item.get("formats") or []
-        if not isinstance(formats, list):
-            continue
-        result.update(str(value).strip().casefold() for value in formats)
+        if isinstance(formats, list):
+            result.update(str(value).strip().casefold() for value in formats)
     return result
 
 
 def fetch_cards_with_rush_normal_supplement(*, timeout: float, retries: int) -> list[dict[str, Any]]:
     standard_cards = _ORIGINAL_FETCH_ALL_CARDS(timeout=timeout, retries=retries)
-    misc_payload = base._request_json(
-        MISC_CATALOG_URL,
-        timeout=timeout,
-        retries=retries,
-    )
+    misc_payload = base._request_json(MISC_CATALOG_URL, timeout=timeout, retries=retries)
     misc_cards = misc_payload.get("data", [])
     if not isinstance(misc_cards, list):
         raise base.DownloaderError("Resposta inesperada do catálogo misc=yes: campo 'data' inválido.")
@@ -112,31 +112,71 @@ def fetch_cards_with_rush_normal_supplement(*, timeout: float, retries: int) -> 
         tagged["_monster_impact_source"] = "rush-duel"
         supplement.append(tagged)
 
-    # O suplemento vem primeiro para preservar a marca de origem caso uma carta
-    # também apareça no catálogo padrão com o mesmo ID.
-    return base.dedupe_cards([*supplement, *standard_cards])
+    # O catálogo padrão vem primeiro; Rush só complementa IDs ausentes.
+    return base.dedupe_cards([*standard_cards, *supplement])
 
 
 def _eligible_monster_for_race(card: dict[str, Any], race: str) -> bool:
     return (
         card.get("type") in base.ALLOWED_MONSTER_API_TYPES
         and str(card.get("race", "")) == race
-        and not has_named_archetype(card)
     )
 
 
-def _normal_candidates(
-    compatible: Sequence[dict[str, Any]], race: str
-) -> list[dict[str, Any]]:
-    return sorted(
-        (card for card in compatible if is_normal_slot_candidate(card, race)),
-        key=base.deterministic_card_key,
+def _prefer_no_archetype_key(card: dict[str, Any]) -> tuple[int, str, int]:
+    return (
+        1 if has_named_archetype(card) else 0,
+        str(card.get("name", "")).casefold(),
+        int(card.get("id", 0)),
     )
 
 
-def _non_normal_candidates(
-    compatible: Sequence[dict[str, Any]], race: str
+def _high_level_key(card: dict[str, Any]) -> tuple[int, int, str, int]:
+    level = card.get("level")
+    safe_level = int(level) if isinstance(level, int) and not isinstance(level, bool) else -1
+    return (
+        -safe_level,
+        1 if has_named_archetype(card) else 0,
+        str(card.get("name", "")).casefold(),
+        int(card.get("id", 0)),
+    )
+
+
+def _archetype_available(card: dict[str, Any], used_archetypes: set[str]) -> bool:
+    archetype = archetype_name(card)
+    return archetype is None or archetype.casefold() not in used_archetypes
+
+
+def _record_archetype(card: dict[str, Any], used_archetypes: set[str]) -> None:
+    archetype = archetype_name(card)
+    if archetype is not None:
+        used_archetypes.add(archetype.casefold())
+
+
+def _choose_unique(
+    candidates: Iterable[dict[str, Any]],
+    count: int,
+    used_archetypes: set[str],
+    *,
+    context: str,
 ) -> list[dict[str, Any]]:
+    chosen: list[dict[str, Any]] = []
+    for card in candidates:
+        if not _archetype_available(card, used_archetypes):
+            continue
+        chosen.append(card)
+        _record_archetype(card, used_archetypes)
+        if len(chosen) >= count:
+            break
+    if len(chosen) < count:
+        raise base.DownloaderError(
+            f"Pool insuficiente para {context}: necessários {count}, encontrados {len(chosen)} "
+            "após aplicar unicidade de arquétipo."
+        )
+    return chosen
+
+
+def _non_normal_candidates(compatible: Sequence[dict[str, Any]], race: str) -> list[dict[str, Any]]:
     return sorted(
         (
             card
@@ -144,31 +184,38 @@ def _non_normal_candidates(
             if _eligible_monster_for_race(card, race)
             and card.get("type") not in base.NORMAL_MONSTER_API_TYPES
         ),
-        key=base.deterministic_card_key,
+        key=_prefer_no_archetype_key,
     )
 
 
-def _high_level_key(card: dict[str, Any]) -> tuple[int, str, int]:
-    level = card.get("level")
-    safe_level = int(level) if isinstance(level, int) and not isinstance(level, bool) else -1
-    return (-safe_level, str(card.get("name", "")).casefold(), int(card.get("id", 0)))
+def _normal_candidates(compatible: Sequence[dict[str, Any]], race: str) -> list[dict[str, Any]]:
+    return sorted(
+        (card for card in compatible if is_normal_slot_candidate(card, race)),
+        key=_prefer_no_archetype_key,
+    )
 
 
 def _select_non_normal_for_race(
-    compatible: Sequence[dict[str, Any]], race: str, quota: int
+    compatible: Sequence[dict[str, Any]],
+    race: str,
+    quota: int,
+    used_archetypes: set[str],
 ) -> list[dict[str, Any]]:
     candidates = _non_normal_candidates(compatible, race)
     reserved: list[dict[str, Any]] = []
     reserved_ids: set[int] = set()
 
     if race in RITUAL_TARGET_RACES:
-        rituals = [card for card in candidates if card.get("type") in base.RITUAL_MONSTER_API_TYPES]
-        if len(rituals) < RITUAL_TARGET_PER_RACE:
-            raise base.DownloaderError(
-                f"Ritual sem arquétipo obrigatório ausente para {race}: "
-                f"necessário {RITUAL_TARGET_PER_RACE}, encontrado {len(rituals)}."
-            )
-        chosen = rituals[:RITUAL_TARGET_PER_RACE]
+        rituals = sorted(
+            (card for card in candidates if card.get("type") in base.RITUAL_MONSTER_API_TYPES),
+            key=_prefer_no_archetype_key,
+        )
+        chosen = _choose_unique(
+            rituals,
+            RITUAL_TARGET_PER_RACE,
+            used_archetypes,
+            context=f"Ritual Monster de {race}",
+        )
         reserved.extend(chosen)
         reserved_ids.update(int(card["id"]) for card in chosen)
 
@@ -177,23 +224,26 @@ def _select_non_normal_for_race(
             (card for card in candidates if int(card["id"]) not in reserved_ids),
             key=_high_level_key,
         )
-        if len(high_level) < PSYCHIC_HIGH_LEVEL_TARGET:
-            raise base.DownloaderError(
-                f"Pool Psychic insuficiente para {PSYCHIC_HIGH_LEVEL_TARGET} reservas de alto Nível."
-            )
-        chosen = high_level[:PSYCHIC_HIGH_LEVEL_TARGET]
+        chosen = _choose_unique(
+            high_level,
+            PSYCHIC_HIGH_LEVEL_TARGET,
+            used_archetypes,
+            context="reservas Psychic de maior Nível",
+        )
         reserved.extend(chosen)
         reserved_ids.update(int(card["id"]) for card in chosen)
 
-    remaining_needed = quota - len(reserved)
-    fillers = [card for card in candidates if int(card["id"]) not in reserved_ids]
-    if len(fillers) < remaining_needed:
-        raise base.DownloaderError(
-            f"Pool não-Normal sem arquétipo insuficiente para {race}: "
-            f"necessários {remaining_needed}, encontrados {len(fillers)}."
-        )
-
-    selected = reserved + fillers[:remaining_needed]
+    fillers = [
+        card
+        for card in sorted(candidates, key=_prefer_no_archetype_key)
+        if int(card["id"]) not in reserved_ids
+    ]
+    selected = reserved + _choose_unique(
+        fillers,
+        quota - len(reserved),
+        used_archetypes,
+        context=f"slots não-Normal de {race}",
+    )
     if len(selected) != quota:
         raise base.DownloaderError(
             f"Seleção não-Normal inválida para {race}: esperado {quota}, obtido {len(selected)}."
@@ -202,36 +252,39 @@ def _select_non_normal_for_race(
 
 
 def _select_normals_for_race(
-    compatible: Sequence[dict[str, Any]], race: str
+    compatible: Sequence[dict[str, Any]],
+    race: str,
+    used_archetypes: set[str],
 ) -> list[dict[str, Any]]:
-    candidates = _normal_candidates(compatible, race)
-    if len(candidates) < NORMAL_TARGET_PER_RACE:
-        raise base.DownloaderError(
-            f"Pool de Normal Monsters sem arquétipo insuficiente para {race} entre Níveis "
-            f"{NORMAL_LEVEL_MIN}-{NORMAL_LEVEL_MAX}: necessários {NORMAL_TARGET_PER_RACE}, "
-            f"encontrados {len(candidates)}."
-        )
-    return candidates[:NORMAL_TARGET_PER_RACE]
+    return _choose_unique(
+        _normal_candidates(compatible, race),
+        NORMAL_TARGET_PER_RACE,
+        used_archetypes,
+        context=f"Normal Monsters {race} Níveis {NORMAL_LEVEL_MIN}-{NORMAL_LEVEL_MAX}",
+    )
 
 
 def select_prototype_pool(cards: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     compatible = [card for card in base.dedupe_cards(cards) if base.card_is_supported(card)]
     selected: list[dict[str, Any]] = []
+    used_archetypes: set[str] = set()
 
+    # As reservas e os slots não-Normal têm precedência; os 40 Normais são adicionais.
     for race, non_normal_quota in CORE_NON_NORMAL_QUOTAS.items():
-        selected.extend(_select_non_normal_for_race(compatible, race, non_normal_quota))
-        selected.extend(_select_normals_for_race(compatible, race))
+        selected.extend(
+            _select_non_normal_for_race(compatible, race, non_normal_quota, used_archetypes)
+        )
+    for race in CORE_NON_NORMAL_QUOTAS:
+        selected.extend(_select_normals_for_race(compatible, race, used_archetypes))
 
     spell_candidates = sorted(
         (card for card in compatible if card.get("type") == "Spell Card"),
         key=base.deterministic_card_key,
     )
     used_spell_ids: set[int] = set()
-
     for subtype, quota in base.SPELL_SUBTYPE_QUOTAS.items():
         candidates = [
-            card
-            for card in spell_candidates
+            card for card in spell_candidates
             if base.spell_subtype(card) == subtype and int(card["id"]) not in used_spell_ids
         ]
         if len(candidates) < quota:
@@ -244,8 +297,7 @@ def select_prototype_pool(cards: Iterable[dict[str, Any]]) -> list[dict[str, Any
 
     general_spell_quota = base.TOTAL_SPELLS - sum(base.SPELL_SUBTYPE_QUOTAS.values())
     general_candidates = [
-        card
-        for card in spell_candidates
+        card for card in spell_candidates
         if base.spell_subtype(card) in base.GENERAL_SPELL_SUBTYPES
         and int(card["id"]) not in used_spell_ids
     ]
@@ -262,10 +314,9 @@ def select_prototype_pool(cards: Iterable[dict[str, Any]]) -> list[dict[str, Any
     )
     if len(trap_candidates) < base.TOTAL_TRAPS:
         raise base.DownloaderError(
-            f"Pool insuficiente para Armadilhas: necessárias {base.TOTAL_TRAPS}, "
-            f"encontradas {len(trap_candidates)}."
+            f"Pool insuficiente para Armadilhas: necessárias {base.TOTAL_TRAPS}, encontradas {len(trap_candidates)}."
         )
-    selected.extend(trap_candidates[: base.TOTAL_TRAPS])
+    selected.extend(trap_candidates[:base.TOTAL_TRAPS])
 
     if len(selected) != TOTAL_PROTOTYPE_CARDS:
         raise base.DownloaderError(
@@ -277,52 +328,43 @@ def select_prototype_pool(cards: Iterable[dict[str, Any]]) -> list[dict[str, Any
 def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
     document = _ORIGINAL_BUILD_SELECTION_DOCUMENT(cards)
     card_by_id = {int(card["id"]): card for card in cards}
-
     for row in document["cards"]:
         card = card_by_id[int(row["id"])]
-        archetype = str(card.get("archetype") or "").strip() or None
-        row["archetype"] = archetype
+        row["archetype"] = archetype_name(card)
         row["selection_source"] = str(card.get("_monster_impact_source") or "standard")
 
-    monster_cards = [
-        card for card in cards if card.get("type") not in {"Spell Card", "Trap Card"}
-    ]
-    normal_cards = [
-        card for card in monster_cards if card.get("type") in base.NORMAL_MONSTER_API_TYPES
-    ]
+    monster_cards = [card for card in cards if card.get("type") not in {"Spell Card", "Trap Card"}]
+    normal_cards = [card for card in monster_cards if card.get("type") in base.NORMAL_MONSTER_API_TYPES]
     normal_counts = Counter(str(card.get("race", "")) for card in normal_cards)
     non_normal_counts = Counter(
-        str(card.get("race", ""))
-        for card in monster_cards
+        str(card.get("race", "")) for card in monster_cards
         if card.get("type") not in base.NORMAL_MONSTER_API_TYPES
     )
     ritual_counts = Counter(
-        str(card.get("race", ""))
-        for card in monster_cards
+        str(card.get("race", "")) for card in monster_cards
         if card.get("type") in base.RITUAL_MONSTER_API_TYPES
     )
     normal_source_counts = Counter(
         str(card.get("_monster_impact_source") or "standard") for card in normal_cards
     )
+    archetype_counts = Counter(
+        archetype_name(card) for card in monster_cards if archetype_name(card) is not None
+    )
+    duplicated = {name: count for name, count in archetype_counts.items() if count > 1}
+    if duplicated:
+        raise base.DownloaderError(f"Seleção contém arquétipos repetidos: {duplicated}")
 
     psychic_non_normals = sorted(
         (
-            card
-            for card in monster_cards
+            card for card in monster_cards
             if str(card.get("race", "")) == "Psychic"
             and card.get("type") not in base.NORMAL_MONSTER_API_TYPES
         ),
         key=_high_level_key,
     )
-    psychic_reserved = psychic_non_normals[:PSYCHIC_HIGH_LEVEL_TARGET]
-
-    selected_archetyped_monsters = [card for card in monster_cards if has_named_archetype(card)]
-    if selected_archetyped_monsters:
-        names = ", ".join(str(card.get("name", card.get("id"))) for card in selected_archetyped_monsters)
-        raise base.DownloaderError(f"Seleção contém monstros com arquétipo proibido: {names}")
 
     document["selection_rule"] = (
-        "deterministic-name-id-archetype-free-with-10-normals-level-2-4-per-race"
+        "deterministic-prefer-no-archetype-max-one-per-archetype-with-10-normals-level-2-4-per-race"
     )
     document["requested"]["monster_races"] = TOTAL_MONSTER_QUOTAS
     document["requested"]["core_non_normal_quotas"] = CORE_NON_NORMAL_QUOTAS
@@ -334,7 +376,7 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
     document["requested"]["ritual_monster_target_races"] = list(RITUAL_TARGET_RACES)
     document["requested"]["ritual_spell_compatibility"] = RITUAL_SPELL_COMPATIBILITY
     document["requested"]["psychic_high_level_target"] = PSYCHIC_HIGH_LEVEL_TARGET
-    document["requested"]["psychic_high_level_rule"] = "highest-level-then-name-id"
+    document["requested"]["psychic_high_level_rule"] = "highest-level-then-prefer-no-archetype-then-name-id"
 
     document["summary"]["normal_monsters_by_race"] = {
         race: normal_counts.get(race, 0) for race in CORE_NON_NORMAL_QUOTAS
@@ -346,15 +388,18 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
     document["summary"]["ritual_monsters_by_race"] = {
         race: ritual_counts.get(race, 0) for race in CORE_NON_NORMAL_QUOTAS
     }
-    document["summary"]["archetyped_monsters_selected"] = 0
+    document["summary"]["archetyped_monsters_selected"] = sum(archetype_counts.values())
+    document["summary"]["named_archetypes_selected"] = dict(sorted(archetype_counts.items()))
+    document["summary"]["duplicated_named_archetypes"] = {}
     document["summary"]["psychic_high_level_reserved"] = [
         {
             "id": int(card["id"]),
             "name": str(card.get("name", "")),
             "level": int(card["level"]),
             "prototype_type": base.prototype_type(card),
+            "archetype": archetype_name(card),
         }
-        for card in psychic_reserved
+        for card in psychic_non_normals[:PSYCHIC_HIGH_LEVEL_TARGET]
     ]
     return document
 
