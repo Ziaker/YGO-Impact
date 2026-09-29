@@ -39,6 +39,13 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 - O comparador 2D+3D permanece ferramenta de QA; não é um terceiro modo normal de gameplay.
 - VIS-002 não aprova por herança arte final, terreno final, altura como regra, facing de gameplay ou pathfinding do protótipo como núcleo definitivo.
 - Evidência atual de VIS-002: **18/18 testes embutidos e 29/29 checks reais em Chromium/Playwright**.
+- `VIS-003 — Planejamento e movimento tático, Parte 1/5`: **Aprovado pelo autor em 2026-09-29 — opção A (Área cheia)**.
+- VIS-003 fixa área cheia como overlay normal de movimento e preserva seletor 2D/3D durante gameplay; B/C ficam restritas à comparação QA.
+- Trocar 2D ↔ 3D preserva seleção, destino, caminho, movimento em andamento e estado lógico; câmera/orientação/overlay não alteram regras nem hash.
+- Confirmação de movimento pode usar botão, `Enter` ou duplo clique em destino livre/legal; duplo clique em monstro continua sendo seleção + foco traseiro.
+- Movimento é revalidado bloco a bloco e a simulação de 20 Hz fica desacoplada de `requestAnimationFrame`.
+- Evidência atual de VIS-003: **25/25 testes Node, 25/25 embutidos e 14/14 checks reais em Chromium/Playwright**.
+- A ordem de desempate `N,E,S,W,NE,SE,SW,NW` usada em VIS-003 permanece **provisória** e não é regra canônica.
 
 ### Artes e conteúdo
 
@@ -55,12 +62,14 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 - Testes do núcleo TypeScript e invariantes espaciais: **Implementados**.
 - Typecheck/build do núcleo: **Implementados no CI**.
 - VIS-002 possui testes internos e smoke de navegador executados durante aprovação; a integração desses checks à CI geral ainda é **Pendente**.
+- VIS-003 possui testes Node, testes embutidos e smoke de navegador executados durante aprovação; a integração desses checks à CI geral ainda é **Pendente**.
 - Determinismo de partida completa, replay, propriedades, fuzzing, self-play, smoke geral e endurance: **Pendentes**, pois dependem dos sistemas correspondentes.
 
 ### Web e publicação
 
 - Protótipo HTML VIS-001: **Implementado como comparador histórico; decisão da versão melhorada aprovada**.
 - Protótipo web modular VIS-002 (`index.html` + CSS + JS): **Implementado e aprovado**.
+- VIS-003 possui executável validado fora do diretório versionado de protótipos; sua **decisão está documentada/aprovada no Git**, e a integração do executável ao diretório `prototypes/` permanece pendente.
 - Build jogável: **Pendente**.
 - GitHub Pages: **Pendente / não publicado**.
 
@@ -72,24 +81,29 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 
 ## Ordem recomendada das próximas entregas
 
-1. **Usar VIS-001 e VIS-002 como decisões aprovadas**, sem reabrir seus pontos já decididos por registros antigos. Se a revisão melhorada do VIS-001 ganhar um snapshot executável identificável, versioná-lo como evidência da decisão já tomada, não como nova aprovação.
-2. **Expandir o núcleo por regras pequenas e testáveis**, começando por contratos que não dependem de direção visual: recursos/turno, validações básicas e operações de estado explicitamente descritas no GDD.
-3. **Reutilizar VIS-002 como referência de mapa/câmera nos protótipos seguintes**, preservando 2D/3D selecionáveis, picking equivalente e câmera fora do estado autoritativo. Mudança material desse contrato exige reabertura/sucessor de VIS-002.
-4. **Introduzir movimento/pathfinding determinístico** somente após extrair do GDD os desempates e invariantes correspondentes e escrever testes antes/de junto da implementação. O pathfinding local de VIS-002 não substitui esse trabalho.
-5. **Implementar Correntes/IMEDIATOS** como módulo isolado e fortemente testado, preservando a regra crítica de alvo inimigo.
-6. **Adicionar telemetria e replay mínimos** cedo o suficiente para validar hashes e determinismo antes da IA e do self-play.
-7. **Adicionar IA competitiva e QA** somente sobre a interface pública do mesmo núcleo.
-8. **Criar build web e Pages** depois que conteúdo, testes, build e smoke test estiverem automatizados.
+1. **Usar VIS-001, VIS-002 e VIS-003 como decisões aprovadas**, sem reabrir seus pontos já decididos por registros antigos.
+2. **VIS-004 — Terreno, SPD e movimento avançado:** prototipar custos de terreno, impassáveis, SPD negativo, movimento fracionado em contexto amplo, recuperação de +2 SPD após 8 s de ociosidade e movimento como Reação, herdando área cheia e 2D/3D selecionáveis de VIS-003.
+3. **Expandir o núcleo por regras pequenas e testáveis**, começando por contratos que não dependem de direção visual: recursos/turno, validações básicas e operações de estado explicitamente descritas no GDD.
+4. **Reutilizar VIS-002/VIS-003 como referência de mapa/câmera/movimento nos protótipos seguintes**, preservando 2D/3D selecionáveis, picking equivalente, área cheia e câmera fora do estado autoritativo.
+5. **Formalizar o desempate canônico de pathfinding** antes de promover a ordem provisória de VIS-003 ao núcleo final.
+6. **Depois do VIS-004, prototipar VIS/Fog of War, alcance e seleção de alvos** antes de Invocações, combate e Correntes interativas.
+7. **Implementar Correntes/IMEDIATOS** como módulo isolado e fortemente testado, preservando a regra crítica de alvo inimigo.
+8. **Adicionar telemetria e replay mínimos** cedo o suficiente para validar hashes e determinismo antes da IA e do self-play.
+9. **Adicionar IA competitiva e QA** somente sobre a interface pública do mesmo núcleo.
+10. **Criar build web e Pages** depois que conteúdo, testes, build e smoke test estiverem automatizados.
 
 ## Bloqueios explícitos
 
 - Não rebaixar VIS-001 para “aguardando aprovação”: a versão melhorada já foi aprovada pelo autor em 2026-09-29.
 - Não inventar que a aprovação do VIS-001 corresponde a A, B ou C pura quando o registro atual não sustenta essa equivalência.
 - Não reinterpretar a câmera 3D de VIS-002 como altura ou facing de gameplay.
-- Não permitir que orientação, câmera, zoom, pan ou foco alterem estado/hash autoritativo.
+- Não reabrir a decisão de VIS-003: **A — área cheia** é o overlay normal de movimento; B/C são apenas QA/histórico.
+- Não remover o seletor 2D/3D aprovado do fluxo normal de gameplay.
+- Não permitir que orientação, câmera, zoom, pan, foco ou overlay alterem estado/hash autoritativo.
+- Não promover a ordem provisória de desempate de VIS-003 a regra final sem decisão explícita.
 - Não completar regras ausentes usando Yu-Gi-Oh! oficial.
 - Não tratar o scaffold do núcleo como jogo completo.
-- Não tratar o pathfinding local de VIS-002 como implementação final.
+- Não tratar pathfinding de protótipos como implementação final do núcleo.
 - Não confundir a política de 136 cartas do DEC-001 com o snapshot `selection.json` de 96 cartas enquanto ele não for regenerado/sincronizado.
 - Não publicar GitHub Pages sem validação e autorização explícita.
 - Não definir sozinho a lista final de cartas do primeiro conjunto quando o GDD não fornece nomes específicos.
