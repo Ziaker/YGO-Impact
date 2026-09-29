@@ -20,7 +20,8 @@ Pool atual de monstros:
 
 - RACE ativas: Beast, Psychic, Fiend e Spellcaster;
 - tipos permitidos: Normal, Efeito, Ritual e Fusion;
-- nenhum monstro com `archetype` preenchido na API;
+- monstros sem arquétipo têm prioridade;
+- no máximo **1 monstro por arquétipo nomeado** em todo o pool;
 - slots não-Normal preservados:
   - 15 Beast;
   - 15 Psychic;
@@ -30,9 +31,11 @@ Pool atual de monstros:
 
 Isso resulta em 25 Beast, 25 Psychic, 28 Fiend e 28 Spellcaster: **106 monstros**.
 
-O catálogo padrão não oferece Psychic Normal Monster Nível 2–4 sem arquétipo. Por isso, `sync_prototype_pool.py` consulta também `format=Rush Duel` como **fonte suplementar somente para slots Normal**. Efeito, Ritual e Fusion continuam no catálogo padrão. O `selection.json` registra `selection_source` para auditoria.
+`sync_prototype_pool.py` consulta o catálogo padrão e pode usar cartas marcadas como Rush Duel como **fonte suplementar somente para slots Normal Nível 2–4**. Efeito, Ritual e Fusion continuam no catálogo padrão. O `selection.json` registra `selection_source` para auditoria.
 
-Beast, Fiend e Spellcaster reservam 1 Ritual Monster sem arquétipo dentro de seus slots não-Normal. Psychic reserva 2 slots não-Normal para os dois candidatos sem arquétipo de maior Nível.
+A política de arquétipos usa apenas o campo `archetype` retornado pela API: uma carta de arquétipo pode entrar, mas uma segunda carta com o mesmo valor é rejeitada. Não se deduz arquétipo pelo nome.
+
+Beast, Fiend e Spellcaster reservam 1 Ritual Monster dentro de seus slots não-Normal. Psychic reserva 2 slots não-Normal para os dois candidatos de maior Nível, sempre respeitando a unicidade de arquétipo.
 
 Magias:
 
@@ -56,7 +59,7 @@ assets-local/card-art/selection.json
 assets-local/card-art/manifest.json
 ```
 
-`selection.json` registra nome, ID, RACE, tipo retornado pela API, tipo normalizado do protótipo, Nível, `archetype`, `selection_source` e `image_url_cropped`, além dos resumos das cotas selecionadas.
+`selection.json` registra nome, ID, RACE, tipo retornado pela API, tipo normalizado do protótipo, Nível, `archetype`, `selection_source` e `image_url_cropped`, além dos resumos das cotas selecionadas e dos arquétipos usados.
 
 `manifest.json` registra os arquivos efetivamente baixados, SHA-256, tamanho e os metadados relevantes disponíveis no downloader.
 
