@@ -888,17 +888,17 @@
       "sha256": "aa47c2a69348a1392780abafb0787fbd397c0654b82b92cb12c2795287ebaee3",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/22171591.jpg"
     },
-    "Monstros/Psychic/Efeito/dr.-frankenderp__27995943.jpg": {
+    "Monstros/Psychic/Efeito/hyper-psychic-blaster-assault-mode__37169670.jpg": {
       "api_type": "Effect Monster",
-      "bytes": 107796,
-      "card_id": 27995943,
-      "image_id": 27995943,
-      "level": 3,
-      "name": "Dr. Frankenderp",
+      "bytes": 180017,
+      "card_id": 37169670,
+      "image_id": 37169670,
+      "level": 11,
+      "name": "Hyper Psychic Blaster/Assault Mode",
       "prototype_type": "Efeito",
       "race": "Psychic",
-      "sha256": "baf2083f3eed56383a27bb2f9e18bfe93432822ecf3b69daff687fb5782e2b46",
-      "source": "https://images.ygoprodeck.com/images/cards_cropped/27995943.jpg"
+      "sha256": "cedf9079534ad309daeb5f3594bcda35a14227facf63aa84bc11fdf9b58dd5ed",
+      "source": "https://images.ygoprodeck.com/images/cards_cropped/37169670.jpg"
     },
     "Monstros/Psychic/Fusion/absolute-axon-kicker__80073414.jpg": {
       "api_type": "Fusion Monster",
@@ -1157,9 +1157,9 @@
     "monsters_by_level": {
       "1": 7,
       "10": 1,
-      "11": 1,
+      "11": 2,
       "2": 4,
-      "3": 12,
+      "3": 11,
       "4": 17,
       "5": 3,
       "6": 7,
@@ -1180,6 +1180,20 @@
       "Ritual": 3
     },
     "monsters_total": 66,
+    "psychic_high_level_reserved": [
+      {
+        "id": 80073414,
+        "level": 11,
+        "name": "Absolute Axon Kicker",
+        "prototype_type": "Fusion"
+      },
+      {
+        "id": 37169670,
+        "level": 11,
+        "name": "Hyper Psychic Blaster/Assault Mode",
+        "prototype_type": "Efeito"
+      }
+    ],
     "ritual_monsters_by_race": {
       "Beast": 1,
       "Fiend": 1,

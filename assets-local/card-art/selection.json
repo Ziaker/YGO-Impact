@@ -163,6 +163,16 @@
     {
       "api_type": "Effect Monster",
       "bucket": "monster",
+      "id": 37169670,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/37169670.jpg",
+      "level": 11,
+      "name": "Hyper Psychic Blaster/Assault Mode",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
       "id": 31600845,
       "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/31600845.jpg",
       "level": 7,
@@ -287,16 +297,6 @@
       "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/22171591.jpg",
       "level": 1,
       "name": "Doctor Cranium",
-      "prototype_type": "Efeito",
-      "race": "Psychic"
-    },
-    {
-      "api_type": "Effect Monster",
-      "bucket": "monster",
-      "id": 27995943,
-      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/27995943.jpg",
-      "level": 3,
-      "name": "Dr. Frankenderp",
       "prototype_type": "Efeito",
       "race": "Psychic"
     },
@@ -974,10 +974,15 @@
       "Ritual",
       "Fusion"
     ],
+    "psychic_high_level_rule": "highest-level-then-name-id",
+    "psychic_high_level_target": 2,
+    "psychic_ritual_substitution": "2 highest-level compatible Psychic monsters inside the existing 15-card Psychic quota",
     "ritual_monster_target_per_race": 1,
-    "ritual_official_exceptions": {
-      "Psychic": "o catálogo oficial atual não possui Ritual Monster Psychic"
-    },
+    "ritual_monster_target_races": [
+      "Beast",
+      "Fiend",
+      "Spellcaster"
+    ],
     "ritual_spell_compatibility": "generic-any-ritual-monster",
     "spell_general_subtypes": [
       "Continuous",
@@ -993,14 +998,14 @@
     "traps_total": 10
   },
   "schema_version": 1,
-  "selection_rule": "deterministic-name-id-with-ritual-per-race",
+  "selection_rule": "deterministic-name-id-with-rituals-and-psychic-high-level",
   "summary": {
     "monsters_by_level": {
       "1": 7,
       "10": 1,
-      "11": 1,
+      "11": 2,
       "2": 4,
-      "3": 12,
+      "3": 11,
       "4": 17,
       "5": 3,
       "6": 7,
@@ -1021,6 +1026,20 @@
       "Ritual": 3
     },
     "monsters_total": 66,
+    "psychic_high_level_reserved": [
+      {
+        "id": 80073414,
+        "level": 11,
+        "name": "Absolute Axon Kicker",
+        "prototype_type": "Fusion"
+      },
+      {
+        "id": 37169670,
+        "level": 11,
+        "name": "Hyper Psychic Blaster/Assault Mode",
+        "prototype_type": "Efeito"
+      }
+    ],
     "ritual_monsters_by_race": {
       "Beast": 1,
       "Fiend": 1,
