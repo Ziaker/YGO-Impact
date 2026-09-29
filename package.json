@@ -1,0 +1,18 @@
+{
+  "name": "monster-impact",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json",
+    "test:core": "node --experimental-strip-types --test tests/core/*.test.mjs",
+    "test": "npm run typecheck && npm run test:core"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}
