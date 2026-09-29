@@ -59,9 +59,10 @@ test("same seed and command log produce identical per-step hashes", () => {
   assert.deepEqual(run(), run());
 });
 
-test("canonical serialization ignores object insertion order", () => {
+test("canonical serialization ignores insertion order and never depends on locale collation", () => {
   assert.equal(canonicalStringify({ b: 2, a: 1 }), canonicalStringify({ a: 1, b: 2 }));
   assert.equal(hashCanonical({ b: 2, a: 1 }), hashCanonical({ a: 1, b: 2 }));
+  assert.equal(canonicalStringify({ "ä": 3, a: 2, Z: 1 }), '{"Z":1,"a":2,"ä":3}');
 });
 
 test("authoritative numeric values reject floats and unsafe integers", () => {
@@ -69,8 +70,18 @@ test("authoritative numeric values reject floats and unsafe integers", () => {
   assert.throws(() => canonicalStringify({ value: Number.MAX_SAFE_INTEGER + 1 }), /safe integers/);
 });
 
+test("queued payloads are defensive immutable snapshots", () => {
+  const payload = { nested: { value: 1 } };
+  const engine = enqueueCommand(createEngine("seed-3"), { issuer: "human:0", kind: "noop", payload });
+  payload.nested.value = 99;
+
+  assert.equal(engine.pendingCommands[0].payload.nested.value, 1);
+  assert.equal(Object.isFrozen(engine.pendingCommands[0].payload), true);
+  assert.equal(Object.isFrozen(engine.pendingCommands[0].payload.nested), true);
+});
+
 test("returned authoritative structures are frozen", () => {
-  let engine = createEngine("seed-3");
+  let engine = createEngine("seed-4");
   engine = enqueueCommand(engine, { issuer: "human:0", kind: "noop", payload: { nested: [1, 2] } });
   const result = advanceStep(engine);
   assert.equal(Object.isFrozen(result.engine), true);

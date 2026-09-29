@@ -1,5 +1,5 @@
 import { canonicalStringify } from "./canonical.ts";
-import { deepFreeze } from "./freeze.ts";
+import { cloneAndFreezeJson, deepFreeze } from "./freeze.ts";
 import type { CommandEnvelope, CommandInput, CoreEngine, JsonValue } from "./types.ts";
 
 function assertNonEmpty(label: string, value: string): void {
@@ -16,8 +16,9 @@ export function enqueueCommand(engine: CoreEngine, input: CommandInput): CoreEng
   assertNonEmpty("issuer", input.issuer);
   assertNonEmpty("kind", input.kind);
 
-  const payload = input.payload ?? {};
-  canonicalStringify(payload as JsonValue);
+  const sourcePayload = input.payload ?? {};
+  canonicalStringify(sourcePayload as JsonValue);
+  const payload = cloneAndFreezeJson(sourcePayload);
 
   const command: CommandEnvelope = deepFreeze({
     sequence: engine.nextCommandSequence,

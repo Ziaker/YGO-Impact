@@ -10,6 +10,12 @@ function assertIntegerNumber(value: number): void {
   }
 }
 
+function compareCodeUnits(left: string, right: string): number {
+  if (left < right) return -1;
+  if (left > right) return 1;
+  return 0;
+}
+
 export function canonicalStringify(value: JsonValue): string {
   if (value === null) return "null";
 
@@ -27,7 +33,7 @@ export function canonicalStringify(value: JsonValue): string {
       }
 
       const objectValue = value as { readonly [key: string]: JsonValue };
-      const entries = Object.entries(objectValue).sort(([left], [right]) => left.localeCompare(right, "en"));
+      const entries = Object.entries(objectValue).sort(([left], [right]) => compareCodeUnits(left, right));
       return `{${entries
         .map(([key, item]) => `${JSON.stringify(key)}:${canonicalStringify(item)}`)
         .join(",")}}`;

@@ -13,26 +13,35 @@ Essa escolha é arquitetural, não uma regra de gameplay. Protótipos visuais co
 - desempate inicial por sequência monotônica de registro;
 - estruturas retornadas pelo core são imutáveis;
 - números autoritativos aceitos pelo scaffold são inteiros seguros; floats são rejeitados;
-- serialização de estado ordena chaves de objetos canonicamente;
+- serialização de estado usa ordem lexicográfica por unidades UTF-16, sem depender de locale/ICU;
 - mesmos seed, estado e comandos produzem os mesmos hashes;
+- primeiro mapa físico usa **31 × 17** blocos;
+- bases são blocos sólidos não ocupáveis;
+- no máximo um monstro ocupa fisicamente cada bloco;
+- no máximo cinco monstros por jogador ficam no mapa;
 - a ordem macro do passo permanece a definida pelo GDD: receber, ordenar, validar, confirmar custos, mutar, resolver gatilhos/Correntes, checar estado, atualizar timers, emitir telemetria e calcular hash.
 
-## Implementado nesta etapa
+## Implementado
 
 - `constants.ts`: cadência e pipeline fixo;
 - `types.ts`: tipos mínimos de estado, comando, evento e resultado de passo;
 - `queue.ts`: registro monotônico e elegibilidade no próximo passo;
 - `canonical.ts`: serialização canônica e hash determinístico FNV-1a 64-bit;
-- `freeze.ts`: congelamento recursivo de estruturas públicas;
-- `engine.ts`: criação do estado e avanço de um passo sem gameplay;
-- `index.ts`: interface pública inicial do módulo.
+- `freeze.ts`: congelamento recursivo e cópia defensiva de payloads JSON;
+- `engine.ts`: criação do estado e avanço de um passo sem gameplay complexo;
+- `spatial.ts`: dimensões do primeiro mapa e invariantes físicas estáticas de bases/unidades;
+- `index.ts`: interface pública do módulo.
 
 O FNV-1a é usado **somente como hash determinístico inicial de regressão**, não como mecanismo criptográfico ou decisão eterna do formato de replay. Uma troca futura exige versionamento explícito do schema/hash.
+
+`isTilePhysicallyFree()` verifica apenas ocupação física e limites do mapa. Ele **não** afirma que um destino seja legal para movimento/Invocação, porque terreno, efeitos, alcance e outras regras ainda não fazem parte desse módulo.
 
 ## Deliberadamente não implementado ainda
 
 - custos;
-- movimento;
+- movimento/travessia/pathfinding;
+- colisão simultânea;
+- terreno e custo de SPD;
 - dano/HP;
 - Invocações;
 - Correntes, Cross Chains e IMEDIATOS executáveis;
