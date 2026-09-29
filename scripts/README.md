@@ -4,14 +4,14 @@
 
 `scripts/baixar_artes.py` contém o downloader genérico de artes `image_url_cropped` do YGOPRODeck usando somente a biblioteca padrão do Python.
 
-A política oficial do pool do primeiro protótipo é aplicada por `scripts/sync_prototype_pool.py`.
+A política oficial do pool do primeiro protótipo é aplicada por `scripts/sync_prototype_pool.py`. No GitHub Actions, `scripts/sync_prototype_pool_curated.py` aplica a mesma política usando uma coleta suplementar curada para os Normal Monsters Rush necessários enquanto o endpoint em massa correspondente permanece instável.
 
 ### Pool automático do primeiro protótipo
 
 O modo oficial atual é:
 
 ```bash
-python scripts/sync_prototype_pool.py --prototype-pool
+python scripts/sync_prototype_pool_curated.py --prototype-pool
 ```
 
 A seleção exige `image_url_cropped` disponível e usa regras determinísticas.
@@ -31,7 +31,7 @@ Pool atual de monstros:
 
 Isso resulta em 25 Beast, 25 Psychic, 28 Fiend e 28 Spellcaster: **106 monstros**.
 
-`sync_prototype_pool.py` consulta o catálogo padrão e pode usar cartas marcadas como Rush Duel como **fonte suplementar somente para slots Normal Nível 2–4**. Efeito, Ritual e Fusion continuam no catálogo padrão. O `selection.json` registra `selection_source` para auditoria.
+`sync_prototype_pool.py` define a política e o runner curado complementa somente os slots Normal Nível 2–4 que não estão disponíveis de forma suficiente no catálogo padrão. Efeito, Ritual e Fusion continuam no catálogo padrão. O `selection.json` registra `selection_source` para auditoria.
 
 A política de arquétipos usa apenas o campo `archetype` retornado pela API: uma carta de arquétipo pode entrar, mas uma segunda carta com o mesmo valor é rejeitada. Não se deduz arquétipo pelo nome.
 
@@ -63,13 +63,36 @@ assets-local/card-art/manifest.json
 
 `manifest.json` registra os arquivos efetivamente baixados, SHA-256, tamanho e os metadados relevantes disponíveis no downloader.
 
+## Referências de efeito
+
+`scripts/sync_effect_texts.py` cria um arquivo `.effect.txt` para cada monstro cujo tipo normalizado seja **Efeito**. O arquivo fica na mesma pasta e usa o mesmo nome-base da arte:
+
+```text
+assets-local/card-art/Monstros/Psychic/Efeito/
+├── nome-do-monstro__12345678.jpg
+└── nome-do-monstro__12345678.effect.txt
+```
+
+O sidecar registra nome, ID, RACE, Nível, tipo da API e o texto `desc` da carta-fonte retornado pelo YGOPRODeck.
+
+Esses arquivos são **referência de conteúdo**, não regra autoritativa: texto oficial da carta não cria automaticamente custo, alvo, timing, Corrente, Keyword ou qualquer interação no Monster Impact. O GDD e o conteúdo aprovado do projeto continuam prevalecendo.
+
+Sincronização manual dos sidecars após as artes/seleção estarem atualizadas:
+
+```bash
+python scripts/sync_effect_texts.py --root assets-local/card-art
+```
+
+O workflow de artes executa essa etapa automaticamente e registra os `.effect.txt` no `manifest.json`. A poda remove sidecars órfãos quando uma carta deixa de pertencer à seleção.
+
 ### Dry-run
 
 ```bash
-python scripts/sync_prototype_pool.py --prototype-pool --dry-run
+python scripts/sync_prototype_pool_curated.py --prototype-pool --dry-run
+python scripts/sync_effect_texts.py --root assets-local/card-art --dry-run
 ```
 
-O dry-run mostra a distribuição por Nível e o plano de download sem criar arquivos.
+O dry-run do pool mostra a distribuição por Nível e o plano de download sem criar arquivos. O dry-run de efeitos lista os sidecars planejados sem gravá-los.
 
 ### Coleta manual
 
@@ -83,7 +106,7 @@ python scripts/baixar_artes.py --race Beast --dry-run
 python scripts/baixar_artes.py --all-compatible --dry-run
 ```
 
-Nos modos manuais, monstros continuam limitados às quatro RACE ativas e aos quatro tipos de monstro suportados pelo downloader; a política ampliada de cotas, arquétipos e suplemento Rush pertence a `sync_prototype_pool.py`.
+Nos modos manuais, monstros continuam limitados às quatro RACE ativas e aos quatro tipos de monstro suportados pelo downloader; a política ampliada de cotas, arquétipos e suplemento Rush pertence aos scripts de sincronização do pool.
 
 `--all-artworks` baixa artes alternativas. `--pre-2010` permanece como filtro opcional e não faz parte da regra padrão do pool.
 
@@ -96,10 +119,13 @@ assets-local/card-art/
 │   ├── Psychic/
 │   ├── Fiend/
 │   └── Spellcaster/
+│       └── Efeito/
+│           ├── nome__id.jpg
+│           └── nome__id.effect.txt
 ├── Magias/
 ├── Armadilhas/
 ├── selection.json
 └── manifest.json
 ```
 
-O workflow `.github/workflows/sync-card-art.yml` executa `scripts/sync_prototype_pool.py --prototype-pool` e versiona as artes, a seleção e o manifesto quando houver alterações.
+O workflow `.github/workflows/sync-card-art.yml` executa a seleção do pool, baixa as artes, sincroniza referências de efeito, poda arquivos obsoletos e versiona artes, sidecars, seleção e manifesto quando houver alterações.
