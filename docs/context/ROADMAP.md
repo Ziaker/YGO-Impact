@@ -30,12 +30,14 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 
 ### Prototipagem visual
 
-- `VIS-001 — Composição do campo e HUD principal`: **Prototipado / aguardando aprovação**.
+- `VIS-001 — Composição do campo e HUD principal`: **Aprovado pelo autor em 2026-09-29 na versão melhorada**.
+- O comparador A/B/C atualmente versionado em `prototypes/visual-001-hud-layout/index.html` é a evidência histórica inicial; o Git atual não permite identificar a revisão melhorada como uma opção A/B/C pura sem inventar informação.
+- A aprovação de VIS-001 cobre composição, hierarquia e densidade do HUD/campo; não aprova por herança movimento, timing, Correntes interativas ou Fog of War dinâmico.
 - `VIS-002 — Mapa, orientação 2D/3D e sistema de câmera`: **Prototipado, testado e aprovado pelo autor em 2026-09-29**.
 - VIS-002 aprova **2D top-down e 3D tático como orientações selecionáveis in-game** sobre o mesmo estado lógico.
 - Contrato de câmera aprovado em VIS-002: pan/zoom/foco no 2D; órbita/pan/zoom/elevação/presets/reset no 3D; duplo clique em monstro para foco traseiro puramente visual.
 - O comparador 2D+3D permanece ferramenta de QA; não é um terceiro modo normal de gameplay.
-- VIS-002 não aprova por herança o HUD de VIS-001, arte final, terreno final, altura como regra, facing de gameplay ou pathfinding do protótipo como núcleo definitivo.
+- VIS-002 não aprova por herança arte final, terreno final, altura como regra, facing de gameplay ou pathfinding do protótipo como núcleo definitivo.
 - Evidência atual de VIS-002: **18/18 testes embutidos e 29/29 checks reais em Chromium/Playwright**.
 
 ### Artes e conteúdo
@@ -43,7 +45,8 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 - Downloader `image_url_cropped`: **Implementado e testado**.
 - Seleção versionada: **Implementada**.
 - Sincronização por GitHub Actions: **Implementada**.
-- Artes atualmente versionadas: lote inicial de Dark Magician e Blue-Eyes White Dragon + manifesto.
+- `DEC-001-initial-card-pool.md` define a política automática atual em **136 cartas**: 106 monstros, 20 Magias e 10 Armadilhas.
+- O snapshot atualmente versionado em `assets-local/card-art/selection.json` ainda registra **96 cartas**: 66 monstros, 20 Magias e 10 Armadilhas. Portanto, esse artefato está atrás da política atual e não deve ser descrito como se já fosse o pool de 136 materializado.
 - Seleção final das 88 cartas (ou redução deliberada para 40): **Pendente de conteúdo**, sem inventar lista por conta própria.
 
 ### Testes e CI
@@ -56,19 +59,20 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 
 ### Web e publicação
 
-- Protótipo HTML VIS-001: **Implementado localmente no repositório**.
-- Protótipo web modular VIS-002 (`index.html` + CSS + JS): **Implementado localmente no repositório**.
+- Protótipo HTML VIS-001: **Implementado como comparador histórico; decisão da versão melhorada aprovada**.
+- Protótipo web modular VIS-002 (`index.html` + CSS + JS): **Implementado e aprovado**.
 - Build jogável: **Pendente**.
 - GitHub Pages: **Pendente / não publicado**.
 
 ### IA, replay e telemetria
 
 - Contratos: **Definidos no GDD**.
+- Documentos técnicos específicos como `TELEMETRY_SCHEMA.md` e `AI_INTERFACE.md`: **Ainda não versionados**.
 - Implementação: **Pendente**.
 
 ## Ordem recomendada das próximas entregas
 
-1. **Obter decisão do autor sobre VIS-001**: A, B, C ou revisão. A aprovação é necessária para transformar a composição de HUD escolhida em referência visual; VIS-002 não decide esse ponto.
+1. **Usar VIS-001 e VIS-002 como decisões aprovadas**, sem reabrir seus pontos já decididos por registros antigos. Se a revisão melhorada do VIS-001 ganhar um snapshot executável identificável, versioná-lo como evidência da decisão já tomada, não como nova aprovação.
 2. **Expandir o núcleo por regras pequenas e testáveis**, começando por contratos que não dependem de direção visual: recursos/turno, validações básicas e operações de estado explicitamente descritas no GDD.
 3. **Reutilizar VIS-002 como referência de mapa/câmera nos protótipos seguintes**, preservando 2D/3D selecionáveis, picking equivalente e câmera fora do estado autoritativo. Mudança material desse contrato exige reabertura/sucessor de VIS-002.
 4. **Introduzir movimento/pathfinding determinístico** somente após extrair do GDD os desempates e invariantes correspondentes e escrever testes antes/de junto da implementação. O pathfinding local de VIS-002 não substitui esse trabalho.
@@ -79,11 +83,13 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 
 ## Bloqueios explícitos
 
-- Não declarar VIS-001 aprovado sem resposta do autor.
+- Não rebaixar VIS-001 para “aguardando aprovação”: a versão melhorada já foi aprovada pelo autor em 2026-09-29.
+- Não inventar que a aprovação do VIS-001 corresponde a A, B ou C pura quando o registro atual não sustenta essa equivalência.
 - Não reinterpretar a câmera 3D de VIS-002 como altura ou facing de gameplay.
 - Não permitir que orientação, câmera, zoom, pan ou foco alterem estado/hash autoritativo.
 - Não completar regras ausentes usando Yu-Gi-Oh! oficial.
 - Não tratar o scaffold do núcleo como jogo completo.
 - Não tratar o pathfinding local de VIS-002 como implementação final.
+- Não confundir a política de 136 cartas do DEC-001 com o snapshot `selection.json` de 96 cartas enquanto ele não for regenerado/sincronizado.
 - Não publicar GitHub Pages sem validação e autorização explícita.
 - Não definir sozinho a lista final de cartas do primeiro conjunto quando o GDD não fornece nomes específicos.

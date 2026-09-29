@@ -1,6 +1,8 @@
 # VIS-001 — Composição do campo e HUD principal
 
-**Status:** aguardando aprovação. Nenhuma opção é considerada final.
+**Status:** **APROVADO PELO AUTOR — versão melhorada do VIS-001**  
+**Data da aprovação:** 2026-09-29  
+**Escopo da aprovação:** direção de composição, hierarquia e densidade do HUD/campo na versão melhorada apresentada ao autor. A aprovação não valida, por herança, movimento, timing, Correntes interativas, Fog of War dinâmico ou outras regras temporais.
 
 ## Pergunta avaliada
 
@@ -20,9 +22,9 @@ O experimento segue o GDD v0.42: decisões visuais ainda não aprovadas devem ap
 - marcador de impactos da base;
 - Corrente representada em profundidade de cinco elementos para teste de densidade.
 
-Abra `prototypes/visual-001-hud-layout/index.html` e alterne entre A, B e C. As três opções usam o mesmo conteúdo e diferem somente na composição.
+O comparador originalmente versionado em `prototypes/visual-001-hud-layout/index.html` permite alternar entre A, B e C. Ele permanece como evidência histórica da comparação inicial.
 
-## Opções
+## Opções históricas
 
 ### A — Mapa dominante + inspetor lateral
 
@@ -44,7 +46,7 @@ Mapa utiliza toda a largura superior e a informação detalhada fica concentrada
 
 ## Critérios
 
-Avaliar, para cada opção:
+Avaliar, para cada opção/revisão:
 
 1. leitura imediata de fase, Ações e Reações;
 2. visibilidade do objetivo de cinco impactos;
@@ -57,10 +59,16 @@ Avaliar, para cada opção:
 9. capacidade de identificar estado, ações disponíveis, custo, alvo, consequência e resultado sem conhecimento externo;
 10. comportamento aceitável ao reduzir a janela.
 
-## Evidências
+## Evidências e rastreabilidade
 
-Ainda não coletadas. O protótipo é deliberadamente provisório e não constitui aprovação.
+- O autor aprovou explicitamente a **versão melhorada do VIS-001** em 2026-09-29.
+- Essa decisão é mais recente e prevalece sobre registros antigos que ainda marcavam o experimento como “aguardando aprovação”.
+- O histórico Git atual identifica de forma inequívoca o comparador A/B/C original, mas não permite atribuir retroativamente a aprovação a uma das opções A, B ou C puras sem inventar informação.
+- Portanto, a decisão registrada é exatamente a fornecida pelo autor: **versão melhorada aprovada**.
+- Enquanto um snapshot executável específico dessa revisão melhorada não estiver identificado no Git, o `index.html` atual deve ser tratado como comparador histórico, não como prova de que uma opção A/B/C pura foi a aprovada.
 
 ## Resultado
 
-**Pendente de decisão do autor: A, B, C ou revisão.**
+**APROVADA: versão melhorada do VIS-001.**
+
+Esta aprovação encerra a decisão de composição/HUD deste experimento. Reabertura só ocorre por nova decisão explícita do autor ou por mudança material de requisitos. Sistemas temporais e interativos continuam exigindo protótipos executáveis próprios conforme o GDD.

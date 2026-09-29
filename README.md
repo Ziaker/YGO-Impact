@@ -14,7 +14,7 @@ O GDD-base está concluído na versão **0.42**, com **25 de 25 fases finalizada
 
 A cópia binária `.docx` ainda não está versionada porque o conector disponível nesta sessão não permite transportar o arquivo binário preservando integralmente os bytes acima do limite do canal. O repositório não trata reconstruções ou resumos como substitutos do original enquanto o hash canônico não puder ser preservado exatamente.
 
-### Já implementado ou prototipado
+### Já implementado, prototipado ou aprovado
 
 - núcleo autoritativo inicial em TypeScript em `src/core/`;
 - passo lógico fixo de **20 Hz / 50 ms** no scaffold;
@@ -22,19 +22,20 @@ A cópia binária `.docx` ainda não está versionada porque o conector disponí
 - serialização/hash determinístico inicial;
 - invariantes espaciais básicas do mapa **31 × 17**, bases e ocupação;
 - testes automatizados do núcleo em `tests/core/`;
-- primeiro experimento visual A/B/C (`VIS-001`) para campo/HUD;
+- `VIS-001` para composição do campo/HUD: **versão melhorada aprovada pelo autor em 2026-09-29**;
+- `VIS-002` para mapa/câmera: **aprovado pelo autor em 2026-09-29**, com 2D top-down e 3D tático selecionáveis in-game sobre o mesmo estado lógico;
 - downloader de artes `image_url_cropped`;
 - seleção e sincronização versionada de artes;
-- lote inicial de artes cropped e manifesto SHA-256;
+- manifesto SHA-256 das artes versionadas;
 - CI para TypeScript, núcleo e ferramentas Python.
 
 ### Ainda pendente
 
 - gameplay completo do núcleo: recursos, custos, movimento, pathfinding, dano, Invocações, Correntes, Cross Chains, IMEDIATOS, Fog of War, RNG e timers;
-- aprovação visual explícita do VIS-001;
-- demais protótipos visuais obrigatórios do GDD;
-- conteúdo inicial completo;
+- demais protótipos visuais obrigatórios do GDD além dos pontos já aprovados em VIS-001 e VIS-002;
+- conteúdo inicial completo e seleção final do primeiro conjunto/decks;
 - IA competitiva e IA de QA;
+- contratos técnicos versionados de telemetria/IA e implementação correspondente;
 - telemetria e replay do motor;
 - self-play headless;
 - build web jogável;
@@ -45,7 +46,7 @@ Não confundir **definido no GDD**, **prototipado**, **implementado**, **testado
 ## Conceito do primeiro protótipo
 
 - single-player contra IA;
-- apresentação 2D top-down;
+- apresentação do mesmo campo lógico em **2D top-down** e **3D tático**, selecionáveis in-game conforme VIS-002;
 - mapa inicial de **31 × 17 blocos**;
 - até **5 monstros por jogador** simultaneamente;
 - Duelista não aparece fisicamente no mapa;
@@ -171,13 +172,27 @@ Toda decisão visual relevante precisa de validação antes da implementação f
 
 O inventário fica em `docs/prototypes/INDEX.md`.
 
-O primeiro experimento é:
+### VIS-001 — HUD/campo
+
+O comparador originalmente versionado fica em:
 
 ```text
 prototypes/visual-001-hud-layout/index.html
 ```
 
-Ele compara três composições do campo/HUD sob o mesmo cenário de densidade. **Nenhuma opção está aprovada ainda.** Critérios e hipóteses ficam em `docs/prototypes/VIS-001-hud-layout.md`.
+Ele compara três composições históricas A/B/C do campo/HUD sob o mesmo cenário de densidade. A decisão vigente é posterior: **o autor aprovou a versão melhorada do VIS-001 em 2026-09-29**. O Git atual não sustenta transformar essa aprovação em “A”, “B” ou “C” pura sem inventar informação; por isso o comparador original permanece evidência histórica e a decisão normativa fica em `docs/prototypes/VIS-001-hud-layout.md`.
+
+A aprovação do VIS-001 cobre composição, hierarquia e densidade. Ela não valida timing, movimento, Correntes interativas ou Fog of War dinâmico.
+
+### VIS-002 — mapa/câmera
+
+O executável aprovado fica em:
+
+```text
+prototypes/visual-002-map-camera-2d-3d/index.html
+```
+
+VIS-002 aprova 2D top-down e 3D tático como orientações selecionáveis do mesmo estado lógico, com o contrato de câmera descrito em `docs/prototypes/VIS-002-map-camera-2d-3d.md`.
 
 ## Artes das cartas
 
@@ -185,13 +200,15 @@ O projeto utiliza ilustrações oficiais como composição visual do fangame pes
 
 Por decisão explícita do autor, as artes selecionadas e o `manifest.json` podem ser versionados no repositório.
 
-Seleção atual:
+O `DEC-001-initial-card-pool.md` define atualmente uma política automática de **136 cartas**. O snapshot `assets-local/card-art/selection.json` ainda registra **96 cartas**, portanto está atrás da política atual e não deve ser tratado como materialização completa dos 136 até nova sincronização.
+
+Seleção manual de alvos do downloader:
 
 ```text
 scripts/card_art_targets.txt
 ```
 
-Sincronização local:
+Sincronização local básica:
 
 ```bash
 python scripts/baixar_artes.py \
@@ -207,7 +224,7 @@ python scripts/baixar_artes.py \
   --dry-run
 ```
 
-Detalhes, filtros e alternativas estão em `scripts/README.md`. Avisos sobre conteúdo de terceiros estão em `THIRD_PARTY_NOTICES.md`.
+Detalhes, filtros, política de pool e alternativas estão em `scripts/README.md`. Avisos sobre conteúdo de terceiros estão em `THIRD_PARTY_NOTICES.md`.
 
 ## Desenvolvimento do núcleo
 
@@ -248,15 +265,16 @@ python -m py_compile scripts/baixar_artes.py
 
 O workflow `.github/workflows/ci.yml` executa as verificações automatizadas em push e pull request.
 
-## Como abrir o protótipo visual
+## Como abrir os protótipos visuais
 
-Abra em um navegador moderno:
+Abra em navegador moderno:
 
 ```text
 prototypes/visual-001-hud-layout/index.html
+prototypes/visual-002-map-camera-2d-3d/index.html
 ```
 
-O VIS-001 avalia composição/aparência. Ele não valida timing, movimento, Correntes ou Fog of War interativo; esses sistemas exigem protótipos executáveis próprios quando forem avaliados.
+O VIS-001 versionado é o comparador histórico de composição/aparência; a versão melhorada foi aprovada pelo autor. O VIS-002 é o protótipo aprovado de mapa/câmera. Sistemas temporais adicionais continuam exigindo protótipos executáveis próprios quando forem avaliados.
 
 ## GitHub Pages
 
@@ -266,7 +284,7 @@ O GDD exige uma build jogável estática e reproduzível no GitHub Pages usando 
 
 ## IA, telemetria e replay
 
-Os contratos já estão definidos no GDD, mas ainda não estão implementados. A IA competitiva deve respeitar a mesma informação do jogador; a IA de QA será separada, mas utilizará o mesmo núcleo e interface pública. Replays e telemetria deverão registrar seed, comandos, causalidade, aleatoriedade e hashes suficientes para reprodução determinística.
+Os contratos conceituais estão definidos no GDD, mas documentos técnicos específicos como `TELEMETRY_SCHEMA.md` e `AI_INTERFACE.md` ainda não estão versionados e a implementação desses sistemas permanece pendente. A IA competitiva deve respeitar a mesma informação do jogador; a IA de QA será separada, mas utilizará o mesmo núcleo e interface pública. Replays e telemetria deverão registrar seed, comandos, causalidade, aleatoriedade e hashes suficientes para reprodução determinística.
 
 ## Objetivo técnico
 
