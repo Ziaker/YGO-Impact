@@ -10,25 +10,27 @@ Monster Impact **não reproduz automaticamente as regras tradicionais de Yu-Gi-O
 
 **Fase atual: estruturação e pré-implementação do primeiro protótipo.**
 
-O GDD-base está concluído na versão **0.42**, com **25 de 25 fases finalizadas e nenhuma pendência P0 ativa**. `docs/context/GDD_SOURCE.md` fixa a versão e o SHA-256 do arquivo canônico efetivamente lido nesta etapa; o binário `.docx` ainda será incorporado ao repositório em uma etapa própria.
+O GDD-base está concluído na versão **0.42**, com **25 de 25 fases finalizadas e nenhuma pendência P0 ativa**. O binário canônico agora está versionado em `docs/context/Monster_Impact_GDD_v0.42.docx`, e `docs/context/GDD_SOURCE.md` registra nome de origem, tamanho e SHA-256 do arquivo efetivamente lido.
 
 Já estão versionados:
 
-- referência verificável do GDD v0.42 em `docs/context/`;
+- GDD canônico v0.42 em `docs/context/`;
 - documentação inicial de contexto e prototipagem;
-- contrato arquitetural inicial em `src/README.md`;
+- contrato arquitetural do núcleo em `src/core/README.md`;
+- primeiro experimento visual A/B/C em `prototypes/visual-001-hud-layout/`;
+- registro do experimento VIS-001 em `docs/prototypes/VIS-001-hud-layout.md`;
 - downloader de artes em `scripts/baixar_artes.py`;
 - seleção versionada de artes em `scripts/card_art_targets.txt`;
+- artes cropped selecionadas e `manifest.json` em `assets-local/card-art/`;
 - testes automatizados do downloader;
 - workflow inicial de CI;
 - workflow de sincronização de artes em `.github/workflows/sync-card-art.yml`;
-- política de versionamento de `assets-local/card-art/` e seu manifesto;
 - `.gitignore` para builds, caches, logs, temporários e telemetria local.
 
 Ainda não estão implementados:
 
-- núcleo autoritativo do jogo;
-- interface e renderização;
+- núcleo autoritativo executável do jogo;
+- interface e renderização finais;
 - IA competitiva e IA de QA;
 - conteúdo jogável completo;
 - replay e telemetria do motor;
@@ -36,7 +38,7 @@ Ainda não estão implementados:
 - build web jogável;
 - publicação em GitHub Pages.
 
-Não confundir **definido no GDD** com **implementado**.
+Não confundir **definido no GDD**, **prototipado** e **implementado**.
 
 ## Conceito
 
@@ -102,6 +104,8 @@ Com os mesmos dados, Decks, seed, comandos, ordem de entrada, configuração e v
 
 Lógica autoritativa usa inteiros ou ponto fixo. Ponto flutuante fica restrito à apresentação.
 
+O contrato inicial do núcleo está documentado em `src/core/README.md`. A tecnologia final do runtime ainda não foi escolhida; isso evita transformar uma decisão provisória em arquitetura definitiva sem validação.
+
 ## Decks
 
 ### Deck de Monstros
@@ -160,11 +164,12 @@ YGO-Impact/
 ├── docs/
 │   ├── context/          # GDD, decisões, contratos e contexto
 │   └── prototypes/       # registros de experimentos e aprovações
-├── prototypes/           # protótipos executáveis
-├── src/                  # núcleo e implementação do jogo
+├── prototypes/           # protótipos executáveis/visuais
+├── src/
+│   └── core/             # contrato do núcleo autoritativo
 ├── tests/                # testes automatizados
 ├── scripts/              # ferramentas e seleção de coleta
-├── assets-local/         # artes selecionadas + manifesto, agora versionados
+├── assets-local/         # artes selecionadas + manifesto versionados
 └── .github/
     └── workflows/        # CI, sincronização de artes e, futuramente, Pages
 ```
@@ -197,7 +202,13 @@ Quando ainda não houver solução aprovada, devem ser comparadas **três opçõ
 
 Aparência pode usar protótipo estático. Interação, movimento, timing, Correntes, animação, Fog of War, densidade de informação e feedback exigem protótipo executável.
 
-Registros ficam em `docs/prototypes/`; executáveis em `prototypes/`.
+O primeiro experimento já está disponível:
+
+```text
+prototypes/visual-001-hud-layout/index.html
+```
+
+Ele compara três composições do campo/HUD sob o mesmo cenário de densidade. **Nenhuma opção está aprovada ainda.** O registro e os critérios estão em `docs/prototypes/VIS-001-hud-layout.md`.
 
 ## Artes das cartas
 
@@ -284,8 +295,6 @@ Filtro pré-2010 opcional:
 python scripts/baixar_artes.py --all-compatible --pre-2010 --dry-run
 ```
 
-Remova `--dry-run` somente depois de revisar a seleção.
-
 Saída padrão:
 
 ```text
@@ -322,7 +331,9 @@ Não existe build jogável nem protótipo de gameplay versionado neste momento.
 
 ## Como abrir protótipos
 
-Consulte `prototypes/` para executáveis e `docs/prototypes/` para registros e aprovações. No momento há apenas a estrutura documental inicial; nenhum protótipo visual foi aprovado ainda.
+Abra `prototypes/visual-001-hud-layout/index.html` em um navegador moderno. O VIS-001 não possui dependências nem build.
+
+Protótipos interativos de timing, movimento, Correntes e Fog of War serão separados, pois a aprovação de aparência do VIS-001 não valida comportamento.
 
 ## Build e GitHub Pages
 
