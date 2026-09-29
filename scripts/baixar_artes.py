@@ -82,6 +82,9 @@ TOTAL_PROTOTYPE_CARDS = TOTAL_MONSTERS + TOTAL_SPELLS + TOTAL_TRAPS
 
 FORBIDDEN_TYPE_TOKENS = ("synchro", "xyz", "pendulum", "link")
 FORBIDDEN_EXACT_TYPES = {"Token", "Skill Card"}
+# Confirmados pela sincronização real de 2026-09-29: a API anuncia image_url_cropped,
+# mas o servidor de imagens responde 404. Mantidos como regressão explícita até a fonte corrigir.
+KNOWN_UNAVAILABLE_CROPPED_CARD_IDS = frozenset({100460002, 100460003})
 NORMAL_MONSTER_API_TYPES = frozenset({"Normal Monster"})
 FUSION_MONSTER_API_TYPES = frozenset({"Fusion Monster"})
 RITUAL_MONSTER_API_TYPES = frozenset({"Ritual Monster", "Ritual Effect Monster"})
@@ -228,6 +231,12 @@ def monster_family(card_type: str) -> str | None:
 
 
 def card_is_supported(card: dict[str, Any]) -> bool:
+    try:
+        card_id = int(card.get("id", 0))
+    except (TypeError, ValueError):
+        return False
+    if card_id in KNOWN_UNAVAILABLE_CROPPED_CARD_IDS:
+        return False
     card_type = str(card.get("type", ""))
     lowered = card_type.casefold()
     if card_type in FORBIDDEN_EXACT_TYPES:

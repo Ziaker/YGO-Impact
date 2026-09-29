@@ -84,6 +84,15 @@ class DownloaderContractTests(unittest.TestCase):
             module.card_is_supported(fake_card(1, "Dragon Test", "Effect Monster", "Dragon", level=4))
         )
 
+
+    def test_confirmed_broken_cropped_urls_are_regressions(self):
+        for card_id in (100460002, 100460003):
+            self.assertFalse(
+                module.card_is_supported(
+                    fake_card(card_id, f"Broken {card_id}", "Effect Monster", "Fiend", level=4)
+                )
+            )
+
     def test_card_without_cropped_art_is_rejected(self):
         self.assertFalse(
             module.card_is_supported(fake_card(1, "No Art", "Effect Monster", "Beast", level=4, image=False))
