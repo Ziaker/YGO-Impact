@@ -1,6 +1,16 @@
 {
   "cards": [
     {
+      "api_type": "Ritual Monster",
+      "bucket": "monster",
+      "id": 33951077,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/33951077.jpg",
+      "level": 7,
+      "name": "Super War-Lion",
+      "prototype_type": "Ritual",
+      "race": "Beast"
+    },
+    {
       "api_type": "Effect Monster",
       "bucket": "monster",
       "id": 86988864,
@@ -138,16 +148,6 @@
       "level": 9,
       "name": "Amazoness Pet Liger King",
       "prototype_type": "Fusion",
-      "race": "Beast"
-    },
-    {
-      "api_type": "Effect Monster",
-      "bucket": "monster",
-      "id": 10979723,
-      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/10979723.jpg",
-      "level": 4,
-      "name": "Amazoness Tiger",
-      "prototype_type": "Efeito",
       "race": "Beast"
     },
     {
@@ -299,6 +299,16 @@
       "name": "Dr. Frankenderp",
       "prototype_type": "Efeito",
       "race": "Psychic"
+    },
+    {
+      "api_type": "Ritual Effect Monster",
+      "bucket": "monster",
+      "id": 95825679,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/95825679.jpg",
+      "level": 6,
+      "name": "Archfiend's Awakening",
+      "prototype_type": "Ritual",
+      "race": "Fiend"
     },
     {
       "api_type": "Effect Monster",
@@ -471,14 +481,14 @@
       "race": "Fiend"
     },
     {
-      "api_type": "Effect Monster",
+      "api_type": "Ritual Effect Monster",
       "bucket": "monster",
-      "id": 60411677,
-      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/60411677.jpg",
-      "level": 10,
-      "name": "Anubis the Last Judge",
-      "prototype_type": "Efeito",
-      "race": "Fiend"
+      "id": 8454126,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/8454126.jpg",
+      "level": 2,
+      "name": "Conductor of Nephthys",
+      "prototype_type": "Ritual",
+      "race": "Spellcaster"
     },
     {
       "api_type": "Effect Monster",
@@ -647,16 +657,6 @@
       "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/59185998.jpg",
       "level": 1,
       "name": "Altergeist Pookuery",
-      "prototype_type": "Efeito",
-      "race": "Spellcaster"
-    },
-    {
-      "api_type": "Effect Monster",
-      "bucket": "monster",
-      "id": 89538537,
-      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/89538537.jpg",
-      "level": 2,
-      "name": "Altergeist Silquitous",
       "prototype_type": "Efeito",
       "race": "Spellcaster"
     },
@@ -974,6 +974,11 @@
       "Ritual",
       "Fusion"
     ],
+    "ritual_monster_target_per_race": 1,
+    "ritual_official_exceptions": {
+      "Psychic": "o catálogo oficial atual não possui Ritual Monster Psychic"
+    },
+    "ritual_spell_compatibility": "generic-any-ritual-monster",
     "spell_general_subtypes": [
       "Continuous",
       "Normal",
@@ -988,18 +993,18 @@
     "traps_total": 10
   },
   "schema_version": 1,
-  "selection_rule": "deterministic-name-id",
+  "selection_rule": "deterministic-name-id-with-ritual-per-race",
   "summary": {
     "monsters_by_level": {
       "1": 7,
-      "10": 2,
+      "10": 1,
       "11": 1,
       "2": 4,
       "3": 12,
-      "4": 18,
+      "4": 17,
       "5": 3,
-      "6": 6,
-      "7": 5,
+      "6": 7,
+      "7": 6,
       "8": 6,
       "9": 2
     },
@@ -1010,11 +1015,18 @@
       "Spellcaster": 18
     },
     "monsters_by_type": {
-      "Efeito": 54,
+      "Efeito": 51,
       "Fusion": 6,
-      "Normal": 6
+      "Normal": 6,
+      "Ritual": 3
     },
     "monsters_total": 66,
+    "ritual_monsters_by_race": {
+      "Beast": 1,
+      "Fiend": 1,
+      "Psychic": 0,
+      "Spellcaster": 1
+    },
     "spells_by_subtype": {
       "Continuous": 5,
       "Equip": 5,

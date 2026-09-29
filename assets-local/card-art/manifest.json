@@ -492,18 +492,6 @@
       "sha256": "056bc064b25500a648ff89223ca63eb3fb28ca0614d195378ce602cd1e841ca7",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/10928224.jpg"
     },
-    "Monstros/Beast/Efeito/amazoness-tiger__10979723.jpg": {
-      "api_type": "Effect Monster",
-      "bytes": 150661,
-      "card_id": 10979723,
-      "image_id": 10979723,
-      "level": 4,
-      "name": "Amazoness Tiger",
-      "prototype_type": "Efeito",
-      "race": "Beast",
-      "sha256": "cf04d2d5afce48d63a4c7ed6a3fcc861d9e97767c3359ad34d4ed70fe163bd27",
-      "source": "https://images.ygoprodeck.com/images/cards_cropped/10979723.jpg"
-    },
     "Monstros/Beast/Fusion/amazoness-pet-liger-king__59353647.jpg": {
       "api_type": "Fusion Monster",
       "bytes": 213463,
@@ -539,6 +527,18 @@
       "race": "Beast",
       "sha256": "b848623e1513e151c21310f17f7998c13435f8ba155afe7343cc6b03fb3b721d",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/64428736.jpg"
+    },
+    "Monstros/Beast/Ritual/super-war-lion__33951077.jpg": {
+      "api_type": "Ritual Monster",
+      "bytes": 157199,
+      "card_id": 33951077,
+      "image_id": 33951077,
+      "level": 7,
+      "name": "Super War-Lion",
+      "prototype_type": "Ritual",
+      "race": "Beast",
+      "sha256": "9f4a19aade554ed3997485088ec6fc7cdce6ed13903148c8ea5331fcd76a0bc3",
+      "source": "https://images.ygoprodeck.com/images/cards_cropped/33951077.jpg"
     },
     "Monstros/Fiend/Efeito/abaki__12694768.jpg": {
       "api_type": "Effect Monster",
@@ -684,18 +684,6 @@
       "sha256": "253d6bf5f2675ceb5b12f6f9776433b3f3a1acd60c949256f5a277bf10f7336c",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/29603180.jpg"
     },
-    "Monstros/Fiend/Efeito/anubis-the-last-judge__60411677.jpg": {
-      "api_type": "Effect Monster",
-      "bytes": 262511,
-      "card_id": 60411677,
-      "image_id": 60411677,
-      "level": 10,
-      "name": "Anubis the Last Judge",
-      "prototype_type": "Efeito",
-      "race": "Fiend",
-      "sha256": "c6b61a65813ebff787e78fd1c44a0007df04efa48fe63b5a90e0d59b29b0c20e",
-      "source": "https://images.ygoprodeck.com/images/cards_cropped/60411677.jpg"
-    },
     "Monstros/Fiend/Fusion/aerial-eater__28143384.jpg": {
       "api_type": "Fusion Monster",
       "bytes": 223938,
@@ -755,6 +743,18 @@
       "race": "Fiend",
       "sha256": "2ec4e51b73f215074027966bbfb7e3bcebe7090a4031efae36690355940e0525",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/86893702.jpg"
+    },
+    "Monstros/Fiend/Ritual/archfiends-awakening__95825679.jpg": {
+      "api_type": "Ritual Effect Monster",
+      "bytes": 181773,
+      "card_id": 95825679,
+      "image_id": 95825679,
+      "level": 6,
+      "name": "Archfiend's Awakening",
+      "prototype_type": "Ritual",
+      "race": "Fiend",
+      "sha256": "7c9d301c6e675883c85d93f9037d4edef7cb8808dd323743ede5639392baef55",
+      "source": "https://images.ygoprodeck.com/images/cards_cropped/95825679.jpg"
     },
     "Monstros/Psychic/Efeito/amazement-abomination-arlekino__31600845.jpg": {
       "api_type": "Effect Monster",
@@ -1128,18 +1128,6 @@
       "sha256": "82fe1d61adccade6cfafcc24ca2cdeda83e8e4706d00f69b615afebc7dc01086",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/59185998.jpg"
     },
-    "Monstros/Spellcaster/Efeito/altergeist-silquitous__89538537.jpg": {
-      "api_type": "Effect Monster",
-      "bytes": 124383,
-      "card_id": 89538537,
-      "image_id": 89538537,
-      "level": 2,
-      "name": "Altergeist Silquitous",
-      "prototype_type": "Efeito",
-      "race": "Spellcaster",
-      "sha256": "384c5573dfb66055b72b8bd0f319297d8ceb4693685a1bb808ab4dab384b6d96",
-      "source": "https://images.ygoprodeck.com/images/cards_cropped/89538537.jpg"
-    },
     "Monstros/Spellcaster/Normal/akakieisu__38035986.jpg": {
       "api_type": "Normal Monster",
       "bytes": 185066,
@@ -1151,19 +1139,31 @@
       "race": "Spellcaster",
       "sha256": "dae9a0c05462b23f240f4477836cf9013484c05380cadf75cab85bcf1c4b0d59",
       "source": "https://images.ygoprodeck.com/images/cards_cropped/38035986.jpg"
+    },
+    "Monstros/Spellcaster/Ritual/conductor-of-nephthys__8454126.jpg": {
+      "api_type": "Ritual Effect Monster",
+      "bytes": 151470,
+      "card_id": 8454126,
+      "image_id": 8454126,
+      "level": 2,
+      "name": "Conductor of Nephthys",
+      "prototype_type": "Ritual",
+      "race": "Spellcaster",
+      "sha256": "05150a29f9644073931f832019f960c8a21d8bb9227aaa2382ba85ec9b463053",
+      "source": "https://images.ygoprodeck.com/images/cards_cropped/8454126.jpg"
     }
   },
   "prototype_pool_summary": {
     "monsters_by_level": {
       "1": 7,
-      "10": 2,
+      "10": 1,
       "11": 1,
       "2": 4,
       "3": 12,
-      "4": 18,
+      "4": 17,
       "5": 3,
-      "6": 6,
-      "7": 5,
+      "6": 7,
+      "7": 6,
       "8": 6,
       "9": 2
     },
@@ -1174,11 +1174,18 @@
       "Spellcaster": 18
     },
     "monsters_by_type": {
-      "Efeito": 54,
+      "Efeito": 51,
       "Fusion": 6,
-      "Normal": 6
+      "Normal": 6,
+      "Ritual": 3
     },
     "monsters_total": 66,
+    "ritual_monsters_by_race": {
+      "Beast": 1,
+      "Fiend": 1,
+      "Psychic": 0,
+      "Spellcaster": 1
+    },
     "spells_by_subtype": {
       "Continuous": 5,
       "Equip": 5,
