@@ -41,6 +41,8 @@ jobs:
           python -m unittest discover -s tests -p "test_*.py" -v
 
       - name: Select and download prototype card art
+        id: pool_sync
+        continue-on-error: true
         run: |
           python scripts/sync_prototype_pool_curated.py \
             --prototype-pool \
@@ -119,4 +121,11 @@ jobs:
             exit 0
           fi
           git commit -m "assets: sync prototype card pool"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Report prototype pool sync failure
+        if: steps.pool_sync.outcome == 'failure'
+        run: |
+          echo "A sincronização do pool ampliado falhou; sidecars do snapshot versionado foram preservados/sincronizados."
+          exit 1
