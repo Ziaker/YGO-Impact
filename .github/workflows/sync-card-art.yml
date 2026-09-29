@@ -1,0 +1,54 @@
+name: Sync card art
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/card_art_targets.txt"
+      - "scripts/baixar_artes.py"
+      - ".github/workflows/sync-card-art.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-card-art
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate downloader
+        run: |
+          python -m py_compile scripts/baixar_artes.py
+          python -m unittest discover -s tests -p "test_*.py" -v
+
+      - name: Download selected cropped artwork
+        run: |
+          python scripts/baixar_artes.py \
+            --input scripts/card_art_targets.txt \
+            --output assets-local/card-art
+
+      - name: Commit synchronized artwork
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets-local/card-art
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração de arte para versionar."
+            exit 0
+          fi
+          git commit -m "assets: sync selected card artwork"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
