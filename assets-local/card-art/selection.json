@@ -1,0 +1,1034 @@
+{
+  "cards": [
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 86988864,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/86988864.jpg",
+      "level": 3,
+      "name": "3-Hump Lacooda",
+      "prototype_type": "Efeito",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Flip Effect Monster",
+      "bucket": "monster",
+      "id": 24140059,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/24140059.jpg",
+      "level": 2,
+      "name": "A Cat of Ill Omen",
+      "prototype_type": "Efeito",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 18847598,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/18847598.jpg",
+      "level": 4,
+      "name": "Advanced Crystal Beast Amber Mammoth",
+      "prototype_type": "Efeito",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 19963185,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/19963185.jpg",
+      "level": 3,
+      "name": "Advanced Crystal Beast Amethyst Cat",
+      "prototype_type": "Efeito",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 71620241,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/71620241.jpg",
+      "level": 4,
+      "name": "Advanced Crystal Beast Sapphire Pegasus",
+      "prototype_type": "Efeito",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 72843899,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/72843899.jpg",
+      "level": 4,
+      "name": "Advanced Crystal Beast Topaz Tiger",
+      "prototype_type": "Efeito",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Normal Monster",
+      "bucket": "monster",
+      "id": 64428736,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/64428736.jpg",
+      "level": 4,
+      "name": "Alligator's Sword",
+      "prototype_type": "Normal",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 92998610,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/92998610.jpg",
+      "level": 4,
+      "name": "Aloof Lupine",
+      "prototype_type": "Efeito",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 77797992,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/77797992.jpg",
+      "level": 7,
+      "name": "Alpacaribou, Mystical Beast of the Forest",
+      "prototype_type": "Efeito",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 73304257,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/73304257.jpg",
+      "level": 8,
+      "name": "Alpha, the Master of Beasts",
+      "prototype_type": "Efeito",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 30829071,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/30829071.jpg",
+      "level": 3,
+      "name": "Amazement Ambassador Bufo",
+      "prototype_type": "Efeito",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 10928224,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/10928224.jpg",
+      "level": 2,
+      "name": "Amazoness Baby Tiger",
+      "prototype_type": "Efeito",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Fusion Monster",
+      "bucket": "monster",
+      "id": 68507541,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/68507541.jpg",
+      "level": 7,
+      "name": "Amazoness Pet Liger",
+      "prototype_type": "Fusion",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Fusion Monster",
+      "bucket": "monster",
+      "id": 59353647,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/59353647.jpg",
+      "level": 9,
+      "name": "Amazoness Pet Liger King",
+      "prototype_type": "Fusion",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 10979723,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/10979723.jpg",
+      "level": 4,
+      "name": "Amazoness Tiger",
+      "prototype_type": "Efeito",
+      "race": "Beast"
+    },
+    {
+      "api_type": "Fusion Monster",
+      "bucket": "monster",
+      "id": 80073414,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/80073414.jpg",
+      "level": 11,
+      "name": "Absolute Axon Kicker",
+      "prototype_type": "Fusion",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 31600845,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/31600845.jpg",
+      "level": 7,
+      "name": "Amazement Abomination Arlekino",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 94821366,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/94821366.jpg",
+      "level": 7,
+      "name": "Amazement Administrator Arlekino",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 56827051,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/56827051.jpg",
+      "level": 4,
+      "name": "Ariel, Priestess of the Nekroz",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 62742651,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/62742651.jpg",
+      "level": 6,
+      "name": "Armored Axon Kicker",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Fusion Monster",
+      "bucket": "monster",
+      "id": 33171768,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/33171768.jpg",
+      "level": 10,
+      "name": "Axon Kicker Oracle",
+      "prototype_type": "Fusion",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 7428507,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/7428507.jpg",
+      "level": 6,
+      "name": "Burial Summit Xenovader△ Helheim",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 91449144,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/91449144.jpg",
+      "level": 4,
+      "name": "Caam, Serenity of Gusto",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Normal Monster",
+      "bucket": "monster",
+      "id": 22916281,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/22916281.jpg",
+      "level": 3,
+      "name": "Chosen by the World Chalice",
+      "prototype_type": "Normal",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 81524756,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/81524756.jpg",
+      "level": 4,
+      "name": "Crusadia Maximus",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 89015998,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/89015998.jpg",
+      "level": 3,
+      "name": "D.D. Seeker",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 51701885,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/51701885.jpg",
+      "level": 2,
+      "name": "D.D. Telepon",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 11232355,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/11232355.jpg",
+      "level": 4,
+      "name": "Destructotron",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 22171591,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/22171591.jpg",
+      "level": 1,
+      "name": "Doctor Cranium",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 27995943,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/27995943.jpg",
+      "level": 3,
+      "name": "Dr. Frankenderp",
+      "prototype_type": "Efeito",
+      "race": "Psychic"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 12694768,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/12694768.jpg",
+      "level": 4,
+      "name": "Abaki",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 1966438,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/1966438.jpg",
+      "level": 8,
+      "name": "Abominable Unchained Soul",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 60990740,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/60990740.jpg",
+      "level": 1,
+      "name": "Absolute King Back Jack",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Fusion Monster",
+      "bucket": "monster",
+      "id": 28143384,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/28143384.jpg",
+      "level": 6,
+      "name": "Aerial Eater",
+      "prototype_type": "Fusion",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 86377375,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/86377375.jpg",
+      "level": 4,
+      "name": "Ahrima, the Wicked Warden",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Normal Monster",
+      "bucket": "monster",
+      "id": 8353769,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/8353769.jpg",
+      "level": 6,
+      "name": "Air Eater",
+      "prototype_type": "Normal",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 84288367,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/84288367.jpg",
+      "level": 8,
+      "name": "Aiwass, Divine Spirit of the Law",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Fusion Monster",
+      "bucket": "monster",
+      "id": 35877582,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/35877582.jpg",
+      "level": 8,
+      "name": "Aiwass, the Magistus Spell Spirit",
+      "prototype_type": "Fusion",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 38331244,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/38331244.jpg",
+      "level": 8,
+      "name": "Akasuna the Battle Ashtra",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 14504454,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/14504454.jpg",
+      "level": 3,
+      "name": "Alice, Lady of Lament",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 47728740,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/47728740.jpg",
+      "level": 3,
+      "name": "Alich, Malebranche of the Burning Abyss",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 41224658,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/41224658.jpg",
+      "level": 6,
+      "name": "Ambitious Gofer",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Normal Monster",
+      "bucket": "monster",
+      "id": 42431843,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/42431843.jpg",
+      "level": 3,
+      "name": "Ancient Brain",
+      "prototype_type": "Normal",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 65612386,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/65612386.jpg",
+      "level": 6,
+      "name": "Angmarl the Fiendish Monarch",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 595626,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/595626.jpg",
+      "level": 1,
+      "name": "Ankuriboh",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 29603180,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/29603180.jpg",
+      "level": 9,
+      "name": "Annihilator Archfiend",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Normal Monster",
+      "bucket": "monster",
+      "id": 86893702,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/86893702.jpg",
+      "level": 8,
+      "name": "Anotherverse Gluttonia",
+      "prototype_type": "Normal",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 60411677,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/60411677.jpg",
+      "level": 10,
+      "name": "Anubis the Last Judge",
+      "prototype_type": "Efeito",
+      "race": "Fiend"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 51351302,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/51351302.jpg",
+      "level": 4,
+      "name": "A Man with Wdjat",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 15464375,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/15464375.jpg",
+      "level": 5,
+      "name": "Adularia of the June Moon",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Normal Monster",
+      "bucket": "monster",
+      "id": 38035986,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/38035986.jpg",
+      "level": 3,
+      "name": "Akakieisu",
+      "prototype_type": "Normal",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 78121572,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/78121572.jpg",
+      "level": 4,
+      "name": "Alchemist of Black Spells",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 86120751,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/86120751.jpg",
+      "level": 4,
+      "name": "Aleister the Invoker",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 57294268,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/57294268.jpg",
+      "level": 4,
+      "name": "Aleister the Reminiscent",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 87257460,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/87257460.jpg",
+      "level": 3,
+      "name": "Allure Queen LV3",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 23756165,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/23756165.jpg",
+      "level": 5,
+      "name": "Allure Queen LV5",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 50140163,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/50140163.jpg",
+      "level": 7,
+      "name": "Allure Queen LV7",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 85673903,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/85673903.jpg",
+      "level": 4,
+      "name": "Altergeist Fijialert",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 52927340,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/52927340.jpg",
+      "level": 5,
+      "name": "Altergeist Kunquery",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 53143898,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/53143898.jpg",
+      "level": 4,
+      "name": "Altergeist Marionetter",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 25533642,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/25533642.jpg",
+      "level": 1,
+      "name": "Altergeist Meluseek",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 42790071,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/42790071.jpg",
+      "level": 3,
+      "name": "Altergeist Multifaker",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 54126514,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/54126514.jpg",
+      "level": 1,
+      "name": "Altergeist Peritrator",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 57769391,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/57769391.jpg",
+      "level": 1,
+      "name": "Altergeist Pixiel",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 59185998,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/59185998.jpg",
+      "level": 1,
+      "name": "Altergeist Pookuery",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Effect Monster",
+      "bucket": "monster",
+      "id": 89538537,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/89538537.jpg",
+      "level": 2,
+      "name": "Altergeist Silquitous",
+      "prototype_type": "Efeito",
+      "race": "Spellcaster"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 295517,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/295517.jpg",
+      "level": null,
+      "name": "A Legendary Ocean",
+      "prototype_type": "Magia",
+      "race": "Field"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 77297908,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/77297908.jpg",
+      "level": null,
+      "name": "Abyss Playhouse - Fantastic Theater",
+      "prototype_type": "Magia",
+      "race": "Field"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 85327820,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/85327820.jpg",
+      "level": null,
+      "name": "A.I.'s Ritual",
+      "prototype_type": "Magia",
+      "race": "Ritual"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 46052429,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/46052429.jpg",
+      "level": null,
+      "name": "Advanced Ritual Art",
+      "prototype_type": "Magia",
+      "race": "Ritual"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 98319530,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/98319530.jpg",
+      "level": null,
+      "name": "\"Infernoble Arms - Almace\"",
+      "prototype_type": "Magia",
+      "race": "Equip"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 37478723,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/37478723.jpg",
+      "level": null,
+      "name": "\"Infernoble Arms - Durendal\"",
+      "prototype_type": "Magia",
+      "race": "Equip"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 64867422,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/64867422.jpg",
+      "level": null,
+      "name": "\"Infernoble Arms - Hauteclere\"",
+      "prototype_type": "Magia",
+      "race": "Equip"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 90861137,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/90861137.jpg",
+      "level": null,
+      "name": "\"Infernoble Arms - Joyeuse\"",
+      "prototype_type": "Magia",
+      "race": "Equip"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 86198326,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/86198326.jpg",
+      "level": null,
+      "name": "7 Completed",
+      "prototype_type": "Magia",
+      "race": "Equip"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 80181649,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/80181649.jpg",
+      "level": null,
+      "name": "\"A Case for K9\"",
+      "prototype_type": "Magia",
+      "race": "Continuous"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 34541863,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/34541863.jpg",
+      "level": null,
+      "name": "\"A\" Cell Breeding Device",
+      "prototype_type": "Magia",
+      "race": "Continuous"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 64163367,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/64163367.jpg",
+      "level": null,
+      "name": "\"A\" Cell Incubator",
+      "prototype_type": "Magia",
+      "race": "Continuous"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 91231901,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/91231901.jpg",
+      "level": null,
+      "name": "\"A\" Cell Recombination Device",
+      "prototype_type": "Magia",
+      "race": "Quick-Play"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 73262676,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/73262676.jpg",
+      "level": null,
+      "name": "\"A\" Cell Scatter Burst",
+      "prototype_type": "Magia",
+      "race": "Quick-Play"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 72978038,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/72978038.jpg",
+      "level": null,
+      "name": "\"Raise Moon\" the City that Never Sleeps",
+      "prototype_type": "Magia",
+      "race": "Continuous"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 44256816,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/44256816.jpg",
+      "level": null,
+      "name": "1st Movement Solo",
+      "prototype_type": "Magia",
+      "race": "Normal"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 67048711,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/67048711.jpg",
+      "level": null,
+      "name": "7",
+      "prototype_type": "Magia",
+      "race": "Continuous"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 149694341,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/149694341.jpg",
+      "level": null,
+      "name": "???",
+      "prototype_type": "Magia",
+      "race": "Normal"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 6850209,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/6850209.jpg",
+      "level": null,
+      "name": "A Deal with Dark Ruler",
+      "prototype_type": "Magia",
+      "race": "Quick-Play"
+    },
+    {
+      "api_type": "Spell Card",
+      "bucket": "spell",
+      "id": 49140998,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/49140998.jpg",
+      "level": null,
+      "name": "A Feather of the Phoenix",
+      "prototype_type": "Magia",
+      "race": "Normal"
+    },
+    {
+      "api_type": "Trap Card",
+      "bucket": "trap",
+      "id": 68170903,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/68170903.jpg",
+      "level": null,
+      "name": "A Feint Plan",
+      "prototype_type": "Armadilha",
+      "race": "Normal"
+    },
+    {
+      "api_type": "Trap Card",
+      "bucket": "trap",
+      "id": 21597117,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/21597117.jpg",
+      "level": null,
+      "name": "A Hero Emerges",
+      "prototype_type": "Armadilha",
+      "race": "Normal"
+    },
+    {
+      "api_type": "Trap Card",
+      "bucket": "trap",
+      "id": 32207100,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/32207100.jpg",
+      "level": null,
+      "name": "A Major Upset",
+      "prototype_type": "Armadilha",
+      "race": "Normal"
+    },
+    {
+      "api_type": "Trap Card",
+      "bucket": "trap",
+      "id": 5728014,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/5728014.jpg",
+      "level": null,
+      "name": "A Rival Appears!",
+      "prototype_type": "Armadilha",
+      "race": "Normal"
+    },
+    {
+      "api_type": "Trap Card",
+      "bucket": "trap",
+      "id": 44553392,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/44553392.jpg",
+      "level": null,
+      "name": "A Shattered, Colorless Realm",
+      "prototype_type": "Armadilha",
+      "race": "Normal"
+    },
+    {
+      "api_type": "Trap Card",
+      "bucket": "trap",
+      "id": 75926389,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/75926389.jpg",
+      "level": null,
+      "name": "A-to-Z Energy Load",
+      "prototype_type": "Armadilha",
+      "race": "Normal"
+    },
+    {
+      "api_type": "Trap Card",
+      "bucket": "trap",
+      "id": 28645123,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/28645123.jpg",
+      "level": null,
+      "name": "A.I. Challenge You",
+      "prototype_type": "Armadilha",
+      "race": "Continuous"
+    },
+    {
+      "api_type": "Trap Card",
+      "bucket": "trap",
+      "id": 77421977,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/77421977.jpg",
+      "level": null,
+      "name": "A.I. Shadow",
+      "prototype_type": "Armadilha",
+      "race": "Continuous"
+    },
+    {
+      "api_type": "Trap Card",
+      "bucket": "trap",
+      "id": 54374642,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/54374642.jpg",
+      "level": null,
+      "name": "A.I.'s Show",
+      "prototype_type": "Armadilha",
+      "race": "Normal"
+    },
+    {
+      "api_type": "Trap Card",
+      "bucket": "trap",
+      "id": 69381150,
+      "image_url_cropped": "https://images.ygoprodeck.com/images/cards_cropped/69381150.jpg",
+      "level": null,
+      "name": "A.I.Q",
+      "prototype_type": "Armadilha",
+      "race": "Continuous"
+    }
+  ],
+  "requested": {
+    "monster_races": {
+      "Beast": 15,
+      "Fiend": 18,
+      "Psychic": 15,
+      "Spellcaster": 18
+    },
+    "monster_types": [
+      "Normal",
+      "Efeito",
+      "Ritual",
+      "Fusion"
+    ],
+    "spell_general_subtypes": [
+      "Continuous",
+      "Normal",
+      "Quick-Play"
+    ],
+    "spell_subtypes_exact": {
+      "Equip": 5,
+      "Field": 2,
+      "Ritual": 2
+    },
+    "spells_total": 20,
+    "traps_total": 10
+  },
+  "schema_version": 1,
+  "selection_rule": "deterministic-name-id",
+  "summary": {
+    "monsters_by_level": {
+      "1": 7,
+      "10": 2,
+      "11": 1,
+      "2": 4,
+      "3": 12,
+      "4": 18,
+      "5": 3,
+      "6": 6,
+      "7": 5,
+      "8": 6,
+      "9": 2
+    },
+    "monsters_by_race": {
+      "Beast": 15,
+      "Fiend": 18,
+      "Psychic": 15,
+      "Spellcaster": 18
+    },
+    "monsters_by_type": {
+      "Efeito": 54,
+      "Fusion": 6,
+      "Normal": 6
+    },
+    "monsters_total": 66,
+    "spells_by_subtype": {
+      "Continuous": 5,
+      "Equip": 5,
+      "Field": 2,
+      "Normal": 3,
+      "Quick-Play": 3,
+      "Ritual": 2
+    },
+    "spells_total": 20,
+    "total_cards": 96,
+    "traps_by_subtype": {
+      "Continuous": 3,
+      "Normal": 7
+    },
+    "traps_total": 10
+  }
+}
