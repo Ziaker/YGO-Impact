@@ -28,15 +28,11 @@ Pool atual de monstros:
   - 18 Spellcaster;
 - mais **10 Normal Monsters por RACE**, todos de **Nível 2 a 4**.
 
-Isso resulta em:
+Isso resulta em 25 Beast, 25 Psychic, 28 Fiend e 28 Spellcaster: **106 monstros**.
 
-- 25 Beast;
-- 25 Psychic;
-- 28 Fiend;
-- 28 Spellcaster;
-- **106 monstros** no total.
+O catálogo padrão não oferece Psychic Normal Monster Nível 2–4 sem arquétipo. Por isso, `sync_prototype_pool.py` consulta também `format=Rush Duel` como **fonte suplementar somente para slots Normal**. Efeito, Ritual e Fusion continuam no catálogo padrão. O `selection.json` registra `selection_source` para auditoria.
 
-Beast, Fiend e Spellcaster reservam 1 Ritual Monster sem arquétipo dentro de seus slots não-Normal. Psychic, por não possuir Ritual compatível com a política atual, reserva 2 slots não-Normal para os dois candidatos sem arquétipo de maior Nível.
+Beast, Fiend e Spellcaster reservam 1 Ritual Monster sem arquétipo dentro de seus slots não-Normal. Psychic reserva 2 slots não-Normal para os dois candidatos sem arquétipo de maior Nível.
 
 Magias:
 
@@ -60,9 +56,9 @@ assets-local/card-art/selection.json
 assets-local/card-art/manifest.json
 ```
 
-`selection.json` registra nome, ID, RACE, tipo retornado pela API, tipo normalizado do protótipo, Nível, `archetype` e `image_url_cropped`, além de resumos das cotas selecionadas.
+`selection.json` registra nome, ID, RACE, tipo retornado pela API, tipo normalizado do protótipo, Nível, `archetype`, `selection_source` e `image_url_cropped`, além dos resumos das cotas selecionadas.
 
-`manifest.json` registra os arquivos efetivamente baixados, SHA-256, tamanho e os mesmos metadados relevantes disponíveis no downloader.
+`manifest.json` registra os arquivos efetivamente baixados, SHA-256, tamanho e os metadados relevantes disponíveis no downloader.
 
 ### Dry-run
 
@@ -84,7 +80,7 @@ python scripts/baixar_artes.py --race Beast --dry-run
 python scripts/baixar_artes.py --all-compatible --dry-run
 ```
 
-Nos modos manuais, monstros continuam limitados às quatro RACE ativas e aos quatro tipos de monstro suportados pelo downloader; a política ampliada de cotas/arquétipos pertence a `sync_prototype_pool.py`.
+Nos modos manuais, monstros continuam limitados às quatro RACE ativas e aos quatro tipos de monstro suportados pelo downloader; a política ampliada de cotas, arquétipos e suplemento Rush pertence a `sync_prototype_pool.py`.
 
 `--all-artworks` baixa artes alternativas. `--pre-2010` permanece como filtro opcional e não faz parte da regra padrão do pool.
 

@@ -7,18 +7,13 @@
 
 As 17 RACE prioritárias do projeto continuam válidas como universo de expansão, mas **não precisam estar todas representadas no primeiro protótipo**.
 
-O pool automático usa somente quatro RACE de monstros:
-
-- Beast;
-- Psychic;
-- Fiend;
-- Spellcaster.
+O pool automático usa somente quatro RACE de monstros: Beast, Psychic, Fiend e Spellcaster.
 
 Somente entram monstros classificados no pool como Normal, Efeito, Ritual ou Fusion. Synchro, Xyz, Pendulum e Link continuam fora do primeiro protótipo.
 
 ## Expansão de Normais
 
-A partir desta decisão, o pool preserva os slots não-Normal anteriores e adiciona uma cota específica de Normal Monsters:
+O pool preserva os slots não-Normal anteriores e adiciona uma cota específica de Normal Monsters:
 
 | RACE | Slots não-Normal | Normal Monsters adicionais | Total da RACE |
 | --- | ---: | ---: | ---: |
@@ -31,6 +26,20 @@ A partir desta decisão, o pool preserva os slots não-Normal anteriores e adici
 Cada RACE deve possuir exatamente **10 Normal Monsters** escolhidos somente entre **Níveis 2, 3 e 4**.
 
 Os 10 Normais são slots adicionais; eles não substituem os 66 slots não-Normal já usados para Efeito/Fusion/Ritual e para as reservas especiais descritas abaixo.
+
+### Fonte suplementar para Normais
+
+O catálogo padrão retornado por `cardinfo.php` não possui Psychic Normal Monster Nível 2–4 sem arquétipo elegível. Para cumprir a cota sem falsificar RACE, tipo ou Nível, o seletor pode consultar também o formato oficial **Rush Duel** do mesmo YGOPRODeck.
+
+Essa fonte suplementar é restrita aos slots de Normal Monster:
+
+- somente `Normal Monster`;
+- somente Beast, Psychic, Fiend ou Spellcaster;
+- somente Níveis 2–4;
+- somente sem `archetype` preenchido;
+- Efeito, Ritual e Fusion continuam vindo do catálogo padrão do protótipo.
+
+O `selection.json` registra `selection_source` por carta para permitir auditoria (`standard` ou `rush-duel`).
 
 ## Exclusão de arquétipos em monstros
 
@@ -50,15 +59,9 @@ Isso remove automaticamente monstros de famílias nomeadas como Amazoness, Cryst
 
 Beast, Fiend e Spellcaster reservam **1 slot de Ritual Monster oficial sem arquétipo por RACE** dentro de suas cotas não-Normal.
 
-O catálogo oficial atual não possui Ritual Monster Psychic compatível com a política do protótipo. Em vez de adulterar RACE ou tipo de carta, os **15 slots não-Normal Psychic continuam sendo 15**, mas **2 desses slots são reservados aos dois monstros Psychic compatíveis, sem arquétipo, de maior Nível disponíveis**.
+Psychic continua sem Ritual compatível com a política do protótipo. Em vez de adulterar RACE ou tipo de carta, os **15 slots não-Normal Psychic continuam sendo 15**, mas **2 desses slots são reservados aos dois monstros Psychic compatíveis, sem arquétipo, de maior Nível disponíveis**.
 
-Para essa seleção técnica, "alto nível" não é uma categoria de gameplay nem cria um limiar novo. O script ordena candidatos Psychic por:
-
-1. Nível decrescente;
-2. nome;
-3. ID.
-
-Os dois primeiros são reservados; os 13 slots não-Normal Psychic restantes seguem a ordenação determinística normal por nome + ID.
+Para essa seleção técnica, "alto nível" não é uma categoria de gameplay nem cria um limiar novo. O script ordena candidatos Psychic por Nível decrescente, depois nome e ID.
 
 ## Magias
 
@@ -69,9 +72,7 @@ O pool contém exatamente **20 Magias**:
 - 5 Equip Spell;
 - 11 Magias gerais, escolhidas entre Normal, Quick-Play e Continuous.
 
-As cotas Field, Ritual e Equip são exatas; a parcela geral não adiciona cópias desses três subtipos.
-
-As **Ritual Spells são genéricas no fangame nesta etapa**: qualquer uma das Ritual Spells selecionadas pode servir para qualquer Ritual Monster do protótipo. Não existe vínculo obrigatório com o nome, arquétipo ou Ritual Spell da carta oficial.
+As **Ritual Spells são genéricas no fangame nesta etapa**: qualquer uma das Ritual Spells selecionadas pode servir para qualquer Ritual Monster do protótipo.
 
 ## Armadilhas
 
@@ -85,14 +86,13 @@ A seleção automática:
 2. restringe monstros às quatro RACE ativas e aos tipos Normal/Efeito/Ritual/Fusion;
 3. descarta qualquer monstro com `archetype` preenchido na API;
 4. reserva exatamente 10 Normal Monsters Nível 2–4 por RACE;
-5. preserva 15/15/18/18 slots não-Normal para Beast/Psychic/Fiend/Spellcaster;
-6. reserva 1 Ritual sem arquétipo para Beast, Fiend e Spellcaster;
-7. reserva os 2 Psychic sem arquétipo de maior Nível, com desempate por nome + ID;
-8. completa os demais slots por nome e, em seguida, ID;
-9. registra nome, ID, RACE, tipo de carta, tipo normalizado, Nível, `archetype` e `image_url_cropped`;
-10. falha explicitamente se alguma cota obrigatória não puder ser preenchida.
-
-Fora das reservas de Normais Nível 2–4 e dos dois Psychic de maior Nível, o Nível é metadado, não critério geral de escolha.
+5. permite Rush Duel apenas como suplemento para esses slots Normal;
+6. preserva 15/15/18/18 slots não-Normal para Beast/Psychic/Fiend/Spellcaster;
+7. reserva 1 Ritual sem arquétipo para Beast, Fiend e Spellcaster;
+8. reserva os 2 Psychic sem arquétipo de maior Nível, com desempate por nome + ID;
+9. completa os demais slots por nome e, em seguida, ID;
+10. registra nome, ID, RACE, tipo de carta, tipo normalizado, Nível, `archetype`, `selection_source` e `image_url_cropped`;
+11. falha explicitamente se alguma cota obrigatória não puder ser preenchida.
 
 ## Total
 

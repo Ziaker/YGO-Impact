@@ -6,8 +6,9 @@ Escopo atual:
   18 Fiend, 18 Spellcaster);
 - adiciona 10 Normal Monsters por RACE, somente Níveis 2 a 4;
 - exclui qualquer MONSTRO cujo campo `archetype` da API esteja preenchido;
-- Beast, Fiend e Spellcaster tentam reservar 1 Ritual Monster sem arquétipo;
+- Beast, Fiend e Spellcaster reservam 1 Ritual Monster sem arquétipo;
 - Psychic reserva 2 monstros não-Normal sem arquétipo de maior Nível;
+- o catálogo Rush Duel pode complementar SOMENTE os slots Normal Nível 2-4;
 - Ritual Spells permanecem genéricas no Monster Impact.
 
 Magias e Armadilhas não são filtradas por arquétipo nesta etapa.
@@ -35,6 +36,8 @@ RITUAL_TARGET_PER_RACE = 1
 RITUAL_TARGET_RACES = ("Beast", "Fiend", "Spellcaster")
 RITUAL_SPELL_COMPATIBILITY = "generic-any-ritual-monster"
 MONSTER_ARCHETYPE_POLICY = "exclude-any-monster-with-nonempty-api-archetype"
+NORMAL_SOURCE_POLICY = "standard-catalog-plus-rush-duel-normal-only-supplement"
+RUSH_DUEL_FORMAT = "Rush Duel"
 
 TOTAL_MONSTER_QUOTAS = {
     race: quota + NORMAL_TARGET_PER_RACE
@@ -44,10 +47,53 @@ TOTAL_MONSTERS = sum(TOTAL_MONSTER_QUOTAS.values())
 TOTAL_PROTOTYPE_CARDS = TOTAL_MONSTERS + base.TOTAL_SPELLS + base.TOTAL_TRAPS
 
 _ORIGINAL_BUILD_SELECTION_DOCUMENT = base.build_selection_document
+_ORIGINAL_FETCH_ALL_CARDS = base.fetch_all_cards
 
 
 def has_named_archetype(card: dict[str, Any]) -> bool:
     return bool(str(card.get("archetype") or "").strip())
+
+
+def is_normal_slot_candidate(card: dict[str, Any], race: str | None = None) -> bool:
+    if not base.card_is_supported(card):
+        return False
+    if card.get("type") not in base.NORMAL_MONSTER_API_TYPES:
+        return False
+    card_race = str(card.get("race", ""))
+    if race is not None and card_race != race:
+        return False
+    if card_race not in CORE_NON_NORMAL_QUOTAS:
+        return False
+    if has_named_archetype(card):
+        return False
+    level = card.get("level")
+    return (
+        isinstance(level, int)
+        and not isinstance(level, bool)
+        and NORMAL_LEVEL_MIN <= level <= NORMAL_LEVEL_MAX
+    )
+
+
+def fetch_cards_with_rush_normal_supplement(*, timeout: float, retries: int) -> list[dict[str, Any]]:
+    standard_cards = _ORIGINAL_FETCH_ALL_CARDS(timeout=timeout, retries=retries)
+    rush_payload = base._request_json(
+        base._api_url({"format": RUSH_DUEL_FORMAT}),
+        timeout=timeout,
+        retries=retries,
+    )
+    rush_cards = rush_payload.get("data", [])
+    if not isinstance(rush_cards, list):
+        raise base.DownloaderError("Resposta inesperada do catálogo Rush Duel: campo 'data' inválido.")
+
+    supplement: list[dict[str, Any]] = []
+    for card in rush_cards:
+        if not isinstance(card, dict) or not is_normal_slot_candidate(card):
+            continue
+        tagged = dict(card)
+        tagged["_monster_impact_source"] = "rush-duel"
+        supplement.append(tagged)
+
+    return base.dedupe_cards([*standard_cards, *supplement])
 
 
 def _eligible_monster_for_race(card: dict[str, Any], race: str) -> bool:
@@ -62,15 +108,7 @@ def _normal_candidates(
     compatible: Sequence[dict[str, Any]], race: str
 ) -> list[dict[str, Any]]:
     return sorted(
-        (
-            card
-            for card in compatible
-            if _eligible_monster_for_race(card, race)
-            and card.get("type") in base.NORMAL_MONSTER_API_TYPES
-            and isinstance(card.get("level"), int)
-            and not isinstance(card.get("level"), bool)
-            and NORMAL_LEVEL_MIN <= int(card["level"]) <= NORMAL_LEVEL_MAX
-        ),
+        (card for card in compatible if is_normal_slot_candidate(card, race)),
         key=base.deterministic_card_key,
     )
 
@@ -223,15 +261,15 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
         card = card_by_id[int(row["id"])]
         archetype = str(card.get("archetype") or "").strip() or None
         row["archetype"] = archetype
+        row["selection_source"] = str(card.get("_monster_impact_source") or "standard")
 
     monster_cards = [
         card for card in cards if card.get("type") not in {"Spell Card", "Trap Card"}
     ]
-    normal_counts = Counter(
-        str(card.get("race", ""))
-        for card in monster_cards
-        if card.get("type") in base.NORMAL_MONSTER_API_TYPES
-    )
+    normal_cards = [
+        card for card in monster_cards if card.get("type") in base.NORMAL_MONSTER_API_TYPES
+    ]
+    normal_counts = Counter(str(card.get("race", "")) for card in normal_cards)
     non_normal_counts = Counter(
         str(card.get("race", ""))
         for card in monster_cards
@@ -241,6 +279,9 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
         str(card.get("race", ""))
         for card in monster_cards
         if card.get("type") in base.RITUAL_MONSTER_API_TYPES
+    )
+    normal_source_counts = Counter(
+        str(card.get("_monster_impact_source") or "standard") for card in normal_cards
     )
 
     psychic_non_normals = sorted(
@@ -254,9 +295,7 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
     )
     psychic_reserved = psychic_non_normals[:PSYCHIC_HIGH_LEVEL_TARGET]
 
-    selected_archetyped_monsters = [
-        card for card in monster_cards if has_named_archetype(card)
-    ]
+    selected_archetyped_monsters = [card for card in monster_cards if has_named_archetype(card)]
     if selected_archetyped_monsters:
         names = ", ".join(str(card.get("name", card.get("id"))) for card in selected_archetyped_monsters)
         raise base.DownloaderError(f"Seleção contém monstros com arquétipo proibido: {names}")
@@ -269,6 +308,7 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
     document["requested"]["normal_monsters_per_race"] = NORMAL_TARGET_PER_RACE
     document["requested"]["normal_monster_level_range"] = [NORMAL_LEVEL_MIN, NORMAL_LEVEL_MAX]
     document["requested"]["monster_archetype_policy"] = MONSTER_ARCHETYPE_POLICY
+    document["requested"]["normal_source_policy"] = NORMAL_SOURCE_POLICY
     document["requested"]["ritual_monster_target_per_race"] = RITUAL_TARGET_PER_RACE
     document["requested"]["ritual_monster_target_races"] = list(RITUAL_TARGET_RACES)
     document["requested"]["ritual_spell_compatibility"] = RITUAL_SPELL_COMPATIBILITY
@@ -281,6 +321,7 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
     document["summary"]["non_normal_monsters_by_race"] = {
         race: non_normal_counts.get(race, 0) for race in CORE_NON_NORMAL_QUOTAS
     }
+    document["summary"]["normal_monsters_by_source"] = dict(sorted(normal_source_counts.items()))
     document["summary"]["ritual_monsters_by_race"] = {
         race: ritual_counts.get(race, 0) for race in CORE_NON_NORMAL_QUOTAS
     }
@@ -300,6 +341,7 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
 def main(argv: Sequence[str] | None = None) -> int:
     base.TOTAL_MONSTERS = TOTAL_MONSTERS
     base.TOTAL_PROTOTYPE_CARDS = TOTAL_PROTOTYPE_CARDS
+    base.fetch_all_cards = fetch_cards_with_rush_normal_supplement
     base.select_prototype_pool = select_prototype_pool
     base.build_selection_document = build_selection_document
     return base.main(argv)
