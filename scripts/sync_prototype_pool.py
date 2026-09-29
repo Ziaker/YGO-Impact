@@ -9,8 +9,7 @@ Escopo atual:
   nomeado em todo o pool;
 - Beast, Fiend e Spellcaster reservam 1 Ritual Monster;
 - Psychic reserva 2 monstros não-Normal de maior Nível;
-- cartas marcadas como Rush Duel podem complementar SOMENTE os slots Normal
-  Nível 2-4;
+- o catálogo Rush Duel pode complementar SOMENTE os slots Normal Nível 2-4;
 - Ritual Spells permanecem genéricas no Monster Impact.
 
 Magias e Armadilhas não são filtradas por arquétipo nesta etapa.
@@ -39,7 +38,7 @@ RITUAL_TARGET_RACES = ("Beast", "Fiend", "Spellcaster")
 RITUAL_SPELL_COMPATIBILITY = "generic-any-ritual-monster"
 MONSTER_ARCHETYPE_POLICY = "prefer-no-archetype-max-one-monster-per-named-archetype"
 NORMAL_SOURCE_POLICY = "standard-catalog-plus-rush-duel-normal-only-supplement"
-MISC_CATALOG_URL = f"{base.API_URL}?misc=yes"
+RUSH_DUEL_URL = f"{base.API_URL}?format=Rush%20Duel"
 
 TOTAL_MONSTER_QUOTAS = {
     race: quota + NORMAL_TARGET_PER_RACE
@@ -79,34 +78,16 @@ def is_normal_slot_candidate(card: dict[str, Any], race: str | None = None) -> b
     )
 
 
-def card_formats(card: dict[str, Any]) -> set[str]:
-    result: set[str] = set()
-    misc_info = card.get("misc_info") or []
-    if not isinstance(misc_info, list):
-        return result
-    for item in misc_info:
-        if not isinstance(item, dict):
-            continue
-        formats = item.get("formats") or []
-        if isinstance(formats, list):
-            result.update(str(value).strip().casefold() for value in formats)
-    return result
-
-
 def fetch_cards_with_rush_normal_supplement(*, timeout: float, retries: int) -> list[dict[str, Any]]:
     standard_cards = _ORIGINAL_FETCH_ALL_CARDS(timeout=timeout, retries=retries)
-    misc_payload = base._request_json(MISC_CATALOG_URL, timeout=timeout, retries=retries)
-    misc_cards = misc_payload.get("data", [])
-    if not isinstance(misc_cards, list):
-        raise base.DownloaderError("Resposta inesperada do catálogo misc=yes: campo 'data' inválido.")
+    rush_payload = base._request_json(RUSH_DUEL_URL, timeout=timeout, retries=retries)
+    rush_cards = rush_payload.get("data", [])
+    if not isinstance(rush_cards, list):
+        raise base.DownloaderError("Resposta inesperada do catálogo Rush Duel: campo 'data' inválido.")
 
     supplement: list[dict[str, Any]] = []
-    for card in misc_cards:
-        if not isinstance(card, dict):
-            continue
-        if "rush duel" not in card_formats(card):
-            continue
-        if not is_normal_slot_candidate(card):
+    for card in rush_cards:
+        if not isinstance(card, dict) or not is_normal_slot_candidate(card):
             continue
         tagged = dict(card)
         tagged["_monster_impact_source"] = "rush-duel"
@@ -269,7 +250,6 @@ def select_prototype_pool(cards: Iterable[dict[str, Any]]) -> list[dict[str, Any
     selected: list[dict[str, Any]] = []
     used_archetypes: set[str] = set()
 
-    # As reservas e os slots não-Normal têm precedência; os 40 Normais são adicionais.
     for race, non_normal_quota in CORE_NON_NORMAL_QUOTAS.items():
         selected.extend(
             _select_non_normal_for_race(compatible, race, non_normal_quota, used_archetypes)
