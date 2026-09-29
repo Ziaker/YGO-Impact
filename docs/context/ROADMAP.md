@@ -46,6 +46,11 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 - Movimento é revalidado bloco a bloco e a simulação de 20 Hz fica desacoplada de `requestAnimationFrame`.
 - Evidência atual de VIS-003: **25/25 testes Node, 25/25 embutidos e 14/14 checks reais em Chromium/Playwright**.
 - A ordem de desempate `N,E,S,W,NE,SE,SW,NW` usada em VIS-003 permanece **provisória** e não é regra canônica.
+- `VIS-004 — Terreno, SPD e movimento avançado, Parte 2/5`: **Em teste / aguardando aprovação visual A/B/C**.
+- VIS-004 herda sem reabrir área cheia e seletor 2D/3D e testa três leituras de custo de terreno: A badge persistente, B custo somente no caminho e C mapa sutil/painel.
+- O valor de custo do Campo A é **fixture QA**, padrão 1, porque o GDD não estabelece um custo genérico universal de terreno. Valores maiores não constituem conteúdo/regra final.
+- O experimento já exerce impassáveis, GLIDER, entrada que pode levar SPD a negativo, bloqueio de novo movimento com SPD negativo, recuperação +2 após 8 s/160 ticks e harness de movimento como Reação (1 Reação + SPD) sem implementar Corrente completa.
+- Evidência atual de VIS-004: **30/30 testes Node, 30/30 embutidos e 16/16 checks reais em Chromium/Playwright**, sem exceções JavaScript.
 
 ### Artes e conteúdo
 
@@ -63,6 +68,7 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 - Typecheck/build do núcleo: **Implementados no CI**.
 - VIS-002 possui testes internos e smoke de navegador executados durante aprovação; a integração desses checks à CI geral ainda é **Pendente**.
 - VIS-003 possui testes Node, testes embutidos e smoke de navegador executados durante aprovação; a integração desses checks à CI geral ainda é **Pendente**.
+- VIS-004 possui testes Node, suíte embutida e smoke Chromium/Playwright executados localmente; a integração à CI geral ainda é **Pendente**.
 - Determinismo de partida completa, replay, propriedades, fuzzing, self-play, smoke geral e endurance: **Pendentes**, pois dependem dos sistemas correspondentes.
 
 ### Web e publicação
@@ -70,6 +76,7 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 - Protótipo HTML VIS-001: **Implementado como comparador histórico; decisão da versão melhorada aprovada**.
 - Protótipo web modular VIS-002 (`index.html` + CSS + JS): **Implementado e aprovado**.
 - VIS-003 possui executável validado fora do diretório versionado de protótipos; sua **decisão está documentada/aprovada no Git**, e a integração do executável ao diretório `prototypes/` permanece pendente.
+- VIS-004 possui executável validado localmente; o documento do experimento já está versionado em `docs/prototypes/VIS-004-terrain-spd-movement.md`. O executável ainda não está incorporado ao diretório `prototypes/` enquanto a comparação A/B/C está aberta.
 - Build jogável: **Pendente**.
 - GitHub Pages: **Pendente / não publicado**.
 
@@ -82,11 +89,11 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 ## Ordem recomendada das próximas entregas
 
 1. **Usar VIS-001, VIS-002 e VIS-003 como decisões aprovadas**, sem reabrir seus pontos já decididos por registros antigos.
-2. **VIS-004 — Terreno, SPD e movimento avançado:** prototipar custos de terreno, impassáveis, SPD negativo, movimento fracionado em contexto amplo, recuperação de +2 SPD após 8 s de ociosidade e movimento como Reação, herdando área cheia e 2D/3D selecionáveis de VIS-003.
+2. **Concluir VIS-004 — Terreno, SPD e movimento avançado:** comparar A/B/C para leitura de terreno/custo e registrar a opção aprovada; não transformar os valores numéricos QA em regra de conteúdo.
 3. **Expandir o núcleo por regras pequenas e testáveis**, começando por contratos que não dependem de direção visual: recursos/turno, validações básicas e operações de estado explicitamente descritas no GDD.
 4. **Reutilizar VIS-002/VIS-003 como referência de mapa/câmera/movimento nos protótipos seguintes**, preservando 2D/3D selecionáveis, picking equivalente, área cheia e câmera fora do estado autoritativo.
 5. **Formalizar o desempate canônico de pathfinding** antes de promover a ordem provisória de VIS-003 ao núcleo final.
-6. **Depois do VIS-004, prototipar VIS/Fog of War, alcance e seleção de alvos** antes de Invocações, combate e Correntes interativas.
+6. **Depois do VIS-004, prototipar VIS-005 — VIS/Fog of War, alcance e seleção de alvos** antes de Invocações, combate e Correntes interativas.
 7. **Implementar Correntes/IMEDIATOS** como módulo isolado e fortemente testado, preservando a regra crítica de alvo inimigo.
 8. **Adicionar telemetria e replay mínimos** cedo o suficiente para validar hashes e determinismo antes da IA e do self-play.
 9. **Adicionar IA competitiva e QA** somente sobre a interface pública do mesmo núcleo.
@@ -101,6 +108,9 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 - Não remover o seletor 2D/3D aprovado do fluxo normal de gameplay.
 - Não permitir que orientação, câmera, zoom, pan, foco ou overlay alterem estado/hash autoritativo.
 - Não promover a ordem provisória de desempate de VIS-003 a regra final sem decisão explícita.
+- Não tratar a fixture de custo do Campo A de VIS-004 como valor canônico de terreno/cartas.
+- Não tratar o harness de Reação de VIS-004 como implementação completa de Corrente/Cross Chain.
+- Não marcar A/B/C de terreno do VIS-004 como aprovadas antes da escolha explícita do autor.
 - Não completar regras ausentes usando Yu-Gi-Oh! oficial.
 - Não tratar o scaffold do núcleo como jogo completo.
 - Não tratar pathfinding de protótipos como implementação final do núcleo.
