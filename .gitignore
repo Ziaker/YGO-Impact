@@ -17,8 +17,8 @@ coverage/
 .coverage
 htmlcov/
 
-# Assets locais: artes oficiais baixadas não entram no Git
-assets-local/
+# Assets oficiais selecionados em assets-local/card-art/ são versionados
+# por decisão explícita do autor. Somente temporários continuam ignorados.
 
 # Saídas locais e diagnósticos volumosos
 reports/
