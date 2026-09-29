@@ -38,6 +38,7 @@ RITUAL_SPELL_COMPATIBILITY = "generic-any-ritual-monster"
 MONSTER_ARCHETYPE_POLICY = "exclude-any-monster-with-nonempty-api-archetype"
 NORMAL_SOURCE_POLICY = "standard-catalog-plus-rush-duel-normal-only-supplement"
 RUSH_DUEL_FORMAT = "Rush Duel"
+RUSH_DUEL_URL = f"{base.API_URL}?format=Rush%20Duel"
 
 TOTAL_MONSTER_QUOTAS = {
     race: quota + NORMAL_TARGET_PER_RACE
@@ -77,7 +78,7 @@ def is_normal_slot_candidate(card: dict[str, Any], race: str | None = None) -> b
 def fetch_cards_with_rush_normal_supplement(*, timeout: float, retries: int) -> list[dict[str, Any]]:
     standard_cards = _ORIGINAL_FETCH_ALL_CARDS(timeout=timeout, retries=retries)
     rush_payload = base._request_json(
-        base._api_url({"format": RUSH_DUEL_FORMAT}),
+        RUSH_DUEL_URL,
         timeout=timeout,
         retries=retries,
     )
