@@ -18,9 +18,12 @@ Já estão versionados:
 - documentação inicial de contexto e prototipagem;
 - contrato arquitetural inicial em `src/README.md`;
 - downloader de artes em `scripts/baixar_artes.py`;
+- seleção versionada de artes em `scripts/card_art_targets.txt`;
 - testes automatizados do downloader;
-- workflow inicial de CI para compilar e testar as ferramentas Python;
-- `.gitignore` para assets, builds, caches, logs e telemetria locais.
+- workflow inicial de CI;
+- workflow de sincronização de artes em `.github/workflows/sync-card-art.yml`;
+- política de versionamento de `assets-local/card-art/` e seu manifesto;
+- `.gitignore` para builds, caches, logs, temporários e telemetria local.
 
 Ainda não estão implementados:
 
@@ -160,10 +163,10 @@ YGO-Impact/
 ├── prototypes/           # protótipos executáveis
 ├── src/                  # núcleo e implementação do jogo
 ├── tests/                # testes automatizados
-├── scripts/              # ferramentas de projeto
-├── assets-local/         # artes baixadas localmente; ignorado pelo Git
+├── scripts/              # ferramentas e seleção de coleta
+├── assets-local/         # artes selecionadas + manifesto, agora versionados
 └── .github/
-    └── workflows/        # CI e, futuramente, build/Pages
+    └── workflows/        # CI, sincronização de artes e, futuramente, Pages
 ```
 
 Pastas sem utilidade imediata não são criadas apenas para preencher a árvore. `public/`, relatórios, artefatos e demais diretórios surgirão quando houver consumidores reais.
@@ -200,7 +203,7 @@ Registros ficam em `docs/prototypes/`; executáveis em `prototypes/`.
 
 O projeto pessoal utiliza ilustrações oficiais de cartas.
 
-O jogo não deve fazer hotlink durante a execução. As artes são baixadas previamente e armazenadas localmente em `assets-local/`, que não é versionado.
+O jogo não deve fazer hotlink durante a execução. As artes são baixadas previamente para `assets-local/card-art/`. Por decisão explícita atual do autor, as artes selecionadas e o `manifest.json` gerado pelo downloader podem ser versionados no repositório.
 
 O downloader utiliza o campo `image_url_cropped` da API do YGOPRODeck, que fornece a ilustração separada da moldura e do texto da carta montada.
 
@@ -220,10 +223,16 @@ Características já implementadas:
 - retomada por arquivos existentes;
 - deduplicação por carta/arte;
 - gravação temporária `.part` seguida de substituição atômica;
-- manifesto local com hash SHA-256;
+- manifesto com hash SHA-256;
 - organização por categoria/RACE/tipo;
 - filtro pré-2010 opcional;
 - somente biblioteca padrão do Python.
+
+A seleção oficial versionada para sincronização fica em:
+
+```text
+scripts/card_art_targets.txt
+```
 
 Dry-run por nomes:
 
@@ -240,11 +249,11 @@ Por ID:
 python scripts/baixar_artes.py --id 46986414 --dry-run
 ```
 
-Por arquivo:
+Por arquivo versionado:
 
 ```bash
 python scripts/baixar_artes.py \
-  --input scripts/card_art_targets.example.txt \
+  --input scripts/card_art_targets.txt \
   --dry-run
 ```
 
@@ -282,6 +291,8 @@ Saída padrão:
 ```text
 assets-local/card-art/
 ```
+
+O workflow `.github/workflows/sync-card-art.yml` executa a seleção versionada e commita as artes/manifesto quando houver alterações.
 
 ## Testes
 
