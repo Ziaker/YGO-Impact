@@ -1,0 +1,25 @@
+{
+  "files": {
+    "Monstros/Dragon/Normal/blue-eyes-white-dragon__89631139.jpg": {
+      "bytes": 168069,
+      "card_id": 89631139,
+      "image_id": 89631139,
+      "name": "Blue-Eyes White Dragon",
+      "race": "Dragon",
+      "sha256": "09f5b2399875b2e6523f6825d5d19375c81e398ba2487d1bd5e7d8254a691671",
+      "source": "https://images.ygoprodeck.com/images/cards_cropped/89631139.jpg",
+      "type": "Normal Monster"
+    },
+    "Monstros/Spellcaster/Normal/dark-magician__46986414.jpg": {
+      "bytes": 133569,
+      "card_id": 46986414,
+      "image_id": 46986414,
+      "name": "Dark Magician",
+      "race": "Spellcaster",
+      "sha256": "cffad3a9a824b3d9538dacc23a447a9ba5047079ab84533e9ec8328544df245c",
+      "source": "https://images.ygoprodeck.com/images/cards_cropped/46986414.jpg",
+      "type": "Normal Monster"
+    }
+  },
+  "schema_version": 1
+}
