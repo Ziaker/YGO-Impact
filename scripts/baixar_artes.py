@@ -33,6 +33,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 API_URL = "https://db.ygoprodeck.com/api/v7/cardinfo.php"
+CARDSETS_URL = "https://db.ygoprodeck.com/api/v7/cardsets.php"
 DEFAULT_OUTPUT = Path("assets-local/card-art")
 USER_AGENT = "Monster-Impact-Art-Downloader/1.0 (+https://github.com/Ziaker/YGO-Impact)"
 
@@ -81,23 +82,27 @@ class Artwork:
     relative_path: Path
 
 
-def _request_json(url: str, *, timeout: float, retries: int) -> dict[str, Any]:
+def _request_json_value(url: str, *, timeout: float, retries: int) -> Any:
     last_error: Exception | None = None
     for attempt in range(retries + 1):
         try:
             request = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
             with urlopen(request, timeout=timeout) as response:
                 payload = response.read()
-            data = json.loads(payload.decode("utf-8"))
-            if not isinstance(data, dict):
-                raise DownloaderError("Resposta inesperada da API: objeto JSON esperado.")
-            return data
+            return json.loads(payload.decode("utf-8"))
         except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
             last_error = exc
             if attempt >= retries:
                 break
             time.sleep(min(2 ** attempt, 4))
     raise DownloaderError(f"Falha ao consultar a API: {last_error}")
+
+
+def _request_json(url: str, *, timeout: float, retries: int) -> dict[str, Any]:
+    data = _request_json_value(url, timeout=timeout, retries=retries)
+    if not isinstance(data, dict):
+        raise DownloaderError("Resposta inesperada da API: objeto JSON esperado.")
+    return data
 
 
 def _api_url(params: dict[str, str] | None = None) -> str:
@@ -171,16 +176,30 @@ def card_is_supported(card: dict[str, Any]) -> bool:
     return str(card.get("race", "")) in PRIORITY_RACES
 
 
-def card_is_pre_2010(card: dict[str, Any]) -> bool:
-    for card_set in card.get("card_sets") or []:
-        date_text = card_set.get("set_tcg_date")
-        if not date_text:
+def fetch_card_set_years(*, timeout: float, retries: int) -> dict[str, int]:
+    payload = _request_json_value(CARDSETS_URL, timeout=timeout, retries=retries)
+    if not isinstance(payload, list):
+        raise DownloaderError("Resposta inesperada de cardsets.php: array JSON esperado.")
+    years: dict[str, int] = {}
+    for item in payload:
+        if not isinstance(item, dict):
+            continue
+        name = item.get("set_name")
+        date_text = item.get("tcg_date")
+        if not name or not date_text:
             continue
         try:
-            if datetime.strptime(str(date_text), "%Y-%m-%d").year < 2010:
-                return True
+            years[str(name)] = datetime.strptime(str(date_text), "%Y-%m-%d").year
         except ValueError:
             continue
+    return years
+
+
+def card_is_pre_2010(card: dict[str, Any], set_years: dict[str, int]) -> bool:
+    for card_set in card.get("card_sets") or []:
+        set_name = card_set.get("set_name")
+        if set_name and set_years.get(str(set_name), 9999) < 2010:
+            return True
     return False
 
 
@@ -356,7 +375,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dry-run", action="store_true", help="mostra o plano sem criar ou baixar arquivos")
     parser.add_argument("--force", action="store_true", help="sobrescreve imagens já existentes")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help=f"destino local (padrão: {DEFAULT_OUTPUT})")
-    parser.add_argument("--delay", type=float, default=0.05, help="pausa entre downloads em segundos")
+    parser.add_argument("--delay", type=float, default=0.10, help="pausa entre downloads em segundos")
     parser.add_argument("--timeout", type=float, default=30.0, help="timeout HTTP em segundos")
     parser.add_argument("--retries", type=int, default=2, help="número de novas tentativas por requisição")
     return parser
@@ -390,7 +409,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         filtered = [card for card in dedupe_cards(cards) if card_is_supported(card)]
         filtered = [card for card in filtered if card_matches_races(card, races)]
         if args.pre_2010:
-            filtered = [card for card in filtered if card_is_pre_2010(card)]
+            set_years = fetch_card_set_years(timeout=args.timeout, retries=args.retries)
+            filtered = [card for card in filtered if card_is_pre_2010(card, set_years)]
 
         artworks: list[Artwork] = []
         seen_art: set[tuple[int, int]] = set()

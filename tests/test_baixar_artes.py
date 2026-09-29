@@ -40,15 +40,17 @@ class DownloaderContractTests(unittest.TestCase):
         for card_type in forbidden:
             self.assertFalse(module.card_is_supported({"type": card_type, "race": "Dragon"}), card_type)
 
-
     def test_monster_race_outside_initial_scope_is_rejected(self):
         self.assertFalse(module.card_is_supported({"type": "Effect Monster", "race": "Dinosaur"}))
 
-    def test_pre_2010_filter_is_explicit_helper(self):
-        old = {"card_sets": [{"set_tcg_date": "2009-12-31"}]}
-        modern = {"card_sets": [{"set_tcg_date": "2010-01-01"}]}
-        self.assertTrue(module.card_is_pre_2010(old))
-        self.assertFalse(module.card_is_pre_2010(modern))
+    def test_pre_2010_filter_uses_set_catalog_dates(self):
+        card = {"card_sets": [{"set_name": "Old Set"}, {"set_name": "New Set"}]}
+        self.assertTrue(module.card_is_pre_2010(card, {"Old Set": 2009, "New Set": 2010}))
+        self.assertFalse(module.card_is_pre_2010(card, {"Old Set": 2010, "New Set": 2020}))
+
+    def test_pre_2010_filter_does_not_guess_unknown_set_dates(self):
+        card = {"card_sets": [{"set_name": "Unknown Set"}]}
+        self.assertFalse(module.card_is_pre_2010(card, {}))
 
     def test_category_organizes_monsters_by_race_and_type(self):
         card = {"type": "Fusion Monster", "race": "Dragon"}

@@ -47,7 +47,7 @@ Artes alternativas:
 python scripts/baixar_artes.py --name "Dark Magician" --all-artworks --dry-run
 ```
 
-Filtro histórico opcional:
+Filtro histórico opcional (consulta `cardsets.php` para as datas TCG atuais):
 
 ```bash
 python scripts/baixar_artes.py --all-compatible --pre-2010 --dry-run
