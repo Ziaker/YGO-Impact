@@ -7,8 +7,10 @@ on:
       - "scripts/baixar_artes.py"
       - "scripts/sync_prototype_pool.py"
       - "scripts/sync_prototype_pool_curated.py"
+      - "scripts/sync_effect_texts.py"
       - "tests/test_baixar_artes.py"
       - "tests/test_sync_prototype_pool.py"
+      - "tests/test_sync_effect_texts.py"
       - ".github/workflows/sync-card-art.yml"
       - "docs/context/DEC-001-initial-card-pool.md"
 
@@ -35,7 +37,7 @@ jobs:
 
       - name: Validate downloader and pool policy
         run: |
-          python -m py_compile scripts/baixar_artes.py scripts/sync_prototype_pool.py scripts/sync_prototype_pool_curated.py
+          python -m py_compile scripts/baixar_artes.py scripts/sync_prototype_pool.py scripts/sync_prototype_pool_curated.py scripts/sync_effect_texts.py
           python -m unittest discover -s tests -p "test_*.py" -v
 
       - name: Select and download prototype card art
@@ -44,7 +46,12 @@ jobs:
             --prototype-pool \
             --output assets-local/card-art
 
-      - name: Prune artwork outside current selection
+      - name: Sync effect reference sidecars
+        run: |
+          python scripts/sync_effect_texts.py \
+            --root assets-local/card-art
+
+      - name: Prune artwork and effect references outside current selection
         run: |
           python - <<'PY'
           import json
@@ -72,7 +79,11 @@ jobs:
               category_root = root / category
               if not category_root.exists():
                   continue
-              for path in category_root.rglob("*.jpg"):
+              for path in category_root.rglob("*"):
+                  if not path.is_file():
+                      continue
+                  if path.suffix.casefold() != ".jpg" and not path.name.endswith(".effect.txt"):
+                      continue
                   relative_path = path.relative_to(root).as_posix()
                   if relative_path not in allowed_paths:
                       path.unlink()
@@ -92,19 +103,19 @@ jobs:
               json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
               encoding="utf-8",
           )
-          print(f"Artes antigas removidas: {len(removed)}")
+          print(f"Arquivos antigos removidos: {len(removed)}")
           for relative_path in removed:
               print(f"  PRUNE {relative_path}")
           PY
 
-      - name: Commit synchronized artwork and selection
+      - name: Commit synchronized artwork, effects and selection
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A -f assets-local/card-art
           if git diff --cached --quiet; then
-            echo "Nenhuma alteração de arte/seleção para versionar."
+            echo "Nenhuma alteração de arte/efeito/seleção para versionar."
             exit 0
           fi
           git commit -m "assets: sync prototype card pool"
