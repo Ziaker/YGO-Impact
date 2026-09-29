@@ -26,13 +26,19 @@ Somente entram monstros classificados no pool como:
 
 Synchro, Xyz, Pendulum e Link continuam fora do primeiro protótipo.
 
-## Ritual no pool inicial
+## Ritual Monsters
 
-A intenção de conteúdo é ter **1 Ritual Monster por RACE ativa**, sem alterar a cota total daquela RACE: o Ritual substitui um dos demais candidatos que entrariam na seleção determinística.
+Beast, Fiend e Spellcaster reservam **1 slot de Ritual Monster oficial por RACE** dentro de suas cotas existentes.
 
-A seleção preserva os metadados oficiais retornados pela fonte. No catálogo oficial atual existe pelo menos um Ritual Monster compatível para Beast, Fiend e Spellcaster, portanto essas três RACE devem ter exatamente 1 Ritual selecionado.
+O catálogo oficial atual não possui Ritual Monster Psychic. Em vez de adulterar RACE ou tipo de carta, os **15 Psychic continuam sendo 15**, mas **2 desses slots são reservados aos dois monstros Psychic compatíveis de maior Nível disponíveis**.
 
-**Psychic é uma exceção de disponibilidade:** o catálogo oficial atual não possui Ritual Monster da RACE Psychic. O projeto não reclassifica uma carta de outra RACE e não inventa metadados para preencher essa vaga. Enquanto essa limitação existir, Psychic permanece com 0 Ritual oficial no pool. Se um Ritual Monster Psychic oficial passar a existir e for retornado pela fonte, a política de seleção deve passar a escolhê-lo automaticamente.
+Para essa seleção técnica, "alto nível" não é uma categoria de gameplay nem cria um limiar novo. O script ordena candidatos Psychic por:
+
+1. Nível decrescente;
+2. nome;
+3. ID.
+
+Os dois primeiros são reservados; os 13 slots Psychic restantes seguem a ordenação determinística normal por nome + ID.
 
 ## Magias
 
@@ -45,11 +51,7 @@ O pool contém exatamente **20 Magias**:
 
 As cotas Field, Ritual e Equip são exatas; a parcela geral não adiciona cópias desses três subtipos.
 
-### Compatibilidade de Ritual Spell
-
-Para Monster Impact, as Ritual Spells deste pool são tratadas como **genéricas para os Ritual Monsters do protótipo**. Não existe exigência de correspondência por nome entre a Ritual Spell oficial escolhida como arte/conteúdo e um Ritual Monster específico.
-
-A seleção das 2 Ritual Spells pode, portanto, usar quaisquer cartas oficiais do subtipo Ritual Spell que satisfaçam os filtros técnicos de arte e disponibilidade. Essa decisão altera a compatibilidade de conteúdo do fangame e não importa automaticamente as restrições textuais do TCG/OCG.
+As **Ritual Spells são genéricas no fangame nesta etapa**: qualquer uma das Ritual Spells selecionadas pode servir para qualquer Ritual Monster do protótipo. Não existe vínculo obrigatório com o nome, arquétipo ou Ritual Spell da carta oficial.
 
 ## Armadilhas
 
@@ -61,14 +63,13 @@ Como o autor não exige nomes específicos neste momento, a seleção automátic
 
 1. exige arte `image_url_cropped` disponível;
 2. filtra as categorias e cotas acima;
-3. para cada RACE com Ritual oficial disponível, escolhe primeiro exatamente 1 Ritual Monster;
-4. completa o restante da cota da RACE com monstros não-Ritual;
-5. ordena os candidatos de cada grupo por nome e, em seguida, ID;
-6. escolhe as 2 Ritual Spells sem vínculo de nome com os Ritual Monsters;
-7. registra nome, ID, RACE, tipo de carta, tipo normalizado e Nível;
-8. falha explicitamente se alguma cota obrigatória não puder ser preenchida.
+3. reserva 1 Ritual para Beast, Fiend e Spellcaster;
+4. reserva os 2 Psychic de maior Nível, com desempate por nome + ID;
+5. completa os demais slots por nome e, em seguida, ID;
+6. registra nome, ID, RACE, tipo de carta, tipo normalizado e Nível;
+7. falha explicitamente se alguma cota obrigatória não puder ser preenchida.
 
-O **Nível é metadado**, não critério de escolha. A distribuição por Nível é consequência do pool determinístico selecionado.
+Fora da reserva especial dos dois Psychic, o **Nível é metadado, não critério geral de escolha**. A distribuição por Nível continua sendo consequência do pool determinístico selecionado.
 
 ## Total
 

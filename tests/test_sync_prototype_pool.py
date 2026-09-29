@@ -34,13 +34,20 @@ def fake_card(card_id, name, card_type, race, level=None):
     return card
 
 
-def build_pool(include_psychic_ritual=False):
+def build_pool():
     cards = []
     next_id = 1
     for race, quota in base.PROTOTYPE_MONSTER_QUOTAS.items():
-        if race != "Psychic" or include_psychic_ritual:
+        if race != "Psychic":
             cards.append(fake_card(next_id, f"{race} Ritual", "Ritual Monster", race, level=7))
             next_id += 1
+
+        if race == "Psychic":
+            cards.append(fake_card(next_id, "ZZZ Psychic Apex 12", "Effect Monster", race, level=12))
+            next_id += 1
+            cards.append(fake_card(next_id, "ZZZ Psychic Apex 11", "Fusion Monster", race, level=11))
+            next_id += 1
+
         for index in range(quota + 2):
             cards.append(
                 fake_card(next_id, f"{race} Regular {index:02d}", "Effect Monster", race, level=4)
@@ -65,24 +72,46 @@ def build_pool(include_psychic_ritual=False):
     return cards
 
 
-class RitualPrototypePoolTests(unittest.TestCase):
-    def test_real_ritual_is_selected_for_each_race_where_available(self):
-        selected = module.select_prototype_pool(build_pool(include_psychic_ritual=False))
+class PrototypePoolPolicyTests(unittest.TestCase):
+    def test_real_ritual_is_selected_for_three_races(self):
+        selected = module.select_prototype_pool(build_pool())
         document = module.build_selection_document(selected)
         self.assertEqual(
             document["summary"]["ritual_monsters_by_race"],
             {"Beast": 1, "Psychic": 0, "Fiend": 1, "Spellcaster": 1},
         )
-        self.assertIn("Psychic", document["requested"]["ritual_official_exceptions"])
-
-    def test_psychic_ritual_is_used_automatically_if_official_candidate_exists(self):
-        selected = module.select_prototype_pool(build_pool(include_psychic_ritual=True))
-        document = module.build_selection_document(selected)
         self.assertEqual(
-            document["summary"]["ritual_monsters_by_race"],
-            {"Beast": 1, "Psychic": 1, "Fiend": 1, "Spellcaster": 1},
+            document["requested"]["ritual_monster_target_races"],
+            ["Beast", "Fiend", "Spellcaster"],
         )
-        self.assertEqual(document["requested"]["ritual_official_exceptions"], {})
+
+    def test_psychic_reserves_two_highest_levels_inside_existing_quota(self):
+        selected = module.select_prototype_pool(build_pool())
+        psychic = [card for card in selected if card.get("race") == "Psychic"]
+        self.assertEqual(len(psychic), 15)
+        self.assertIn("ZZZ Psychic Apex 12", [card["name"] for card in psychic])
+        self.assertIn("ZZZ Psychic Apex 11", [card["name"] for card in psychic])
+
+        document = module.build_selection_document(selected)
+        reserved = document["summary"]["psychic_high_level_reserved"]
+        self.assertEqual([row["level"] for row in reserved], [12, 11])
+        self.assertEqual(
+            [row["name"] for row in reserved],
+            ["ZZZ Psychic Apex 12", "ZZZ Psychic Apex 11"],
+        )
+        self.assertEqual(document["requested"]["psychic_high_level_target"], 2)
+        self.assertEqual(
+            document["requested"]["psychic_high_level_rule"],
+            "highest-level-then-name-id",
+        )
+
+    def test_high_level_selection_is_deterministic_on_level_name_and_id(self):
+        cards = build_pool()
+        selected_a = module.select_prototype_pool(cards)
+        selected_b = module.select_prototype_pool(list(reversed(cards)))
+        psych_a = [card["id"] for card in selected_a if card.get("race") == "Psychic"]
+        psych_b = [card["id"] for card in selected_b if card.get("race") == "Psychic"]
+        self.assertEqual(psych_a, psych_b)
 
     def test_race_quotas_and_total_stay_unchanged(self):
         selected = module.select_prototype_pool(build_pool())
