@@ -10,11 +10,11 @@ Monster Impact **não reproduz automaticamente as regras tradicionais de Yu-Gi-O
 
 **Fase atual: estruturação e pré-implementação do primeiro protótipo.**
 
-O GDD-base está concluído na versão **0.42**, com **25 de 25 fases finalizadas e nenhuma pendência P0 ativa**. O binário canônico agora está versionado em `docs/context/Monster_Impact_GDD_v0.42.docx`, e `docs/context/GDD_SOURCE.md` registra nome de origem, tamanho e SHA-256 do arquivo efetivamente lido.
+O GDD-base está concluído na versão **0.42**, com **25 de 25 fases finalizadas e nenhuma pendência P0 ativa**. O arquivo canônico fornecido pelo autor foi lido integralmente; `docs/context/GDD_SOURCE.md` registra nome de origem, tamanho e SHA-256 do arquivo efetivamente lido. A cópia binária `.docx` ainda não está versionada no Git porque o conector disponível nesta sessão trunca conteúdo binário/base64 acima do limite de transporte; o repositório não afirma possuir uma cópia canônica enquanto tamanho e SHA-256 não puderem ser preservados exatamente.
 
 Já estão versionados:
 
-- GDD canônico v0.42 em `docs/context/`;
+- identificação verificável do GDD v0.42 em `docs/context/`;
 - documentação inicial de contexto e prototipagem;
 - contrato arquitetural do núcleo em `src/core/README.md`;
 - primeiro experimento visual A/B/C em `prototypes/visual-001-hud-layout/`;
@@ -162,7 +162,7 @@ Outras RACE ficam fora do escopo inicial até decisão posterior.
 ```text
 YGO-Impact/
 ├── docs/
-│   ├── context/          # GDD, decisões, contratos e contexto
+│   ├── context/          # referência do GDD, decisões, contratos e contexto
 │   └── prototypes/       # registros de experimentos e aprovações
 ├── prototypes/           # protótipos executáveis/visuais
 ├── src/
@@ -178,7 +178,7 @@ Pastas sem utilidade imediata não são criadas apenas para preencher a árvore.
 
 ## GDD e fonte de verdade
 
-Antes de implementar ou modificar regras, leia o GDD mais recente em `docs/context/`.
+Antes de implementar ou modificar regras, consulte o GDD canônico identificado em `docs/context/GDD_SOURCE.md`. Enquanto a cópia binária exata não estiver versionada, nenhuma documentação resumida do repositório substitui o arquivo canônico fornecido pelo autor.
 
 Em conflito, a precedência é:
 
