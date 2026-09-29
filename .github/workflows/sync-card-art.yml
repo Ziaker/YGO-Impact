@@ -41,12 +41,65 @@ jobs:
             --prototype-pool \
             --output assets-local/card-art
 
+      - name: Prune artwork outside current selection
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("assets-local/card-art")
+          selection = json.loads((root / "selection.json").read_text(encoding="utf-8"))
+          manifest_path = root / "manifest.json"
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+          allowed_ids = {int(card["id"]) for card in selection["cards"]}
+          files = manifest.setdefault("files", {})
+
+          for relative_path, metadata in list(files.items()):
+              try:
+                  card_id = int(metadata.get("card_id"))
+              except (TypeError, ValueError):
+                  card_id = -1
+              if card_id not in allowed_ids:
+                  del files[relative_path]
+
+          allowed_paths = set(files)
+          removed = []
+          for category in ("Monstros", "Magias", "Armadilhas"):
+              category_root = root / category
+              if not category_root.exists():
+                  continue
+              for path in category_root.rglob("*.jpg"):
+                  relative_path = path.relative_to(root).as_posix()
+                  if relative_path not in allowed_paths:
+                      path.unlink()
+                      removed.append(relative_path)
+
+          for directory in sorted(
+              (path for path in root.rglob("*") if path.is_dir()),
+              key=lambda path: len(path.parts),
+              reverse=True,
+          ):
+              try:
+                  directory.rmdir()
+              except OSError:
+                  pass
+
+          manifest_path.write_text(
+              json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(f"Artes antigas removidas: {len(removed)}")
+          for relative_path in removed:
+              print(f"  PRUNE {relative_path}")
+          PY
+
       - name: Commit synchronized artwork and selection
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f assets-local/card-art
+          git add -A -f assets-local/card-art
           if git diff --cached --quiet; then
             echo "Nenhuma alteração de arte/seleção para versionar."
             exit 0
