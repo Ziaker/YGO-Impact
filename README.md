@@ -8,50 +8,50 @@ Monster Impact **não reproduz automaticamente as regras tradicionais de Yu-Gi-O
 
 ## Estado do projeto
 
-**Fase atual: estruturação e pré-implementação do primeiro protótipo.**
+**Fase atual: prototipagem e implementação incremental do núcleo do primeiro protótipo.**
 
-O GDD-base está concluído na versão **0.42**, com **25 de 25 fases finalizadas e nenhuma pendência P0 ativa**. O arquivo canônico fornecido pelo autor foi lido integralmente; `docs/context/GDD_SOURCE.md` registra nome de origem, tamanho e SHA-256 do arquivo efetivamente lido. A cópia binária `.docx` ainda não está versionada no Git porque o conector disponível nesta sessão trunca conteúdo binário/base64 acima do limite de transporte; o repositório não afirma possuir uma cópia canônica enquanto tamanho e SHA-256 não puderem ser preservados exatamente.
+O GDD-base está concluído na versão **0.42**, com **25 de 25 fases finalizadas e nenhuma pendência P0 ativa**. `docs/context/GDD_SOURCE.md` registra o nome, tamanho e SHA-256 do arquivo canônico efetivamente lido antes da implementação.
 
-Já estão versionados:
+A cópia binária `.docx` ainda não está versionada porque o conector disponível nesta sessão não permite transportar o arquivo binário preservando integralmente os bytes acima do limite do canal. O repositório não trata reconstruções ou resumos como substitutos do original enquanto o hash canônico não puder ser preservado exatamente.
 
-- identificação verificável do GDD v0.42 em `docs/context/`;
-- documentação inicial de contexto e prototipagem;
-- contrato arquitetural do núcleo em `src/core/README.md`;
-- primeiro experimento visual A/B/C em `prototypes/visual-001-hud-layout/`;
-- registro do experimento VIS-001 em `docs/prototypes/VIS-001-hud-layout.md`;
-- downloader de artes em `scripts/baixar_artes.py`;
-- seleção versionada de artes em `scripts/card_art_targets.txt`;
-- artes cropped selecionadas e `manifest.json` em `assets-local/card-art/`;
-- testes automatizados do downloader;
-- workflow inicial de CI;
-- workflow de sincronização de artes em `.github/workflows/sync-card-art.yml`;
-- `.gitignore` para builds, caches, logs, temporários e telemetria local.
+### Já implementado ou prototipado
 
-Ainda não estão implementados:
+- núcleo autoritativo inicial em TypeScript em `src/core/`;
+- passo lógico fixo de **20 Hz / 50 ms** no scaffold;
+- fila pública determinística de comandos;
+- serialização/hash determinístico inicial;
+- invariantes espaciais básicas do mapa **31 × 17**, bases e ocupação;
+- testes automatizados do núcleo em `tests/core/`;
+- primeiro experimento visual A/B/C (`VIS-001`) para campo/HUD;
+- downloader de artes `image_url_cropped`;
+- seleção e sincronização versionada de artes;
+- lote inicial de artes cropped e manifesto SHA-256;
+- CI para TypeScript, núcleo e ferramentas Python.
 
-- núcleo autoritativo executável do jogo;
-- interface e renderização finais;
+### Ainda pendente
+
+- gameplay completo do núcleo: recursos, custos, movimento, pathfinding, dano, Invocações, Correntes, Cross Chains, IMEDIATOS, Fog of War, RNG e timers;
+- aprovação visual explícita do VIS-001;
+- demais protótipos visuais obrigatórios do GDD;
+- conteúdo inicial completo;
 - IA competitiva e IA de QA;
-- conteúdo jogável completo;
-- replay e telemetria do motor;
-- protótipos visuais aprovados;
+- telemetria e replay do motor;
+- self-play headless;
 - build web jogável;
-- publicação em GitHub Pages.
+- publicação no GitHub Pages.
 
-Não confundir **definido no GDD**, **prototipado** e **implementado**.
+Não confundir **definido no GDD**, **prototipado**, **implementado**, **testado**, **aprovado** e **publicado**. O estado detalhado fica em `docs/context/ROADMAP.md`.
 
-## Conceito
-
-Características centrais do primeiro protótipo:
+## Conceito do primeiro protótipo
 
 - single-player contra IA;
 - apresentação 2D top-down;
 - mapa inicial de **31 × 17 blocos**;
 - até **5 monstros por jogador** simultaneamente;
 - Duelista não aparece fisicamente no mapa;
-- cada jogador possui uma base física sólida de 1 bloco;
-- não existem Life Points tradicionais;
-- vitória ao causar **5 impactos válidos** à base adversária;
+- base física sólida e não ocupável;
+- sem Life Points tradicionais;
+- derrota ao receber **5 impactos válidos** na base, com encerramento imediato no quinto;
 - movimento baseado em **SPD**;
 - Fog of War baseado em **VIS**;
 - posições de ATK e DEF;
@@ -59,52 +59,31 @@ Características centrais do primeiro protótipo:
 - Deck de Monstros separado do Deck de Magias/Armadilhas;
 - Extra Deck;
 - Invocação Normal, Tributo, Ritual e Fusion;
-- IA sujeita às mesmas regras e informações disponíveis ao jogador.
+- IA sujeita às mesmas regras e limitações de informação do jogador.
 
 ## Regras críticas
 
 ### Correntes
 
-Uma Corrente somente é aberta quando uma ativação possui **pelo menos um alvo inimigo**.
+Uma Corrente somente abre ou recebe elementos quando a ativação envolve **pelo menos um alvo inimigo**.
 
-Ações voltadas apenas para o próprio usuário ou aliados não abrem Corrente isoladamente. Reações defensivas sem alvo inimigo podem integrar uma Corrente inimiga quando forem legalmente provocadas por ela.
-
-Correntes normais resolvem em **LIFO**. Alvos e elementos são revalidados individualmente.
+Ações voltadas apenas para o usuário ou aliados não abrem Corrente isoladamente, embora respostas legais possam integrar uma Corrente inimiga. Correntes normais resolvem em **LIFO**, com revalidação individual de alvos e elementos.
 
 ### IMEDIATO
 
-`IMEDIATO` e `IMEDIATAMENTE` são palavras reservadas.
-
-Um efeito IMEDIATO:
-
-- ativa e resolve no mesmo instante;
-- não abre Corrente;
-- não entra na pilha;
-- não recebe elementos entre ativação e resolução;
-- não gera efeitos adicionais a partir do resultado;
-- continua sujeito às verificações obrigatórias de estado.
+`IMEDIATO` e `IMEDIATAMENTE` significam ativar e resolver no mesmo instante, fora da pilha e sem Corrente. Não há janela entre ativação e resolução, mas verificações obrigatórias de estado continuam ocorrendo.
 
 ### Armadilhas
 
-Setar uma Armadilha:
-
-- não abre Corrente;
-- não integra Corrente;
-- não consome o custo de ativação.
-
-O custo é pago somente quando a Armadilha é ativada.
+Setar uma Armadilha não abre Corrente e não paga custo de ativação. O custo é pago somente quando a Armadilha é ativada.
 
 ## Determinismo e arquitetura
 
-O jogo terá um único núcleo autoritativo.
+Existe um único núcleo autoritativo. Interface, renderização, animação, IA e telemetria não alteram diretamente o estado; usam snapshots somente para leitura ou enviam comandos pela interface pública.
 
-A simulação opera em **20 Hz**, equivalentes a passos lógicos de **50 ms**. Renderização, interface, animação, IA e telemetria não modificam diretamente o estado autoritativo.
+A simulação opera em **20 Hz**, com passos de **50 ms**. Humanos e IA usam a mesma fila. Com os mesmos dados, Decks, seed, comandos, ordem de entrada, configuração e versão de regras, partida, replay, headless e web devem produzir estados, eventos, hashes e resultado equivalentes.
 
-Com os mesmos dados, Decks, seed, comandos, ordem de entrada, configuração e versão das regras, o motor deve produzir os mesmos estados, eventos, hashes e resultado.
-
-Lógica autoritativa usa inteiros ou ponto fixo. Ponto flutuante fica restrito à apresentação.
-
-O contrato inicial do núcleo está documentado em `src/core/README.md`. A tecnologia final do runtime ainda não foi escolhida; isso evita transformar uma decisão provisória em arquitetura definitiva sem validação.
+O núcleo inicial está em `src/core/`. Sua decisão arquitetural está registrada em `docs/context/ADR-001-core-runtime.md`, e o contrato técnico atual em `src/core/README.md`.
 
 ## Decks
 
@@ -125,27 +104,15 @@ O contrato inicial do núcleo está documentado em `src/core/README.md`. A tecno
 ### Limites gerais
 
 - máximo de 3 cópias por nome;
-- sem Side Deck no primeiro protótipo;
-- sem limite universal de mão.
+- sem Side Deck no primeiro protótipo.
 
 ## Invocações do primeiro protótipo
 
-Incluídas:
+Incluídas: **Normal, Tributo, Ritual e Fusion**.
 
-- Normal;
-- Tributo;
-- Ritual;
-- Fusion.
+Fora do primeiro protótipo: **Synchro e Xyz**.
 
-Fora do primeiro protótipo:
-
-- Synchro;
-- Xyz.
-
-Fora da direção atual:
-
-- Pendulum;
-- Link.
+Fora da direção atual: **Pendulum e Link**.
 
 Regras específicas de materiais, posicionamento, custos e resolução vêm do GDD e não devem ser inferidas das regras oficiais de Yu-Gi-Oh!.
 
@@ -157,30 +124,34 @@ O primeiro escopo prioriza 17 RACE:
 
 Outras RACE ficam fora do escopo inicial até decisão posterior.
 
-## Estrutura do repositório
+## Estrutura atual
 
 ```text
 YGO-Impact/
 ├── docs/
-│   ├── context/          # referência do GDD, decisões, contratos e contexto
-│   └── prototypes/       # registros de experimentos e aprovações
+│   ├── context/          # GDD, ADRs, roadmap, contratos e contexto
+│   └── prototypes/       # índice, experimentos, evidências e aprovações
 ├── prototypes/           # protótipos executáveis/visuais
 ├── src/
-│   └── core/             # contrato do núcleo autoritativo
-├── tests/                # testes automatizados
-├── scripts/              # ferramentas e seleção de coleta
+│   └── core/             # núcleo autoritativo inicial
+├── tests/
+│   └── core/             # testes do núcleo e invariantes
+├── scripts/              # ferramentas e coleta de artes
 ├── assets-local/         # artes selecionadas + manifesto versionados
+├── package.json          # comandos do núcleo TypeScript
+├── tsconfig.json
+├── THIRD_PARTY_NOTICES.md
 └── .github/
-    └── workflows/        # CI, sincronização de artes e, futuramente, Pages
+    └── workflows/        # CI, sincronização de artes e futuramente Pages
 ```
 
-Pastas sem utilidade imediata não são criadas apenas para preencher a árvore. `public/`, relatórios, artefatos e demais diretórios surgirão quando houver consumidores reais.
+Diretórios sem utilidade imediata não são criados apenas para preencher a árvore.
 
-## GDD e fonte de verdade
+## Fonte de verdade
 
-Antes de implementar ou modificar regras, consulte o GDD canônico identificado em `docs/context/GDD_SOURCE.md`. Enquanto a cópia binária exata não estiver versionada, nenhuma documentação resumida do repositório substitui o arquivo canônico fornecido pelo autor.
+Antes de implementar ou modificar regras, consulte o GDD identificado em `docs/context/GDD_SOURCE.md`.
 
-Em conflito, a precedência é:
+Em conflito, a precedência resumida é:
 
 1. instrução explícita atual do autor;
 2. correções expressas mais recentes;
@@ -188,7 +159,7 @@ Em conflito, a precedência é:
 4. regra específica do GDD;
 5. regra geral do GDD;
 6. decisões arquiteturais versionadas;
-7. testes de regressão aprovados;
+7. testes/regressões aprovados;
 8. implementação existente;
 9. convenções técnicas.
 
@@ -196,71 +167,39 @@ Não preencher lacunas com regras oficiais de Yu-Gi-Oh! nem inventar custos, lim
 
 ## Prototipagem visual
 
-Toda decisão visual relevante precisa de validação antes da implementação definitiva.
+Toda decisão visual relevante precisa de validação antes da implementação final. Quando ainda não houver solução aprovada, o experimento apresenta **A, B e C**.
 
-Quando ainda não houver solução aprovada, devem ser comparadas **três opções: A, B e C**.
+O inventário fica em `docs/prototypes/INDEX.md`.
 
-Aparência pode usar protótipo estático. Interação, movimento, timing, Correntes, animação, Fog of War, densidade de informação e feedback exigem protótipo executável.
-
-O primeiro experimento já está disponível:
+O primeiro experimento é:
 
 ```text
 prototypes/visual-001-hud-layout/index.html
 ```
 
-Ele compara três composições do campo/HUD sob o mesmo cenário de densidade. **Nenhuma opção está aprovada ainda.** O registro e os critérios estão em `docs/prototypes/VIS-001-hud-layout.md`.
+Ele compara três composições do campo/HUD sob o mesmo cenário de densidade. **Nenhuma opção está aprovada ainda.** Critérios e hipóteses ficam em `docs/prototypes/VIS-001-hud-layout.md`.
 
 ## Artes das cartas
 
-O projeto pessoal utiliza ilustrações oficiais de cartas.
+O projeto utiliza ilustrações oficiais como composição visual do fangame pessoal. O downloader usa `image_url_cropped` da API do YGOPRODeck; o jogo não depende de hotlink durante a execução.
 
-O jogo não deve fazer hotlink durante a execução. As artes são baixadas previamente para `assets-local/card-art/`. Por decisão explícita atual do autor, as artes selecionadas e o `manifest.json` gerado pelo downloader podem ser versionados no repositório.
+Por decisão explícita do autor, as artes selecionadas e o `manifest.json` podem ser versionados no repositório.
 
-O downloader utiliza o campo `image_url_cropped` da API do YGOPRODeck, que fornece a ilustração separada da moldura e do texto da carta montada.
-
-### Downloader
-
-Ferramenta: `scripts/baixar_artes.py`
-
-Características já implementadas:
-
-- nomes exatos e IDs;
-- arquivo de seleção;
-- filtro pelas 17 RACE prioritárias;
-- Monstros compatíveis, Ritual, Fusion, Magias e Armadilhas;
-- exclusão de Synchro, Xyz, Pendulum e Link;
-- artes alternativas com `--all-artworks`;
-- dry-run;
-- retomada por arquivos existentes;
-- deduplicação por carta/arte;
-- gravação temporária `.part` seguida de substituição atômica;
-- manifesto com hash SHA-256;
-- organização por categoria/RACE/tipo;
-- filtro pré-2010 opcional;
-- somente biblioteca padrão do Python.
-
-A seleção oficial versionada para sincronização fica em:
+Seleção atual:
 
 ```text
 scripts/card_art_targets.txt
 ```
 
-Dry-run por nomes:
+Sincronização local:
 
 ```bash
 python scripts/baixar_artes.py \
-  --name "Dark Magician" \
-  --name "Blue-Eyes White Dragon" \
-  --dry-run
+  --input scripts/card_art_targets.txt \
+  --output assets-local/card-art
 ```
 
-Por ID:
-
-```bash
-python scripts/baixar_artes.py --id 46986414 --dry-run
-```
-
-Por arquivo versionado:
+Dry-run:
 
 ```bash
 python scripts/baixar_artes.py \
@@ -268,114 +207,73 @@ python scripts/baixar_artes.py \
   --dry-run
 ```
 
-Uma RACE prioritária:
+Detalhes, filtros e alternativas estão em `scripts/README.md`. Avisos sobre conteúdo de terceiros estão em `THIRD_PARTY_NOTICES.md`.
+
+## Desenvolvimento do núcleo
+
+Requer Node.js conforme `package.json`.
+
+Typecheck:
 
 ```bash
-python scripts/baixar_artes.py --race Dragon --dry-run
+npm run typecheck
 ```
 
-Todo o acervo compatível, somente quando solicitado explicitamente:
+Testes do núcleo:
 
 ```bash
-python scripts/baixar_artes.py --all-compatible --dry-run
+npm run test:core
 ```
 
-Artes alternativas:
+Typecheck + testes:
 
 ```bash
-python scripts/baixar_artes.py \
-  --name "Dark Magician" \
-  --all-artworks \
-  --dry-run
+npm test
 ```
 
-Filtro pré-2010 opcional:
+Build TypeScript:
 
 ```bash
-python scripts/baixar_artes.py --all-compatible --pre-2010 --dry-run
+npm run build
 ```
 
-Saída padrão:
+O scaffold atual não constitui uma build jogável.
 
-```text
-assets-local/card-art/
-```
-
-O workflow `.github/workflows/sync-card-art.yml` executa a seleção versionada e commita as artes/manifesto quando houver alterações.
-
-## Testes
-
-A suíte atual cobre o downloader de artes e suas regras de escopo.
-
-Execute:
+## Testes Python
 
 ```bash
 python -m unittest discover -s tests -p "test_*.py" -v
-```
-
-Também é possível verificar a sintaxe diretamente:
-
-```bash
 python -m py_compile scripts/baixar_artes.py
 ```
 
-O workflow `.github/workflows/ci.yml` executa essas verificações em push e pull request.
+O workflow `.github/workflows/ci.yml` executa as verificações automatizadas em push e pull request.
 
-A suíte completa do jogo ainda será construída junto com o núcleo autoritativo e deverá cobrir unidade, integração, propriedades, invariantes, conteúdo, determinismo, replay, regressão, testes metamórficos, diferenciais, fuzzing, self-play, smoke e endurance.
+## Como abrir o protótipo visual
 
-## Como executar o jogo
+Abra em um navegador moderno:
 
-**Ainda não aplicável.**
+```text
+prototypes/visual-001-hud-layout/index.html
+```
 
-Não existe build jogável nem protótipo de gameplay versionado neste momento.
+O VIS-001 avalia composição/aparência. Ele não valida timing, movimento, Correntes ou Fog of War interativo; esses sistemas exigem protótipos executáveis próprios quando forem avaliados.
 
-## Como abrir protótipos
+## GitHub Pages
 
-Abra `prototypes/visual-001-hud-layout/index.html` em um navegador moderno. O VIS-001 não possui dependências nem build.
+O GDD exige uma build jogável estática e reproduzível no GitHub Pages usando o mesmo núcleo ou comprovando equivalência por dados, seeds, eventos e hashes.
 
-Protótipos interativos de timing, movimento, Correntes e Fog of War serão separados, pois a aprovação de aparência do VIS-001 não valida comportamento.
-
-## Build e GitHub Pages
-
-A build web planejada será estática, reproduzível, sem segredos e sem backend privado obrigatório.
-
-A publicação só poderá ocorrer depois de validação de conteúdo, tipos, testes, build e smoke test.
-
-**Ainda não existe versão publicada em GitHub Pages.**
+**Ainda não existe versão jogável publicada.** A publicação só ocorrerá depois de validação de conteúdo, tipos, testes, build e smoke test.
 
 ## IA, telemetria e replay
 
-O GDD já define os contratos para:
-
-- IA competitiva sujeita à mesma informação do jogador;
-- IA de QA separada da IA competitiva;
-- self-play headless usando o mesmo núcleo;
-- telemetria estruturada com seed, causalidade e hashes;
-- replay determinístico por dados, seed e comandos;
-- minimização, deduplicação e regressão permanente de bugs.
-
-Esses sistemas ainda não estão implementados.
+Os contratos já estão definidos no GDD, mas ainda não estão implementados. A IA competitiva deve respeitar a mesma informação do jogador; a IA de QA será separada, mas utilizará o mesmo núcleo e interface pública. Replays e telemetria deverão registrar seed, comandos, causalidade, aleatoriedade e hashes suficientes para reprodução determinística.
 
 ## Objetivo técnico
 
-O objetivo final é construir um protótipo que seja:
-
-- fiel ao GDD;
-- determinístico;
-- testável;
-- reproduzível;
-- orientado por dados;
-- visualmente validado;
-- jogável contra IA;
-- capaz de IA vs. IA;
-- capaz de self-play headless;
-- equipado com telemetria e replay;
-- protegido por testes de regressão;
-- capaz de caça automatizada a bugs;
-- publicável de forma reproduzível no GitHub Pages.
+Construir um protótipo que seja jogável, fiel ao GDD, determinístico, testável, reproduzível, orientado por dados, visualmente validado, jogável contra IA, capaz de IA vs. IA e self-play headless, equipado com telemetria/replay e publicável de forma reproduzível no GitHub Pages.
 
 ## Aviso
 
 Monster Impact é um projeto pessoal, não comercial e não oficial.
 
-Yu-Gi-Oh! e seus personagens, cartas, nomes e artes pertencem aos respectivos detentores de direitos. Este projeto não possui afiliação oficial com a Konami.
+Yu-Gi-Oh! e seus personagens, cartas, nomes e artes pertencem aos respectivos detentores de direitos. Este projeto não possui afiliação oficial com a Konami. Consulte também `THIRD_PARTY_NOTICES.md`.
