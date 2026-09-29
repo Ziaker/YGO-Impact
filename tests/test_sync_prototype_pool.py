@@ -51,9 +51,7 @@ def build_pool():
             next_id += 1
 
         for index in range(non_normal_quota + 8):
-            archetype = None
-            if index in (0, 1):
-                archetype = f"{race} Shared"
+            archetype = f"{race} Shared" if index in (0, 1) else None
             cards.append(
                 fake_card(
                     next_id,
@@ -66,7 +64,6 @@ def build_pool():
             )
             next_id += 1
 
-        # Há candidatos sem arquétipo suficientes e eles devem ser preferidos.
         for index in range(module.NORMAL_TARGET_PER_RACE + 5):
             cards.append(
                 fake_card(
@@ -79,12 +76,10 @@ def build_pool():
             )
             next_id += 1
 
-        # Duas cartas do mesmo arquétipo: no máximo uma poderia entrar.
         cards.append(fake_card(next_id, f"AAA {race} Archetype Normal A", "Normal Monster", race, level=3, archetype=f"{race} Named"))
         next_id += 1
         cards.append(fake_card(next_id, f"AAA {race} Archetype Normal B", "Normal Monster", race, level=3, archetype=f"{race} Named"))
         next_id += 1
-
         cards.append(fake_card(next_id, f"{race} Normal L1", "Normal Monster", race, level=1))
         next_id += 1
         cards.append(fake_card(next_id, f"{race} Normal L5", "Normal Monster", race, level=5))
@@ -114,14 +109,8 @@ class ExpandedPrototypePoolTests(unittest.TestCase):
         document = module.build_selection_document(selected)
         self.assertEqual(len(selected), 136)
         self.assertEqual(document["summary"]["monsters_total"], 106)
-        self.assertEqual(
-            document["summary"]["monsters_by_race"],
-            {"Beast": 25, "Fiend": 28, "Psychic": 25, "Spellcaster": 28},
-        )
-        self.assertEqual(
-            document["summary"]["normal_monsters_by_race"],
-            {"Beast": 10, "Psychic": 10, "Fiend": 10, "Spellcaster": 10},
-        )
+        self.assertEqual(document["summary"]["monsters_by_race"], {"Beast": 25, "Fiend": 28, "Psychic": 25, "Spellcaster": 28})
+        self.assertEqual(document["summary"]["normal_monsters_by_race"], {"Beast": 10, "Psychic": 10, "Fiend": 10, "Spellcaster": 10})
         self.assertEqual(document["summary"]["spells_total"], 20)
         self.assertEqual(document["summary"]["traps_total"], 10)
 
@@ -139,25 +128,23 @@ class ExpandedPrototypePoolTests(unittest.TestCase):
         document = module.build_selection_document(selected)
         self.assertEqual(document["summary"]["duplicated_named_archetypes"], {})
 
-    def test_non_archetype_candidates_are_preferred(self):
+    def test_non_archetype_candidates_are_preferred_for_general_slots(self):
         selected = module.select_prototype_pool(build_pool())
         normals = [card for card in selected if card.get("type") == "Normal Monster"]
         self.assertTrue(all(module.archetype_name(card) is None for card in normals))
 
-    def test_psychic_high_level_reservation_respects_unique_archetypes(self):
+    def test_psychic_high_level_reservation_uses_level_first_and_unique_archetypes(self):
         selected = module.select_prototype_pool(build_pool())
         document = module.build_selection_document(selected)
         reserved = document["summary"]["psychic_high_level_reserved"]
-        self.assertEqual([row["name"] for row in reserved], ["Psychic High 11", "Psychic High 10"])
-        self.assertEqual([row["level"] for row in reserved], [11, 10])
+        self.assertEqual([row["name"] for row in reserved], ["Psychic Duplicate A", "Psychic High 11"])
+        self.assertEqual([row["level"] for row in reserved], [12, 11])
+        self.assertEqual(reserved[0]["archetype"], "Shared Psychic")
 
     def test_rituals_remain_reserved_for_three_races(self):
         selected = module.select_prototype_pool(build_pool())
         document = module.build_selection_document(selected)
-        self.assertEqual(
-            document["summary"]["ritual_monsters_by_race"],
-            {"Beast": 1, "Psychic": 0, "Fiend": 1, "Spellcaster": 1},
-        )
+        self.assertEqual(document["summary"]["ritual_monsters_by_race"], {"Beast": 1, "Psychic": 0, "Fiend": 1, "Spellcaster": 1})
 
     def test_ritual_spells_remain_generic(self):
         selected = module.select_prototype_pool(build_pool())
