@@ -1,0 +1,15 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Monster Impact — VIS-002</title><link rel="stylesheet" href="styles.css"></head><body>
+<div class="app">
+<header><div><strong>MONSTER IMPACT · VIS-002</strong><small> mapa/câmera 2D + 3D</small></div><nav><button data-mode="2d" class="active">2D top-down</button><button data-mode="3d">3D tático</button><button data-mode="split">QA lado a lado</button></nav><div class="meta">31×17 · 20 Hz · hash <b id="hash">--------</b></div></header>
+<main><section class="stage">
+<div id="v2d" class="view active"><canvas id="c2d"></canvas><span class="label">2D · pan/zoom/foco</span><span class="hint">clique seleciona/move · arraste pan · roda zoom · <b>duplo clique no monstro: foco traseiro preparado</b></span></div>
+<div id="v3d" class="view"><canvas id="c3d"></canvas><span class="label">3D · câmera livre</span><span class="hint">arraste órbita · Shift/dir.+arraste pan · roda zoom · WASD · Q/E · ↑/↓ · <b>duplo clique: câmera atrás</b></span></div>
+<div id="vsplit" class="view split"><div><canvas id="c2s"></canvas><span class="label">QA · 2D</span></div><div><canvas id="c3s"></canvas><span class="label">QA · 3D</span></div></div>
+<div id="tests" class="tests"></div><div id="toast" class="toast"></div></section>
+<aside>
+<section><h2>Seleção</h2><div class="big" id="sel">P1-A</div><dl><dt>bloco</dt><dd id="pos">3,8</dd><dt>SPD</dt><dd id="spd">7</dd><dt>hover</dt><dd id="hover">—</dd><dt>prévia</dt><dd id="preview">—</dd></dl><div class="row"><button id="focus">focar</button><button id="cancel">cancelar</button></div></section>
+<section><h2>Câmera</h2><label>yaw <input id="yaw" type="range" min="-180" max="180" value="-35"></label><label>elevação <input id="pitch" type="range" min="20" max="80" value="48"></label><label>distância <input id="dist" type="range" min="9" max="75" value="37"></label><div id="cam" class="readout"></div><div class="row"><button id="preset">tático</button><button id="top">topo</button><button id="resetCam">reset</button></div></section>
+<section><h2>Visual / QA</h2><label class="check"><span>Fog</span><input id="fog" type="checkbox" checked></label><label class="check"><span>Campos</span><input id="fields" type="checkbox" checked></label><label class="check"><span>reduzir movimento</span><input id="reduced" type="checkbox"></label><div class="row"><button id="pause">pausar lógica</button><button id="reset">reset cenário</button><button id="run">testes</button></div><p>2D e 3D são projeções do mesmo estado plano. Câmera não altera regras nem hash.</p></section>
+<section class="logsec"><h2>Log</h2><div id="log" class="log"></div></section>
+</aside></main><footer>VIS-002 aprovado: 2D e 3D selecionáveis in-game · comparador lado a lado = QA · path local é apenas ensaio visual</footer>
+</div><script src="core.js"></script><script src="app.js"></script></body></html>
