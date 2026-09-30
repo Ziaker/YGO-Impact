@@ -105,6 +105,20 @@ A simulação continua em 20 Hz / 50 ms.
 - ao completar 160 ticks ociosos, aplica-se um pacote de +2, limitado por `SPD máximo`;
 - excedente é registrado como perdido.
 
+### 8.1 Feedback visual de recuperação
+
+Correção aprovada para legibilidade durante o experimento:
+
+- quando o processo de recuperação estiver ativo e a unidade estiver abaixo do SPD máximo, um **ícone de recuperação com contador regressivo inteiro** deve aparecer junto ao monstro;
+- o número mostra quantos segundos inteiros faltam para o próximo pacote de recuperação de SPD;
+- o contador deriva somente do estado lógico/timer já existente e é apresentação; ele não altera o timer, o hash ou a regra de recuperação;
+- quando a unidade alcançar o SPD máximo, o contador deve desaparecer;
+- quando um pacote de recuperação for efetivamente aplicado, surge rapidamente acima da unidade um pop-up **`+2SPD`**;
+- o pop-up é feedback visual transitório e não cria evento de gameplay adicional;
+- se o pacote efetivo for limitado pelo SPD máximo, a regra continua sendo a recuperação lógica já existente; a indicação visual permanece vinculada ao evento de pacote aplicado, sem permitir ultrapassar o máximo.
+
+Essa correção vale tanto no modo 2D quanto no 3D e não faz parte da comparação A/B/C de leitura de terreno/custo.
+
 ## 9. Movimento como Reação — harness, não Corrente completa
 
 A UI oferece:
@@ -134,15 +148,19 @@ O núcleo do experimento não marca uma unidade como “movida no turno”. Apó
 - execução é bloco a bloco;
 - custo da rota e estado de recuperação entram no estado/hash;
 - fixture QA de custo e janela/recurso de Reação entram no estado/hash porque alteram legalidade/custos do experimento;
-- escolha visual A/B/C, câmera e orientação não entram no hash;
+- escolha visual A/B/C, câmera, orientação, contador regressivo e pop-up `+2SPD` não entram no hash;
 - renderização continua separada da simulação fixa.
 
 ## 12. Evidência atual
 
-- `30/30` testes Node;
-- `30/30` testes embutidos;
-- `16/16` checks de interação em Chromium/Playwright;
+Após a correção de feedback visual da recuperação:
+
+- `31/31` testes Node;
+- `33/33` testes embutidos;
+- `18/18` checks de interação em Chromium/Playwright;
 - sem exceções JavaScript nos cenários automatizados;
+- contador regressivo e pop-up `+2SPD` exercitados em 2D e 3D;
+- inspeção visual confirma que o contador desaparece no SPD máximo e que o pop-up não altera estado/hash;
 - inspeção visual em 1440×900 confirma painel lateral rolável e preservação do campo 31×17.
 
 ## 13. Critérios para aprovação visual
@@ -153,6 +171,8 @@ O autor deve comparar A/B/C observando:
 - distinção inequívoca entre área alcançável e área de Campo/custo;
 - leitura em 2D e 3D;
 - capacidade de perceber que um destino levará SPD abaixo de zero;
+- contador de recuperação legível sem cobrir informação crítica;
+- pop-up `+2SPD` perceptível sem competir com o restante do HUD;
 - baixa poluição quando outros overlays futuros forem adicionados;
 - leitura em janela menor.
 
