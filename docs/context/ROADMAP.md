@@ -50,7 +50,8 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 - VIS-004 herda sem reabrir área cheia e seletor 2D/3D e testa três leituras de custo de terreno: A badge persistente, B custo somente no caminho e C mapa sutil/painel.
 - O valor de custo do Campo A é **fixture QA**, padrão 1, porque o GDD não estabelece um custo genérico universal de terreno. Valores maiores não constituem conteúdo/regra final.
 - O experimento já exerce impassáveis, GLIDER, entrada que pode levar SPD a negativo, bloqueio de novo movimento com SPD negativo, recuperação +2 após 8 s/160 ticks e harness de movimento como Reação (1 Reação + SPD) sem implementar Corrente completa.
-- Evidência atual de VIS-004: **30/30 testes Node, 30/30 embutidos e 16/16 checks reais em Chromium/Playwright**, sem exceções JavaScript.
+- Correção visual do VIS-004: unidade com recuperação ativa e abaixo do SPD máximo exibe **ícone com contador regressivo inteiro** até o próximo pacote; quando a recuperação ocorre, aparece rapidamente **`+2SPD`** acima da unidade. Esses elementos são apresentação e não alteram timer, regra ou hash.
+- Evidência atual de VIS-004: **31/31 testes Node, 33/33 embutidos e 18/18 checks reais em Chromium/Playwright**, sem exceções JavaScript.
 
 ### Artes e conteúdo
 
@@ -111,6 +112,7 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 - Não tratar a fixture de custo do Campo A de VIS-004 como valor canônico de terreno/cartas.
 - Não tratar o harness de Reação de VIS-004 como implementação completa de Corrente/Cross Chain.
 - Não marcar A/B/C de terreno do VIS-004 como aprovadas antes da escolha explícita do autor.
+- Não transformar contador de recuperação ou pop-up `+2SPD` em lógica autoritativa; são apenas feedback visual derivado do estado.
 - Não completar regras ausentes usando Yu-Gi-Oh! oficial.
 - Não tratar o scaffold do núcleo como jogo completo.
 - Não tratar pathfinding de protótipos como implementação final do núcleo.
