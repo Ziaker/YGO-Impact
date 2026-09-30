@@ -9,7 +9,7 @@ Este índice acompanha o inventário visual obrigatório do GDD v0.42. **Existir
 | VIS-001 | Composição do campo e HUD principal | HTML estático/interativo para alternância A/B/C + revisão melhorada | **Aprovado — versão melhorada pelo autor em 2026-09-29** | `VIS-001-hud-layout.md`; o executável A/B/C em `../../prototypes/visual-001-hud-layout/index.html` permanece como comparador histórico |
 | VIS-002 | Mapa, orientação 2D/3D e sistema de câmera | HTML interativo, 2D/3D sincronizados, câmera livre e foco traseiro | **Aprovado — 2D e 3D selecionáveis in-game** | `VIS-002-map-camera-2d-3d.md` + `../../prototypes/visual-002-map-camera-2d-3d/index.html` |
 | VIS-003 | Planejamento e movimento tático — Parte 1/5 | Protótipo executável com 2D/3D, planejamento, confirmação e execução bloco a bloco | **Aprovado — opção A (Área cheia)** | `VIS-003-movement-part1.md`; evidência validada em 25/25 Node, 25/25 embutidos e 14/14 Chromium/Playwright |
-| VIS-004 | Terreno, SPD e movimento avançado — Parte 2/5 | Protótipo executável em validação com custo ponderado, impassáveis, recuperação e harness de Reação | **Em teste — A/B/C de leitura de terreno aguardam aprovação** | `VIS-004-terrain-spd-movement.md`; evidência atual 30/30 Node, 30/30 embutidos e 16/16 Chromium/Playwright |
+| VIS-004 | Terreno, SPD e movimento avançado — Parte 2/5 | Protótipo executável em validação com custo ponderado, impassáveis, recuperação e harness de Reação | **Em teste — A/B/C de leitura de terreno aguardam aprovação** | `VIS-004-terrain-spd-movement.md`; evidência atual 31/31 Node, 33/33 embutidos e 18/18 Chromium/Playwright |
 
 ## VIS-001
 
@@ -81,6 +81,8 @@ Estado atual:
 - terreno impassável e GLIDER são exercitados;
 - entrada em terreno especial pode levar SPD a negativo quando a regra do GDD se aplica;
 - recuperação usa +2 após 8 s/160 ticks de ociosidade, com cap no máximo;
+- cada unidade abaixo do SPD máximo e com recuperação ativa exibe um contador regressivo inteiro até o próximo pacote de SPD;
+- quando um pacote é aplicado, aparece um pop-up rápido `+2SPD` acima da unidade; contador e pop-up são somente apresentação e ficam fora do hash;
 - movimento como Reação é exercitado por harness QA de 1 Reação + SPD, sem fingir implementar Corrente completa.
 
 ## Inventário ainda pendente
