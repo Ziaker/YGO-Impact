@@ -4,14 +4,17 @@ Esta pasta concentra o GDD e documentos normativos do Monster Impact.
 
 ## GDD atual
 
-O GDD-base do primeiro protótipo é a versão **0.42**, com 25/25 fases concluídas e nenhuma pendência P0 ativa.
+O GDD-base do primeiro protótipo é a versão **0.43**, com 25/25 fases concluídas e nenhuma pendência P0 ativa.
 
-`GDD_SOURCE.md` fixa o nome, a versão e o SHA-256 do arquivo canônico fornecido pelo autor e efetivamente lido. O binário `.docx` ainda precisa ser incorporado preservando exatamente seus bytes e hash.
+A revisão 0.43 registra como decisão normativa que **commits necessários para executar tarefas solicitadas pelo autor estão permanentemente autorizados no projeto YGO Impact e não exigem nova confirmação**. Essa autorização permanente não inclui automaticamente push, Pull Request, merge, publicação, release ou deploy.
+
+`GDD_SOURCE.md` fixa o nome, a versão e o SHA-256 do arquivo canônico efetivamente revisado. O binário `.docx` revisado ainda precisa ser incorporado ao Git preservando exatamente seus bytes e hash.
 
 ## Decisões versionadas
 
 - `ADR-001-core-runtime.md`: decisão arquitetural do runtime/núcleo.
 - `DEC-001-initial-card-pool.md`: política automática atual do pool inicial, com **136 cartas** (106 monstros, 20 Magias e 10 Armadilhas), quatro RACE ativas e cotas específicas.
+- `DEC-002-pre-2005-library-expansion.md`: expansão adicional da biblioteca de cartas, incluindo a exceção Psychic aprovada pelo autor.
 - `ROADMAP.md`: estado técnico e ordem das próximas entregas.
 
 ### Estado do snapshot de seleção
