@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Blue Dragon Summoner
+ID: 55969226
+RACE: Spellcaster
+Nível: 4
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+If this card is sent from the field to the GY: You can add 1 Dragon, Warrior, or Spellcaster Normal Monster from your Deck to your hand.

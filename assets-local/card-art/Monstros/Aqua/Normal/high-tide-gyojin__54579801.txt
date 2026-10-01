@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: High Tide Gyojin
+ID: 54579801
+Categoria: Monstro
+Tipo da API: Normal Monster
+RACE: Aqua
+Nível: 4
+Tipo Monster Impact: Normal
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+A very agile half-fish warrior known for its relentless attacks.

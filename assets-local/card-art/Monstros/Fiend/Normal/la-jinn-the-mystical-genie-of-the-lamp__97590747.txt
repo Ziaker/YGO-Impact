@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: La Jinn the Mystical Genie of the Lamp
+ID: 97590747
+Categoria: Monstro
+Tipo da API: Normal Monster
+RACE: Fiend
+Nível: 4
+Tipo Monster Impact: Normal
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+A genie of the lamp that is at the beck and call of its master.

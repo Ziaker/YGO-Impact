@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Bearblocker
+ID: 80141055
+RACE: Fiend
+Nível: 3
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+During your opponent's turn, Set cards in your Spell & Trap Zones cannot be destroyed by card effects. If a Set card(s) in your Spell & Trap Zone is destroyed by an opponent's card effect: This card gains 800 ATK until the end of this turn.

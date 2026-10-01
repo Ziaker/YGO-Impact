@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Hushed Psychic Minister
+ID: 36218106
+RACE: Psychic
+Nível: 3
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+If you control a Psychic monster other than "Hushed Psychic Minister", you can Special Summon this card (from your hand) in Defense Position. You can only Special Summon "Hushed Psychic Minister" once per turn this way. You can banish this card and 1 Psychic monster from your GY, then target 1 face-up monster on the field; banish it until the End Phase. You can only use this effect of "Hushed Psychic Minister" once per turn.

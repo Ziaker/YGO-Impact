@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Blizzard Princess
+ID: 28348537
+RACE: Spellcaster
+Nível: 8
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+You can Tribute Summon this card in face-up Attack Position by Tributing 1 Spellcaster-Type monster. After this card was Normal Summoned, your opponent cannot activate Spell/Trap Cards for the rest of that turn.

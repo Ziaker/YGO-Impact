@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: M-Warrior #1
+ID: 56342351
+Categoria: Monstro
+Tipo da API: Normal Monster
+RACE: Warrior
+Nível: 3
+Tipo Monster Impact: Normal
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+Specializing in combination attacks, this warrior uses magnetism to block an enemy's escape.

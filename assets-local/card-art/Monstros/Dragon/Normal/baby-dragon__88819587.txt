@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Baby Dragon
+ID: 88819587
+Categoria: Monstro
+Tipo da API: Normal Monster
+RACE: Dragon
+Nível: 3
+Tipo Monster Impact: Normal
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+Much more than just a child, this dragon is gifted with untapped power.

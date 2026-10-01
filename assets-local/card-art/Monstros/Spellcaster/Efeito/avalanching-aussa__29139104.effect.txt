@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Avalanching Aussa
+ID: 29139104
+RACE: Spellcaster
+Nível: 4
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+Once per turn, you can Tribute 1 EARTH monster (except this card) to Special Summon 1 EARTH monster from your hand. The monster Special Summoned by this effect is destroyed if "Avalanching Aussa" is removed from your side of the field.

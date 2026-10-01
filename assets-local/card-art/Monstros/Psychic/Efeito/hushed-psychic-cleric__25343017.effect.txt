@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Hushed Psychic Cleric
+ID: 25343017
+RACE: Psychic
+Nível: 3
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+If this card is Normal or Flip Summoned: Change it to Defense Position. Once per turn: You can send 1 card from your hand to the Graveyard, then target 1 Psychic-Type monster in your Graveyard; banish that target. If this card is sent from the field to the Graveyard: Target 1 monster banished by this card's effect; Special Summon that target.

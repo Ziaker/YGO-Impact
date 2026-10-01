@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Ancient Crimson Ape
+ID: 50781944
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Beast
+Nível: 7
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+When a monster(s) you control is destroyed and sent to the Graveyard, gain 1000 Life Points.

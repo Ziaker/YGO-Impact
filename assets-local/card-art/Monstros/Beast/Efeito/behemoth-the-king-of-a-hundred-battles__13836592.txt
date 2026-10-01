@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Behemoth the King of a Hundred Battles
+ID: 13836592
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Beast
+Nível: 10
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+You can Tribute Summon this card by Tributing 1 monster. This card is unaffected by the activated effects of Special Summoned monsters if it was Normal Summoned/Set. If this card is Normal or Special Summoned: You can target 1 Beast, Beast-Warrior, or Winged Beast monster in your GY; add it to your hand, and if you do, this card loses 700 ATK. Once per turn, during your End Phase: You can make this card gain 700 ATK.

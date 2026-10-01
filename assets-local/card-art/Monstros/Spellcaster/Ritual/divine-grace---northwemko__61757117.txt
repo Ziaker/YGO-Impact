@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Divine Grace - Northwemko
+ID: 61757117
+Categoria: Monstro
+Tipo da API: Ritual Effect Monster
+RACE: Spellcaster
+Nível: 7
+Tipo Monster Impact: Ritual
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+This card can only be Ritual Summoned with the Ritual Spell Card, "Ritual of Grace". When this card is Ritual Summoned, select a number of face-up cards on the field (except this card), up to the number of monsters you used for the Ritual Summon. While any of the selected cards are face-up on the field, this card cannot be destroyed by card effects.

@@ -1,0 +1,19 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Hypnosister
+ID: 22200403
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Psychic
+Nível: 4
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+This card gains effects based on the total number of cards in both players' Pendulum Zones.
+● 1 or more: This card gains 800 ATK and DEF.
+● 2 or more: At the start of the Damage Step, if this card battles a Pendulum Summoned monster: Destroy that monster.
+● 3 or more: Monsters your opponent controls must attack this card, if able.
+● 4: If this card destroys a monster by battle or by its own effect: Draw 1 card.

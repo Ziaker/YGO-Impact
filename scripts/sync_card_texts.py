@@ -71,15 +71,83 @@ def main(argv: Sequence[str] | None = None) -> int:
             catalog_lookup = {int(c["id"]): c for c in all_catalog if "id" in c and str(c["id"]).isdigit()}
         except Exception:
             catalog_lookup = {}
-        for card_id, paths in arts.items():
-            card = catalog_lookup.get(card_id) or fetch(card_id, timeout=args.timeout, retries=args.retries); text = render(card); payload = text.encode("utf-8"); digest = hashlib.sha256(payload).hexdigest()
-            for art in paths:
-                txt = art.with_suffix(".txt"); planned += 1
-                if args.dry_run: print(f"PLAN {txt.as_posix()}"); continue
-                base.write_atomic(args.root / txt, payload); files[txt.as_posix()] = {"kind": REFERENCE_KIND, "card_id": card_id, "name": str(card.get("name", "")), "api_type": str(card.get("type", "")), "race": str(card.get("race", "")), "level": card.get("level") if str(card.get("type", "")) not in {"Spell Card", "Trap Card"} else None, "source": "YGOPRODeck cardinfo.desc", "paired_art": art.as_posix(), "sha256": digest, "bytes": len(payload)}; written += 1; print(f"OK   {txt.as_posix()}")
-        if not args.dry_run:
-            manifest["card_reference_summary"] = {"cards": len(arts), "reference_files": planned, "policy": "one-txt-per-jpg-all-card-categories"}; base.save_manifest(args.root / "manifest.json", manifest)
-        print(f"Referências {'planejadas' if args.dry_run else 'sincronizadas'}: {planned if args.dry_run else written}"); return 0
-    except (CardTextError, base.DownloaderError, OSError, ValueError) as exc: print(f"ERRO: {exc}", file=sys.stderr); return 1
+        # Load selection lookup as fallback
+        selection_path = args.root / "selection.json"
+        selection_lookup = {}
+        if selection_path.exists():
+            try:
+                for row in json.loads(selection_path.read_text(encoding="utf-8")).get("cards", []):
+                    if "id" in row:
+                        selection_lookup[int(row["id"])] = row
+            except Exception:
+                pass
 
-if __name__ == "__main__": raise SystemExit(main())
+        for card_id, paths in arts.items():
+            card = catalog_lookup.get(card_id)
+            if not card and card_id in selection_lookup:
+                sel_row = selection_lookup[card_id]
+                card = {
+                    "id": card_id,
+                    "name": sel_row.get("name", ""),
+                    "type": sel_row.get("api_type", "Normal Monster"),
+                    "race": sel_row.get("race", ""),
+                    "level": sel_row.get("level", 1),
+                    "desc": sel_row.get("desc") or "Normal Monster",
+                }
+            for art in paths:
+                txt = art.with_suffix(".txt")
+                txt_full = args.root / txt
+                if txt_full.exists():
+                    payload = txt_full.read_bytes()
+                    digest = hashlib.sha256(payload).hexdigest()
+                    cname = str(card.get("name") if card else txt.stem.split("__")[0])
+                    files[txt.as_posix()] = {
+                        "kind": REFERENCE_KIND,
+                        "card_id": card_id,
+                        "name": cname,
+                        "api_type": str(card.get("type", "Normal Monster") if card else "Normal Monster"),
+                        "race": str(card.get("race", "") if card else ""),
+                        "level": card.get("level") if card and str(card.get("type", "")) not in {"Spell Card", "Trap Card"} else None,
+                        "source": "YGOPRODeck cardinfo.desc",
+                        "paired_art": art.as_posix(),
+                        "sha256": digest,
+                        "bytes": len(payload),
+                    }
+                    written += 1
+                    planned += 1
+                    continue
+                if not card:
+                    card = fetch(card_id, timeout=args.timeout, retries=args.retries)
+                text = render(card)
+                payload = text.encode("utf-8")
+                digest = hashlib.sha256(payload).hexdigest()
+                planned += 1
+                if args.dry_run:
+                    print(f"PLAN {txt.as_posix()}")
+                    continue
+                base.write_atomic(txt_full, payload)
+                files[txt.as_posix()] = {
+                    "kind": REFERENCE_KIND,
+                    "card_id": card_id,
+                    "name": str(card.get("name", "")),
+                    "api_type": str(card.get("type", "")),
+                    "race": str(card.get("race", "")),
+                    "level": card.get("level") if str(card.get("type", "")) not in {"Spell Card", "Trap Card"} else None,
+                    "source": "YGOPRODeck cardinfo.desc",
+                    "paired_art": art.as_posix(),
+                    "sha256": digest,
+                    "bytes": len(payload),
+                }
+                written += 1
+                print(f"OK   {txt.as_posix()}")
+        if not args.dry_run:
+            manifest["card_reference_summary"] = {"cards": len(arts), "reference_files": planned, "policy": "one-txt-per-jpg-all-card-categories"}
+            base.save_manifest(args.root / "manifest.json", manifest)
+        print(f"Referências {'planejadas' if args.dry_run else 'sincronizadas'}: {planned if args.dry_run else written}")
+        return 0
+    except (CardTextError, base.DownloaderError, OSError, ValueError) as exc:
+        print(f"ERRO: {exc}", file=sys.stderr)
+        return 1
+
+if __name__ == "__main__":
+    raise SystemExit(main())

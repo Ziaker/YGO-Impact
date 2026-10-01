@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Mystical Shine Ball
+ID: 39552864
+Categoria: Monstro
+Tipo da API: Normal Monster
+RACE: Fairy
+Nível: 2
+Tipo Monster Impact: Normal
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+A soul of light covered by mystical shine. When you see its beautiful shape, your dream will come true.

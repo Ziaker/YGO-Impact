@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Battle Fader
+ID: 19665973
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Fiend
+Nível: 1
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+When an opponent's monster declares a direct attack: You can Special Summon this card from your hand, then end the Battle Phase. If Summoned this way, banish it when it leaves the field.

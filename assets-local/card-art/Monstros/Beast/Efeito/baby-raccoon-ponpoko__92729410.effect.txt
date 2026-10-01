@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Baby Raccoon Ponpoko
+ID: 92729410
+RACE: Beast
+Nível: 2
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+When this card is Normal Summoned: You can Special Summon 1 Level 2 Beast-Type monster from your Deck in face-down Defense Position, except "Baby Raccoon Ponpoko". You cannot Special Summon any monsters during the turn you activate this effect, except Beast-Type monsters.

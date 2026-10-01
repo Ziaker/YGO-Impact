@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Leafplace Plaice
+ID: 50599453
+RACE: Psychic
+Nível: 3
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+Gains 200 ATK/DEF for each card in your opponent's GY. During your Standby Phase, if this card is in your hand or GY and your opponent has more cards in their GY than you: You can Special Summon this card. You can only use this effect of "Leafplace Plaice" once per turn.

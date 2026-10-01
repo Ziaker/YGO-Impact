@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Bomber Place
+ID: 71750854
+RACE: Spellcaster
+Nível: 6
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+Once per Chain (Quick Effect): You can pay 600 LP, then activate 1 of these effects;
+● If you control 6 monsters with different Levels (1, 2, 3, 4, 5, and 6): Choose 1 face-up monster your opponent controls with a Level, and destroy all other monsters your opponent controls with the same Level/Rank/Link Rating as that monster.
+● Choose 1 face-up monster you control with a Level, and destroy all of your opponent's monsters in the same column with the same Level/Rank/Link Rating as that monster.

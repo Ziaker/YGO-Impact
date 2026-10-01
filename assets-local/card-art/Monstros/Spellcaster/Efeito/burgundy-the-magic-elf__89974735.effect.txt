@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Burgundy the Magic Elf
+ID: 89974735
+RACE: Spellcaster
+Nível: 4
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+If a card(s) is discarded from your opponent's hand by card effect (except during the Damage Step): You can inflict 400 damage to your opponent for each card discarded. When this card is destroyed by battle and sent to the GY: You can discard 1 random card from your opponent's hand. You can only use each effect of "Burgundy the Magic Elf" once per turn.

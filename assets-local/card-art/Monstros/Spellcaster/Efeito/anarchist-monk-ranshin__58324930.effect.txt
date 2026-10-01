@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Anarchist Monk Ranshin
+ID: 58324930
+RACE: Spellcaster
+Nível: 4
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+When this card you control is sent to your Graveyard by your opponent's card (either by battle, by card effect, or by being destroyed): Target 1 monster in your opponent's Graveyard; banish that target.

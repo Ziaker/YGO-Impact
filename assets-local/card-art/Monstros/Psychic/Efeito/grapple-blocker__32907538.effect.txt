@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Grapple Blocker
+ID: 32907538
+RACE: Psychic
+Nível: 4
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+When this card is Normal Summoned, you can select 1 monster your opponent controls. The selected monster cannot attack or be Tributed, while this card remains face-up on the field. During each of your End Phases, pay 500 Life Points or destroy this card.

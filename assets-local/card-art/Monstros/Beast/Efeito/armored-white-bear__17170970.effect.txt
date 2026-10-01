@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Armored White Bear
+ID: 17170970
+RACE: Beast
+Nível: 4
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+If this card is Normal or Special Summoned while a Synchro Monster is on the field: You can target 1 Field Spell in your GY; add it to your hand. If this card is destroyed by battle and sent to the GY, or if this card in your possession is destroyed by an opponent's card effect and sent to your GY: You can Special Summon 1 Level 4 or lower Beast monster from your Deck or GY, except "Armored White Bear". You can only use each effect of "Armored White Bear" once per turn.

@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Robbarim
+ID: 897145
+Categoria: Monstro
+Tipo da API: Normal Monster
+RACE: Psychic
+Nível: 2
+Tipo Monster Impact: Normal
+Fonte do texto: RushCard API
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+Normal Monster

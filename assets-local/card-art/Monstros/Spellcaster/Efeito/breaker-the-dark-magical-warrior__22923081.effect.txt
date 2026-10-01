@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DE EFEITO
+
+Nome: Breaker the Dark Magical Warrior
+ID: 22923081
+RACE: Spellcaster
+Nível: 6
+Tipo da API: Effect Monster
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: este texto vem da carta-fonte e não define automaticamente o efeito, custo, alvo, timing, Corrente ou qualquer outra regra no Monster Impact. O GDD e o conteúdo aprovado do projeto prevalecem.
+
+EFEITO / DESCRIÇÃO DA CARTA-FONTE:
+If this card is Normal Summoned: Place 2 Spell Counters on it. If this card is Pendulum Summoned: Place 3 Spell Counters on it. Gains 400 ATK for each Spell Counter on it. You can remove 1 Spell Counter from this card, then target 1 Spell/Trap on the field; destroy it. You can only use this effect of "Breaker the Dark Magical Warrior" once per turn.

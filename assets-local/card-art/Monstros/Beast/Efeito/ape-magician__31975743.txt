@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Ape Magician
+ID: 31975743
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Beast
+Nível: 3
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+Cannot be Special Summoned. Once per turn, if this card is in face-up Attack Position: You can send 1 monster from your hand to the Graveyard to target 1 face-up Defense Position monster your opponent controls; take control of it until the End Phase. It cannot change its battle position this turn.

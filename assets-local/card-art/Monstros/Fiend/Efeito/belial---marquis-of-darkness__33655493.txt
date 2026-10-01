@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Belial - Marquis of Darkness
+ID: 33655493
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Fiend
+Nível: 8
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+Your opponent cannot target any face-up monster you control, except "Belial - Marquis of Darkness", for an attack, or with Spell/Trap effects.

@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Dr. Frankenderp
+ID: 27995943
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Psychic
+Nível: 3
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+If this card is Normal or Special Summoned: You can pay 500 LP; look at the top card of your Deck, then place it on the bottom of your Deck, OR reveal it and add it to your hand, but skip your next Draw Phase if added to the hand. You can only use this effect of "Dr. Frankenderp" once per turn.
