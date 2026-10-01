@@ -19,8 +19,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Compile downloader
-        run: python -m py_compile scripts/baixar_artes.py
+      - name: Compile Python tools
+        run: python -m py_compile scripts/baixar_artes.py scripts/sync_prototype_pool.py scripts/sync_prototype_pool_curated.py scripts/verify_context_sources.py
+
+      - name: Verify canonical project sources
+        run: python scripts/verify_context_sources.py
 
       - name: Run Python tests
         run: python -m unittest discover -s tests -p "test_*.py" -v

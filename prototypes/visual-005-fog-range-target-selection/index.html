@@ -1,0 +1,2172 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Monster Impact — VIS-005 · VIS compartilhada, Fog of War, alcance e seleção de alvos</title>
+  <style>
+:root{
+  color-scheme:dark;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --bg:#070b10;--panel:#0f1821;--panel2:#15222d;--line:#2d4355;--ink:#edf5fb;--muted:#8ea2b4;
+  --accent:#e6c468;--good:#78dca7;--bad:#ff8585;--warn:#ffd083;--p1:#4d9eea;--p2:#d95c6b;
+  --fog-a:#060d15;--target:#ff6b6b;--range:#f59e0b;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:radial-gradient(circle at 50% -15%,#20364a 0,#0a1118 34%,#070b10 70%);color:var(--ink);overflow:hidden}
+button,input{font:inherit}
+button{color:inherit}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+.topbar{display:flex;gap:10px;align-items:center;padding:8px 12px;background:#071019ef;border-bottom:1px solid var(--line);backdrop-filter:blur(12px);z-index:20}
+.brand{font-weight:900;letter-spacing:.07em;white-space:nowrap}
+.tag{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 7px;white-space:nowrap}
+.tag.exp{border-color:#e6c468;color:#f0d57c}
+.nav,.buttonrow,.styles{display:flex;gap:6px;flex-wrap:wrap}
+.nav button,.btn,.stylebtn,.fogStyleBtn{cursor:pointer;background:#13212d;border:1px solid var(--line);border-radius:6px;padding:6px 9px;transition:background .12s,border-color .12s}
+.nav button:hover,.btn:hover,.stylebtn:hover,.fogStyleBtn:hover{background:#1a2b39}
+.nav button.active,.stylebtn.active,.fogStyleBtn.active,.btn.primary{outline:2px solid var(--accent);background:#1d2f3d}
+.btn[disabled]{opacity:.42;cursor:not-allowed;outline:none}
+.btn.small,.stylebtn,.fogStyleBtn{font-size:10px;padding:4px 7px}
+.fogStyleBtn.active{outline:2px solid #5ce6b0;background:#163228}
+.topmeta{margin-left:auto;font-size:11px;color:var(--muted);display:flex;gap:10px;align-items:center;white-space:nowrap}
+.topmeta b{color:var(--ink)}
+.workspace{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:8px;padding:8px}
+.stage{position:relative;min-width:0;min-height:0;border:1px solid var(--line);border-radius:9px;background:#04080d;overflow:hidden;box-shadow:0 18px 50px #0007}
+.view{position:absolute;inset:0;display:none}
+.view.active{display:block}
+.view.split.active{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+.half{position:relative;min-width:0;overflow:hidden;background:#05090e}
+.view canvas,.half canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;user-select:none;outline:none}
+.viewlabel,.statuspill{position:absolute;z-index:4;font-size:10px;background:#071019dc;border:1px solid var(--line);padding:4px 7px;pointer-events:none}
+.viewlabel{top:9px;left:9px;border-radius:4px;letter-spacing:.08em;text-transform:uppercase;color:#cbd8e2}
+.statuspill{right:9px;top:9px;border-radius:99px;border-color:#2d8b62;color:#8ee2b3}
+.reducedInfoBanner{position:absolute;top:38px;left:9px;z-index:4;font-size:9.5px;font-weight:750;background:#2c1f10ee;border:1px solid #c98836;border-radius:4px;padding:3px 7px;color:#ffd182;display:none;pointer-events:none}
+.reducedInfoBanner.show{display:block}
+.cameraHint{position:absolute;left:10px;bottom:10px;z-index:4;max-width:min(690px,78%);background:#071019df;border:1px solid var(--line);border-radius:7px;padding:6px 8px;font-size:9px;line-height:1.55;color:#adbdc9;pointer-events:none}
+.cameraHint b{color:#eef5fa}
+.kbd{border:1px solid #405365;border-bottom-width:2px;border-radius:3px;padding:1px 4px;color:#d1dde7;background:#101a23;white-space:nowrap}
+.crosshair{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px;z-index:3;pointer-events:none;opacity:.42}
+.crosshair:before,.crosshair:after{content:"";position:absolute;background:#d7e4ed}
+.crosshair:before{left:6px;top:0;width:1px;height:14px}
+.crosshair:after{top:6px;left:0;height:1px;width:14px}
+.side{display:flex;flex-direction:column;overflow-y:auto;min-height:0;padding-right:2px;gap:8px}
+.side>.panel{flex:0 0 auto}
+.side>.logpanel{min-height:170px;flex:1 0 170px}
+.panel{background:linear-gradient(180deg,#131f29,#0e171f);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.panel h2{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:#a9b8c5;margin:0;padding:7px 9px;border-bottom:1px solid #263b4b}
+.panelbody{padding:8px;font-size:11px;line-height:1.46}
+.big{font-size:17px;font-weight:850}
+.kv{display:grid;grid-template-columns:1fr auto;gap:2px 10px}
+.kv span:nth-child(odd){color:var(--muted)}
+.coord{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.good{color:var(--good)}
+.bad{color:var(--bad)}
+.warn{color:var(--warn)}
+.muted{color:var(--muted)}
+.help{color:var(--muted);font-size:9.5px;line-height:1.48;margin-top:6px}
+.sectionSep{height:1px;background:#263b4b;margin:8px -8px}
+.toggle,.control{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0}
+.toggle input{accent-color:var(--accent)}
+.range{width:145px}
+.readout{margin-top:6px;padding:6px;border:1px solid #294052;border-radius:6px;background:#0a1219;font-size:9.5px;color:#9fb0be}
+.readout b{color:#dbe7ef}
+.planbox{margin-top:7px;padding:7px;border:1px solid #314b5e;border-radius:7px;background:#09131b;transition:border-color .15s}
+.planbox.legality-legal{border-color:#387a58}
+.planbox.legality-consequence{border-color:#a87d2b;background:#181409}
+.planbox.legality-illegal{border-color:#8d3f3f;background:#1a0c0c}
+.planstatus{font-weight:850;letter-spacing:.04em;display:flex;align-items:center;gap:6px}
+.legalityBadge{display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:4px;font-size:9.5px;font-weight:850;text-transform:uppercase}
+.legalityBadge.legal{background:#153825;color:#85f0b5;border:1px solid #2c774d}
+.legalityBadge.consequence{background:#3b2a0c;color:#ffd083;border:1px solid #8e6824}
+.legalityBadge.illegal{background:#3b1414;color:#ff9b9b;border:1px solid #822e2e}
+
+/* Target Legality Badges */
+.targetBadge{display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:4px;font-size:9.5px;font-weight:850;text-transform:uppercase}
+.targetBadge.legal{background:#1b3822;color:#78dca7;border:1px solid #2d7a46}
+.targetBadge.blocked{background:#3a1818;color:#ff8585;border:1px solid #7c2b2b}
+.targetBadge.outOfRange{background:#262a33;color:#9eb3c7;border:1px solid #415163}
+.targetBadge.inFog{background:#1a1926;color:#baa7f5;border:1px solid #4d3a82}
+
+/* Combat Forecast Box */
+.combatBox{margin-top:7px;padding:7px;border:1px solid #3d4f61;border-radius:7px;background:#0b131c}
+.combatBoxHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-weight:850;font-size:10px}
+.combatStatsGrid{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;margin-top:4px;background:#060d14;padding:6px;border-radius:5px;border:1px solid #1a2836}
+.combatantCol{display:flex;flex-direction:column;gap:1px}
+.combatantCol b{font-size:12px}
+.combatantCol span{font-size:9px;color:var(--muted)}
+.combatVs{font-size:11px;font-weight:900;color:#e6c468;text-align:center}
+.combatDamageRow{margin-top:5px;padding-top:4px;border-top:1px dashed #243545;font-size:10px;line-height:1.4}
+
+.log{height:100%;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9.3px;padding:7px 8px}
+.log div{padding:2px 0;border-bottom:1px dotted #24313d}
+.log .error{color:#ff9b9b}
+.log .pass{color:#91e4b6}
+.log .camera{color:#9ecaff}
+.log .command{color:#f2d77f}
+.log .combat{color:#ff9e7d}
+.footer{display:flex;gap:14px;align-items:center;padding:6px 10px;background:#071019;border-top:1px solid var(--line);font-size:10px;color:var(--muted)}
+.footer b{color:#dce8f1}
+.footer .grow{margin-left:auto}
+.modal{position:absolute;inset:auto 10px 10px 10px;max-height:65%;overflow:auto;background:#071019f7;border:1px solid var(--line);border-radius:8px;padding:9px;z-index:30;display:none;box-shadow:0 12px 40px #000a}
+.modal.show{display:block}
+.testrow{display:grid;grid-template-columns:18px 1fr;gap:6px;padding:3px 0;font-size:10px}
+.testrow.pass{color:#9be2bb}
+.testrow.fail{color:#ff9b9b}
+.testsummary{font-weight:800;margin-bottom:5px}
+.toast{position:absolute;top:48px;left:50%;transform:translateX(-50%);z-index:25;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:#071019ec;font-size:10px;color:#d8e4ed;opacity:0;pointer-events:none;transition:opacity .15s}
+.toast.show{opacity:1}
+
+/* Move action bar */
+.moveActionBar{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);z-index:13;display:none;align-items:center;gap:12px;min-width:min(640px,calc(100% - 24px));max-width:780px;padding:8px 12px;border:1px solid #54738a;border-radius:9px;background:#071019f2;box-shadow:0 12px 32px #0009;backdrop-filter:blur(10px)}
+.moveActionBar.show{display:flex}
+.moveActionText{display:flex;flex-direction:column;min-width:0;flex:1}
+.moveActionText b{font-size:11px;display:flex;align-items:center;gap:6px}
+.moveActionText span{font-size:9.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.moveActionBar.legality-legal{border-color:#387a58}
+.moveActionBar.legality-consequence{border-color:#c99335}
+.moveActionBar.legality-consequence .moveActionText b{color:#ffd083}
+.moveActionBar.legality-illegal{border-color:#9b5555}
+.moveActionBar.legality-illegal .moveActionText b{color:var(--bad)}
+
+/* Contextual floating tooltip / card */
+.contextTooltip{position:absolute;z-index:20;background:#071019f7;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:10px;color:var(--ink);box-shadow:0 10px 32px #000c;pointer-events:none;max-width:290px;line-height:1.42;display:none;backdrop-filter:blur(8px)}
+.contextTooltip.show{display:block}
+.contextTooltipHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid #243545}
+.contextTooltipBody{display:flex;flex-direction:column;gap:3px}
+.contextTooltipStats{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:2px;background:#0e1720;padding:4px 6px;border-radius:4px;border:1px solid #1e2e3d}
+.contextTooltipNote{color:#ffd083;font-size:9px;margin-top:3px;padding:2px 4px;background:#2d210c;border-radius:3px;border-left:2px solid #e5a435}
+.contextTooltipReaction{color:#8ed1fc;font-size:9px;margin-top:2px}
+
+/* Collapsible Floating Legend */
+.collapsibleLegend{position:absolute;right:10px;bottom:10px;z-index:12;background:#071019f2;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:9.5px;max-width:320px;backdrop-filter:blur(8px);box-shadow:0 8px 24px #0008}
+.legendHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;font-weight:800;color:#c8d7e3}
+.legendHeader:hover{color:#fff}
+.legendContent{display:grid;grid-template-columns:auto 1fr;gap:3px 7px;margin-top:6px}
+.legendContent.collapsed{display:none}
+.swatch{width:14px;height:10px;border-radius:2px;margin-top:2px;border:1px solid #ffffff55}
+.sReach{background:#4d9eea55}
+.sRng{background:#f59e0b55}
+.sTarget{background:#78dca7}
+.sBlocked{background:#ff6b6b}
+.sFog{background:#060d15}
+.sGhost{background:repeating-linear-gradient(45deg,#2b3238,#2b3238 2px,#708291 2px,#708291 4px)}
+.sPath{background:#e6c468}
+.sAlly{background:#66c4ff66}
+.sEnemy{background:#d95c6b66}
+.sBase{background:#c9a34e}
+
+/* Terrain styles */
+.terrainStyleBtn{cursor:pointer;background:#13212d;border:1px solid var(--line);border-radius:6px;padding:4px 7px;font-size:10px;color:inherit}
+.terrainStyleBtn.active{outline:2px solid #a98cf2;background:#29213a}
+.warningBox{padding:6px 7px;border:1px solid #8b6e3d;border-radius:6px;background:#2c2415;color:#f2d691;font-size:9px;line-height:1.4;margin-bottom:7px}
+.negativeSpd{color:#ff8585!important;font-weight:850}
+.mobilityCard{background:#0a131b;border:1px solid #233748;border-radius:6px;padding:6px;margin-top:6px;font-size:9.5px;line-height:1.4}
+.mobilityCard b{color:#e3eef6}
+
+@media(max-width:1120px){.workspace{grid-template-columns:minmax(0,1fr) 310px}.range{width:115px}.topmeta .hide-small{display:none}}
+@media(max-width:860px){
+  body{overflow:auto}.app{min-height:1120px}.workspace{grid-template-columns:1fr;grid-template-rows:600px auto}
+  .side{display:flex!important;overflow:visible}.side>.logpanel{min-height:190px}
+  .topbar{flex-wrap:wrap}.topmeta{margin-left:0;width:100%}.view.split.active{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
+  .cameraHint{max-width:92%}
+  .moveActionBar{position:fixed;left:10px;right:10px;bottom:10px;transform:none;min-width:0;max-width:none}
+  .moveActionBar .buttonrow{flex-wrap:nowrap}.moveActionBar .btn.primary{white-space:nowrap}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand">MONSTER IMPACT · VIS-005</div><span class="tag exp">Parte 3/5 · VIS compartilhada + Fog + Alcance + Alvos</span>
+  <nav class="nav" aria-label="Orientação"><button data-view="2d" class="active">2D</button><button data-view="3d">3D</button><button data-view="qa">QA 2D+3D</button></nav>
+  <div class="topmeta"><span>Mapa <b>31×17</b></span><span class="hide-small">Simulação <b>20 Hz</b></span><span>Hash <b id="hashTop" class="coord">--------</b></span></div>
+</header>
+<main class="workspace"><section class="stage" id="stage">
+  <div id="view2d" class="view active"><canvas id="canvas2d" tabindex="0"></canvas><div class="viewlabel">2D · VIS COMPARTILHADA + FOG</div><div class="statuspill">VIS-004 + VIS-003 herdados</div><div class="cameraHint"><b>Controles:</b> Clique no bloco para travar rota · Enter confirma · duplo clique move · arraste faz pan · roda zoom. (Atalho auxiliar QA: <span class="kbd">Setas ↑ ↓ ← →</span>).</div></div>
+  <div id="view3d" class="view"><canvas id="canvas3d" tabindex="0"></canvas><div class="viewlabel">3D · VIS COMPARTILHADA + FOG</div><div class="statuspill">mesmo estado autoritativo</div><div class="crosshair"></div><div class="cameraHint"><b>Controles:</b> Clique no bloco para travar · duplo clique move · arraste = órbita · Shift+arraste = pan · roda = zoom. (Atalho auxiliar QA: <span class="kbd">Setas ↑ ↓ ← →</span>).</div></div>
+  <div id="viewQA" class="view split"><div class="half"><canvas id="canvas2dQA" tabindex="0"></canvas><div class="viewlabel">QA · 2D</div></div><div class="half"><canvas id="canvas3dQA" tabindex="0"></canvas><div class="viewlabel">QA · 3D</div><div class="crosshair"></div></div><div class="statuspill">paridade 2D/3D · Fog + alvos</div></div>
+  <div id="reducedInfoBanner" class="reducedInfoBanner">[QA] MODO INFORMAÇÃO REDUZIDA ATIVO (Fog de Guerra)</div>
+  
+  <!-- Floating screen-space Contextual Tooltip -->
+  <div id="contextTooltip" class="contextTooltip" aria-live="polite">
+    <div class="contextTooltipHeader"><span id="ttBadge" class="legalityBadge legal">✓ LEGAL</span><b id="ttCoord" class="coord">12, 8</b></div>
+    <div class="contextTooltipBody">
+      <div id="ttReason">Destino válido</div>
+      <div class="contextTooltipStats">
+        <div>Custo: <b id="ttCost">2 SPD</b></div>
+        <div>SPD: <b id="ttSpd">5 → 3</b></div>
+      </div>
+      <div id="ttTerrain" class="muted">Terreno: Planície</div>
+      <div id="ttMobility" class="muted">Custo-base: 5 blocos</div>
+      <div id="ttCombatPreview" style="display:none;margin-top:3px;padding:3px;border-radius:4px;background:#142230"></div>
+      <div id="ttNote" class="contextTooltipNote" style="display:none"></div>
+      <div id="ttReaction" class="contextTooltipReaction" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Collapsible Legend -->
+  <div id="collapsibleLegend" class="collapsibleLegend">
+    <div class="legendHeader" id="legendToggle" title="Clique ou pressione L para recolher/expandir"><span>Legenda VIS-005</span><span id="legendArrow">▾</span></div>
+    <div class="legendContent" id="legendContent">
+      <span class="swatch sReach"></span><span>alcance de movimento (VIS-003)</span>
+      <span class="swatch sRng"></span><span>alcance de ataque (RNG básico)</span>
+      <span class="swatch sTarget"></span><span>alvo legal (visível + linha livre)</span>
+      <span class="swatch sBlocked"></span><span>alvo bloqueado (obstáculo/unidade)</span>
+      <span class="swatch sFog"></span><span>névoa de guerra (Fog of War)</span>
+      <span class="swatch sGhost"></span><span>última posição conhecida (memória)</span>
+      <span class="swatch sPath"></span><span>rota ponderada (VIS-004 A padrão)</span>
+      <span class="swatch sAlly"></span><span>aliado (atravessável)</span>
+      <span class="swatch sEnemy"></span><span>inimigo (bloqueio total)</span>
+      <span class="swatch sBase"></span><span>base sólida (raio 5 VIS DEC-002)</span>
+    </div>
+  </div>
+
+  <div id="moveActionBar" class="moveActionBar" aria-live="polite">
+    <div class="moveActionText"><b id="moveActionTitle">Destino</b><span id="moveActionDetail">—</span></div>
+    <div class="buttonrow"><button class="btn primary" id="confirmMoveStage">CONFIRMAR MOVIMENTO</button><button class="btn small" id="cancelPlanStage">cancelar</button></div>
+  </div>
+  <div id="testModal" class="modal"></div>
+  <div id="toast" class="toast"></div>
+</section>
+
+<aside class="side">
+<section class="panel"><h2>Unidade Selecionada (P1)</h2><div class="panelbody">
+  <div class="big" id="selectedName">P1-A</div>
+  <div class="kv">
+    <span>Controle</span><b id="controlState">P1</b>
+    <span>Origem</span><b id="selectedPos" class="coord">3,8</b>
+    <span>Nível / Postura</span><b id="selectedLvlStance">Lv 4 · ATK</b>
+    <span>HP / MP</span><b id="selectedHpMp">4/4 · 4/4</b>
+    <span>ATK / DEF</span><b id="selectedAtkDef">4 / 3</b>
+    <span>SPD / VIS</span><b id="selectedSpdVis">5/5 · 4</b>
+    <span>Alcance Ataque</span><b id="selectedRange">1 bloco</b>
+    <span>Keyword</span><b id="selectedKeyword">—</b>
+    <span>Alcançáveis</span><b id="reachableCount">0</b>
+  </div>
+  
+  <div class="mobilityCard" id="selectedMobilityCard">
+    <div>Mobilidade: <b id="mobSummary">5 / 5 SPD • até 5 blocos em custo-base</b></div>
+    <div class="help" style="margin-top:2px">Fluxo principal: aponte e clique com o mouse para planejar e confirmar movimento. (Atalho auxiliar QA: setas do teclado ↑ ↓ ← → para teste direto bloco a bloco).</div>
+  </div>
+
+  <div class="planbox" id="planBox">
+    <div class="planstatus" id="planStatus">SELECIONE UM DESTINO</div>
+    <div class="kv" style="margin-top:4px">
+      <span>Destino travado</span><b id="lockedTarget" class="coord">—</b>
+      <span>Custo total</span><b id="lockedCost">—</b>
+      <span>Transição SPD</span><b id="spdBeforeAfter">—</b>
+      <span>Caminho</span><b id="pathLength">—</b>
+      <span>Modo</span><b id="moveModeLabel">normal</b>
+    </div>
+    <div class="help" id="planReason">Passe o cursor sobre o mapa para inspecionar rota; clique para travar, duplo clique para mover. (Atalho auxiliar QA: setas do teclado).</div>
+  </div>
+  <div class="buttonrow" style="margin-top:7px">
+    <button class="btn primary" id="confirmMove" disabled>CONFIRMAR</button>
+    <button class="btn small" id="cancelPlan">cancelar prévia</button>
+    <button class="btn small" id="focusSelected">focar</button>
+  </div>
+</div></section>
+
+<section class="panel"><h2>Combate e Seleção de Alvos</h2><div class="panelbody">
+  <div id="targetSummary">
+    <div class="kv">
+      <span>Alvo atual</span><b id="targetName">—</b>
+      <span>Status do Alvo</span><b id="targetStatusText">—</b>
+      <span>Distância / Linha</span><b id="targetDistLine">—</b>
+    </div>
+    
+    <div class="combatBox" id="combatBox" style="display:none">
+      <div class="combatBoxHeader"><span>PREVISÃO DE COMBATE CANÔNICA</span><span id="combatModeBadge" class="targetBadge legal">DEFESA</span></div>
+      <div class="combatStatsGrid">
+        <div class="combatantCol">
+          <b id="cbAttackerName">P1-A</b>
+          <span id="cbAttackerStats">ATK 4 · DEF 3</span>
+          <span id="cbAttackerHp">HP 4 → 4</span>
+        </div>
+        <div class="combatVs">VS</div>
+        <div class="combatantCol" style="text-align:right">
+          <b id="cbDefenderName">P2-A</b>
+          <span id="cbDefenderStats">ATK 5 · DEF 3</span>
+          <span id="cbDefenderHp">HP 4 → 3</span>
+        </div>
+      </div>
+      <div class="combatDamageRow" id="combatDamageDetail">Dano: P1-A causa 1 de dano a P2-A.</div>
+    </div>
+  </div>
+  <div class="buttonrow" style="margin-top:7px">
+    <button class="btn small" id="prevTargetBtn">← Alvo Anterior</button>
+    <button class="btn small" id="nextTargetBtn">Próximo Alvo →</button>
+    <button class="btn small" id="clearTargetBtn">Desmarcar</button>
+  </div>
+</div></section>
+
+<section class="panel"><h2>VIS-005 · Apresentação Fog e Alvos (Opção A Padrão Aprovado)</h2><div class="panelbody">
+  <div class="styles fogStyles">
+    <button class="fogStyleBtn active" data-fog-style="A">A · Grade Tática Estrita (padrão aprovado)</button>
+    <button class="fogStyleBtn" data-fog-style="B">B · Gradiente Suave + Feixe (histórico)</button>
+    <button class="fogStyleBtn" data-fog-style="C">C · Sombra Dessaturada (histórico)</button>
+  </div>
+  <div class="help" id="fogStyleDescription"><b>A (Padrão aprovado pelo autor):</b> Névoa de guerra opaca por células quadradas; marcadores de última posição como caixas pontilhadas com [?]; retículo de cantos em alvos válidos; feixe indicado célula a célula. B e C permanecem disponíveis para comparação histórica.</div>
+</div></section>
+
+<section class="panel"><h2>VIS-004 · Terreno (Opção A Padrão Aprovado)</h2><div class="panelbody">
+  <div class="styles terrainStyles">
+    <button class="terrainStyleBtn active" data-terrain-style="A">A · badge persistente (aprovado)</button>
+    <button class="terrainStyleBtn" data-terrain-style="B">B · custo no caminho (histórico)</button>
+    <button class="terrainStyleBtn" data-terrain-style="C">C · sutil (histórico)</button>
+  </div>
+</div></section>
+
+<section class="panel"><h2>Fixture QA · Custo, SPD e Reação</h2><div class="panelbody">
+  <div class="warningBox"><b>Fixtures do Protótipo:</b> Valores de ATK/DEF usam inteiros pequenos ilustrativos do cenário de teste; custos e Reações exercitam regras de borda do motor sem constituir regras universais.</div>
+  <div class="control"><label for="qaCost">Custo entrada Campo A</label><input id="qaCost" type="number" min="1" max="20" step="1" value="1"></div>
+  <div class="buttonrow"><button class="btn small" id="negativeStress">stress SPD negativo</button><button class="btn small" id="qaAction">registrar Ação QA</button></div>
+  <div class="kv" style="margin-top:7px"><span>Timer recuperação</span><b id="recoveryStatus">não iniciado</b><span>Próximo pacote</span><b id="recoveryCountdown">—</b><span>Regra</span><b>+2 / 8 s (160 ticks)</b></div>
+</div></section>
+
+<section class="panel"><h2>Câmera / Estado / Controles</h2><div class="panelbody">
+  <div class="toggle"><label>Fog de Guerra dinâmico</label><input id="showFog" type="checkbox" checked></div>
+  <div class="toggle"><label>Alcance de Ataque (RNG)</label><input id="showRange" type="checkbox" checked></div>
+  <div class="toggle"><label>Coordenadas da grade</label><input id="showLabels" type="checkbox"></div>
+  <div class="toggle"><label>Modo QA informação reduzida</label><input id="reducedInfoToggle" type="checkbox"></div>
+  <div class="toggle"><label>Reduzir animação</label><input id="reducedMotion" type="checkbox"></div>
+  <div class="toggle"><label>Efeitos sonoros (QA)</label><input id="soundToggle" type="checkbox"></div>
+  <div class="sectionSep"></div>
+  <div class="control"><label>Yaw</label><input id="cameraYaw" class="range" type="range" min="-180" max="180" value="-35"></div>
+  <div class="control"><label>Elevação</label><input id="cameraPitch" class="range" type="range" min="20" max="80" value="48"></div>
+  <div class="control"><label>Distância</label><input id="cameraDistance" class="range" type="range" min="12" max="75" value="37"></div>
+  <div class="readout" id="cameraReadout"></div>
+  <div class="sectionSep"></div>
+  <div class="kv"><span>Tick</span><b id="tickValue">0</b><span>Fila comandos</span><b id="queueValue">0</b><span>Estado</span><b id="stateValidity" class="good">válido</b><span>Hash</span><b id="hashValue" class="coord">--------</b></div>
+  <div class="buttonrow" style="margin-top:7px">
+    <button class="btn small" id="resetCamera">reset câmera</button>
+    <button class="btn small" id="togglePause">pausar lógica</button>
+    <button class="btn small" id="resetScenario">reset cenário</button>
+    <button class="btn" id="runTests">testes</button>
+  </div>
+</div></section>
+<section class="panel logpanel"><h2>Log determinístico</h2><div id="eventLog" class="log"></div></section>
+</aside></main>
+<footer class="footer"><span><b>VIS-005</b> · APROVADO (Opção A padrão)</span><span>herda VIS-004 (Terreno Opção A aprovado) + VIS-003 (área cheia) + 2D/3D</span><span class="grow">Stats de cenário (fixtures ilustrativas) · Setas direcionais como atalho auxiliar de QA</span></footer>
+</div>
+
+<script>
+(function(root,factory){
+  const api=factory();
+  if(typeof module==='object'&&module.exports) module.exports=api;
+  root.MIMovementCore=api;
+})(typeof globalThis!=='undefined'?globalThis:this,function(){
+'use strict';
+
+const MAP_WIDTH=31;
+const MAP_HEIGHT=17;
+const MAX_MONSTERS_PER_PLAYER=5;
+const SIMULATION_HZ=20;
+const STEP_MS=50;
+const SPD_RECOVERY_TICKS=160; // 8 s * 20 Hz
+const BASE_VIS_RADIUS=5; // Raio 5 DEC-002
+const PROTOTYPE_TIE_BREAK='N,E,S,W,NE,SE,SW,NW';
+const BASES=Object.freeze([
+  Object.freeze({playerId:'p1',x:0,y:8}),
+  Object.freeze({playerId:'p2',x:30,y:8}),
+]);
+const CARDINALS=Object.freeze([
+  Object.freeze({dx:0,dy:-1,name:'N',diagonal:false}),
+  Object.freeze({dx:1,dy:0,name:'E',diagonal:false}),
+  Object.freeze({dx:0,dy:1,name:'S',diagonal:false}),
+  Object.freeze({dx:-1,dy:0,name:'W',diagonal:false}),
+]);
+const DIAGONALS=Object.freeze([
+  Object.freeze({dx:1,dy:-1,name:'NE',diagonal:true}),
+  Object.freeze({dx:1,dy:1,name:'SE',diagonal:true}),
+  Object.freeze({dx:-1,dy:1,name:'SW',diagonal:true}),
+  Object.freeze({dx:-1,dy:-1,name:'NW',diagonal:true}),
+]);
+const clone=v=>JSON.parse(JSON.stringify(v));
+const key=p=>`${p.x},${p.y}`;
+const stateKey=(p,d)=>`${p.x},${p.y}|${d}`;
+const inBounds=p=>Number.isSafeInteger(p.x)&&Number.isSafeInteger(p.y)&&p.x>=0&&p.x<MAP_WIDTH&&p.y>=0&&p.y<MAP_HEIGHT;
+const orthogonalDistance=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
+
+// Supercover raycasting determinístico (idêntico a src/core/geometry.ts)
+function traceTouchedTiles(origin,target){
+  const deltaX=target.x-origin.x;
+  const deltaY=target.y-origin.y;
+  const countX=Math.abs(deltaX);
+  const countY=Math.abs(deltaY);
+  const stepX=Math.sign(deltaX);
+  const stepY=Math.sign(deltaY);
+  let x=origin.x,y=origin.y,crossedX=0,crossedY=0;
+  const tiles=[{x,y}],seen=new Set([`${x},${y}`]);
+  const add=(tx,ty)=>{
+    const k=`${tx},${ty}`;
+    if(!seen.has(k)){seen.add(k);tiles.push({x:tx,y:ty});}
+  };
+  while(crossedX<countX||crossedY<countY){
+    const cx=(1+2*crossedX)*countY,cy=(1+2*crossedY)*countX;
+    if(cx===cy){
+      add(x+stepX,y);add(x,y+stepY);
+      x+=stepX;y+=stepY;crossedX+=1;crossedY+=1;
+      add(x,y);
+    }else if(cx<cy){
+      x+=stepX;crossedX+=1;add(x,y);
+    }else{
+      y+=stepY;crossedY+=1;add(x,y);
+    }
+  }
+  return tiles;
+}
+
+function hasClearAttackLine(origin,target,blockers){
+  const origK=`${origin.x},${origin.y}`,tgtK=`${target.x},${target.y}`;
+  const blockSet=new Set(blockers.map(b=>`${b.x},${b.y}`));
+  const touched=traceTouchedTiles(origin,target);
+  for(const t of touched){
+    const k=`${t.x},${t.y}`;
+    if(k!==origK&&k!==tgtK&&blockSet.has(k)){
+      return {clear:false,blockingTile:t,touched};
+    }
+  }
+  return {clear:true,blockingTile:null,touched};
+}
+
+function createScenario(){
+  const terrain=[];
+  for(let y=0;y<MAP_HEIGHT;y++) for(let x=0;x<MAP_WIDTH;x++){
+    let kind='plain';
+    if((x>=13&&x<=16&&y>=6&&y<=10)||(x>=25&&x<=27&&y<=3)) kind='water';
+    else if((x+y)%11===0||(x>=3&&x<=5&&y>=11&&y<=14)) kind='brush';
+    if((x===15&&y>=2&&y<=4)||(x===19&&y>=11&&y<=13)||(x===7&&y>=12&&y<=13)) kind='impassable';
+    terrain.push({x,y,kind});
+  }
+
+  // Fixtures ilustrativas do cenário de teste: inteiros pequenos (escala típica ~1-20, HP base = Nível, MP estrutural, VIS 1-5, SPD 1-7, RNG 1-3).
+  const units=[
+    // P1 Units (Aliados)
+    {id:'P1-A',name:'Guerreiro Alado',playerId:'p1',x:3,y:8,level:4,hp:4,hpMax:4,mp:4,mpMax:4,atk:4,def:3,spd:5,spdMax:5,vis:4,attackRange:1,stance:'ATK',keywords:[]},
+    {id:'P1-B',name:'Arqueira Élfica',playerId:'p1',x:5,y:8,level:3,hp:3,hpMax:3,mp:3,mpMax:3,atk:3,def:2,spd:4,spdMax:4,vis:5,attackRange:3,stance:'ATK',keywords:[]},
+    {id:'P1-C',name:'Planador Místico',playerId:'p1',x:6,y:12,level:4,hp:4,hpMax:4,mp:4,mpMax:4,atk:4,def:2,spd:5,spdMax:5,vis:4,attackRange:2,stance:'ATK',keywords:['GLIDER']},
+    {id:'P1-D',name:'Guardião de Pedra',playerId:'p1',x:11,y:8,level:5,hp:5,hpMax:5,mp:0,mpMax:0,atk:2,def:6,spd:3,spdMax:3,vis:3,attackRange:1,stance:'DEF',keywords:[]},
+    {id:'P1-E',name:'Batedor Ágil',playerId:'p1',x:10,y:14,level:3,hp:3,hpMax:3,mp:3,mpMax:3,atk:3,def:2,spd:6,spdMax:6,vis:5,attackRange:1,stance:'ATK',keywords:['LEAPER 2']},
+    // P2 Units (Inimigos)
+    {id:'P2-A',name:'Vanguarda Orc',playerId:'p2',x:13,y:8,level:4,hp:4,hpMax:4,mp:0,mpMax:0,atk:5,def:3,spd:4,spdMax:4,vis:4,attackRange:1,stance:'ATK',keywords:[]},
+    {id:'P2-B',name:'Atirador Sombrio',playerId:'p2',x:18,y:5,level:4,hp:4,hpMax:4,mp:4,mpMax:4,atk:4,def:2,spd:5,spdMax:5,vis:4,attackRange:3,stance:'DEF',keywords:[]},
+    {id:'P2-C',name:'Golem Rúnico',playerId:'p2',x:24,y:12,level:6,hp:6,hpMax:6,mp:0,mpMax:0,atk:3,def:7,spd:3,spdMax:3,vis:3,attackRange:1,stance:'DEF',keywords:[]},
+    {id:'P2-D',name:'Cavaleiro do Caos',playerId:'p2',x:21,y:8,level:5,hp:5,hpMax:5,mp:4,mpMax:4,atk:6,def:4,spd:5,spdMax:5,vis:4,attackRange:1,stance:'ATK',keywords:[]},
+    {id:'P2-E',name:'Espreitador Noturno',playerId:'p2',x:20,y:3,level:3,hp:3,hpMax:3,mp:3,mpMax:3,atk:4,def:1,spd:6,spdMax:6,vis:5,attackRange:1,stance:'ATK',keywords:[]},
+  ];
+
+  const recovery={p1:{},p2:{}};
+  for(const u of units) recovery[u.playerId][u.id]={started:false,lastActivityTick:0};
+
+  return {
+    schemaVersion:6,
+    scenarioId:'VIS-005-FOG-RANGE-TARGET-31x17',
+    seed:20260930,
+    tick:0,
+    bases:clone(BASES),
+    units,
+    movements:[],
+    obstacles:[
+      {x:7,y:4,kind:'rock'},{x:7,y:5,kind:'rock'},{x:7,y:6,kind:'rock'},
+      {x:11,y:10,kind:'ruin'},{x:12,y:10,kind:'ruin'},
+      {x:18,y:6,kind:'rock'},{x:18,y:7,kind:'rock'},{x:18,y:8,kind:'rock'},
+      {x:23,y:11,kind:'ruin'},{x:23,y:12,kind:'ruin'},
+    ],
+    terrain,
+    fields:[
+      {id:'field-a',cx:14,cy:8,radius:2,owner:'p1'},
+      {id:'field-b',cx:17,cy:8,radius:2,owner:'p2'},
+    ],
+    recovery,
+    qa:{
+      costFieldId:'field-a',
+      costFieldEntryCost:1,
+      reactionWindowOpen:false,
+      reactionsByPlayer:{p1:2,p2:2},
+    },
+    // Memória canônica de Fog (EnemyFogRecord em src/core/fog.ts)
+    fogKnowledge:{
+      p1:[
+        {unitId:'P2-D',ownerPlayerId:'p2',lastKnownPosition:{x:21,y:8},currentlyVisible:false},
+        {unitId:'P2-C',ownerPlayerId:'p2',lastKnownPosition:{x:24,y:12},currentlyVisible:false},
+      ],
+      p2:[]
+    },
+    lastKnown:[{id:'ghost-p2',x:21,y:8,playerId:'p2'}],
+  };
+}
+
+function unitAt(s,p,exceptId){return s.units.find(u=>u.id!==exceptId&&u.x===p.x&&u.y===p.y)||null;}
+function obstacleAt(s,p){return s.obstacles.find(o=>o.x===p.x&&o.y===p.y)||null;}
+function baseAt(s,p){return s.bases.find(b=>b.x===p.x&&b.y===p.y)||null;}
+function terrainAt(s,p){return s.terrain.find(t=>t.x===p.x&&t.y===p.y)||null;}
+function getUnit(s,id){return s.units.find(u=>u.id===id)||null;}
+function movementForUnit(s,id){return (s.movements||[]).find(m=>m.unitId===id)||null;}
+function isUnitMoving(s,id){return !!movementForUnit(s,id);}
+function leaperBudget(u){
+  const vals=(u.keywords||[]).map(k=>/^LEAPER\s+(\d+)$/i.exec(k)).filter(Boolean).map(m=>Number(m[1]));
+  return vals.length?vals[0]:0;
+}
+function hasKeyword(u,name){return (u?.keywords||[]).some(k=>k.toUpperCase()===name.toUpperCase());}
+function hasGlider(u){return hasKeyword(u,'GLIDER');}
+function recoveryRecord(s,u){return s.recovery?.[u.playerId]?.[u.id]||null;}
+function fieldAt(s,p,fieldId){const f=(s.fields||[]).find(x=>x.id===fieldId);if(!f)return false;return Math.max(Math.abs(p.x-f.cx),Math.abs(p.y-f.cy))<=f.radius;}
+function isQaCostFieldTile(s,p){return !!(s.qa&&fieldAt(s,p,s.qa.costFieldId));}
+function isImpassable(s,p){return terrainAt(s,p)?.kind==='impassable';}
+function specialTerrainCost(s,u,p){
+  if(hasGlider(u)) return 1;
+  if(isQaCostFieldTile(s,p)) return Math.max(1,Math.trunc(Number(s.qa?.costFieldEntryCost)||1));
+  return 1;
+}
+function stepCost(s,u,p){return specialTerrainCost(s,u,p);}
+
+// Cálculo autoritativo de visão compartilhada (src/core/visibility.ts)
+function calculateVisibility(s,playerId='p1'){
+  const visible=new Set();
+  const blockers=[...s.obstacles,...s.bases];
+  
+  // 1. Visão da Base (Chebyshev raio 5 conforme DEC-002)
+  const base=s.bases.find(b=>b.playerId===playerId);
+  if(base){
+    for(let dy=-BASE_VIS_RADIUS;dy<=BASE_VIS_RADIUS;dy++){
+      for(let dx=-BASE_VIS_RADIUS;dx<=BASE_VIS_RADIUS;dx++){
+        const p={x:base.x+dx,y:base.y+dy};
+        if(inBounds(p)){
+          const ray=hasClearAttackLine(base,p,blockers);
+          if(ray.clear) visible.add(`${p.x},${p.y}`);
+        }
+      }
+    }
+  }
+
+  // 2. Visão compartilhada dos monstros aliados (alcance ortogonal <= u.vis com linha de visão)
+  const allies=s.units.filter(u=>u.playerId===playerId);
+  for(const ally of allies){
+    const range=Math.max(0,ally.vis);
+    for(let dy=-range;dy<=range;dy++){
+      for(let dx=-range;dx<=range;dx++){
+        if(Math.abs(dx)+Math.abs(dy)<=range){
+          const p={x:ally.x+dx,y:ally.y+dy};
+          if(inBounds(p)){
+            const ray=hasClearAttackLine(ally,p,blockers);
+            if(ray.clear) visible.add(`${p.x},${p.y}`);
+          }
+        }
+      }
+    }
+  }
+
+  return visible;
+}
+
+// Atualização da memória de Fog (src/core/fog.ts)
+function updateFogKnowledge(s,viewerPlayerId='p1'){
+  const visibleSet=calculateVisibility(s,viewerPlayerId);
+  const enemies=s.units.filter(u=>u.playerId!==viewerPlayerId);
+  if(!s.fogKnowledge) s.fogKnowledge={[viewerPlayerId]:[]};
+  const records=s.fogKnowledge[viewerPlayerId]||[];
+  const updatedRecords=[];
+
+  for(const e of enemies){
+    const isVis=visibleSet.has(`${e.x},${e.y}`);
+    const prev=records.find(r=>r.unitId===e.id);
+    if(isVis){
+      updatedRecords.push({unitId:e.id,ownerPlayerId:e.playerId,lastKnownPosition:{x:e.x,y:e.y},currentlyVisible:true});
+    } else if(prev){
+      updatedRecords.push({unitId:e.id,ownerPlayerId:e.playerId,lastKnownPosition:{...prev.lastKnownPosition},currentlyVisible:false});
+    }
+  }
+  s.fogKnowledge[viewerPlayerId]=updatedRecords;
+  return s.fogKnowledge[viewerPlayerId];
+}
+
+// Classificação de alvo (LEGAL, BLOQUEADO, FORA_DE_ALCANCE, NA_NEVOA)
+function classifyTarget(s,attackerId,targetId,viewerPlayerId='p1'){
+  const attacker=getUnit(s,attackerId);
+  const defender=getUnit(s,targetId);
+  if(!attacker||!defender) return {status:'INVALID',reason:'unidade inválida'};
+  if(attacker.playerId===defender.playerId) return {status:'INVALID',reason:'alvo é aliado'};
+
+  const visibleSet=calculateVisibility(s,viewerPlayerId);
+  const isTargetVisible=visibleSet.has(`${defender.x},${defender.y}`);
+  if(!isTargetVisible){
+    return {status:'IN_FOG',reason:'alvo oculto na névoa de guerra',distance:orthogonalDistance(attacker,defender),inRange:false,lineClear:false};
+  }
+
+  const dist=orthogonalDistance(attacker,defender);
+  const rng=attacker.attackRange||1;
+  const inRange=dist<=rng;
+
+  // Bloqueadores de ataque: obstáculos, bases E todas as outras unidades no tabuleiro
+  const blockers=[
+    ...s.obstacles,
+    ...s.bases,
+    ...s.units.filter(u=>u.id!==attacker.id&&u.id!==defender.id)
+  ];
+  const ray=hasClearAttackLine(attacker,defender,blockers);
+
+  if(!inRange){
+    return {status:'OUT_OF_RANGE',reason:`alvo fora de alcance (${dist} > RNG ${rng})`,distance:dist,inRange:false,lineClear:ray.clear,blockingTile:ray.blockingTile,touched:ray.touched};
+  }
+  if(!ray.clear){
+    return {status:'BLOCKED',reason:`linha de ataque bloqueada em (${ray.blockingTile.x}, ${ray.blockingTile.y})`,distance:dist,inRange:true,lineClear:false,blockingTile:ray.blockingTile,touched:ray.touched};
+  }
+  return {status:'LEGAL',reason:'alvo legal: dentro do alcance e linha de visada livre',distance:dist,inRange:true,lineClear:true,blockingTile:null,touched:ray.touched};
+}
+
+// Resolução de previsão de combate (idêntico a src/core/combat.ts)
+function resolveCombatForecast(attacker,defender){
+  if(!attacker||!defender) return null;
+  const dist=orthogonalDistance(attacker,defender);
+  const inRange=dist<=(attacker.attackRange||1);
+  const stance=defender.stance||'ATK';
+  
+  let mode='undefended';
+  let counterattackPossible=false;
+  let damageToDefender=0;
+  let damageToAttacker=0;
+
+  if(stance==='DEF'){
+    mode='defense';
+    if(attacker.atk>defender.def){
+      damageToDefender=attacker.atk-defender.def;
+    }else if(defender.def>attacker.atk){
+      damageToAttacker=defender.def-attacker.atk;
+    }
+  } else {
+    // ATK stance: verifica elegibilidade de contra-ataque
+    const defenderCanReach=dist<=(defender.attackRange||1);
+    const defenderSpdAdvantage=defender.spd>attacker.spd;
+    if(defenderCanReach&&defenderSpdAdvantage){
+      mode='counterattack';
+      counterattackPossible=true;
+      damageToDefender=Math.max(0,attacker.atk);
+      damageToAttacker=Math.max(0,defender.atk);
+    } else {
+      mode='undefended';
+      damageToDefender=Math.max(0,attacker.atk);
+      damageToAttacker=0;
+    }
+  }
+
+  const attackerHpAfter=Math.max(0,attacker.hp-damageToAttacker);
+  const defenderHpAfter=Math.max(0,defender.hp-damageToDefender);
+
+  return {
+    attackerId:attacker.id,
+    defenderId:defender.id,
+    mode,
+    counterattackPossible,
+    inRange,
+    damageToDefender,
+    damageToAttacker,
+    attackerHpBefore:attacker.hp,
+    attackerHpAfter,
+    defenderHpBefore:defender.hp,
+    defenderHpAfter,
+    attackerDestroyed:attackerHpAfter===0,
+    defenderDestroyed:defenderHpAfter===0
+  };
+}
+
+function validateState(s){
+  const errors=[]; const ids=new Set(),tiles=new Set(),baseTiles=new Set(),basePlayers=new Set(),counts=new Map();
+  for(const b of s.bases){
+    if(!inBounds(b)) errors.push(`base ${b.playerId} fora do mapa`);
+    if(basePlayers.has(b.playerId)) errors.push(`base duplicada ${b.playerId}`);
+    if(baseTiles.has(key(b))) errors.push(`bases sobrepostas ${key(b)}`);
+    basePlayers.add(b.playerId);baseTiles.add(key(b));
+  }
+  for(const u of s.units){
+    if(!inBounds(u)) errors.push(`${u.id} fora do mapa`);
+    if(ids.has(u.id)) errors.push(`id duplicado ${u.id}`);
+    if(tiles.has(key(u))) errors.push(`duas unidades em ${key(u)}`);
+    if(baseTiles.has(key(u))) errors.push(`${u.id} ocupa base`);
+    if(!Number.isSafeInteger(u.spd)||!Number.isSafeInteger(u.spdMax)) errors.push(`${u.id} SPD não inteiro`);
+    if(u.spdMax<0) errors.push(`${u.id} SPD máximo negativo`);
+    if(!Number.isSafeInteger(u.atk)) errors.push(`${u.id} ATK não inteiro`);
+    if(!Number.isSafeInteger(u.def)) errors.push(`${u.id} DEF não inteiro`);
+    const n=(counts.get(u.playerId)||0)+1;counts.set(u.playerId,n);if(n>MAX_MONSTERS_PER_PLAYER)errors.push(`${u.playerId} excede ${MAX_MONSTERS_PER_PLAYER}`);
+    ids.add(u.id);tiles.add(key(u));
+  }
+  const moveUnits=new Set(),seqs=new Set();
+  for(const m of (s.movements||[])){
+    if(!Number.isSafeInteger(m.seq)) errors.push(`movimento sem seq válida para ${m.unitId}`);
+    if(seqs.has(m.seq)) errors.push(`seq de movimento duplicada ${m.seq}`);seqs.add(m.seq);
+    if(!getUnit(s,m.unitId)) errors.push(`movimento referencia unidade ausente ${m.unitId}`);
+    if(moveUnits.has(m.unitId)) errors.push(`unidade com movimentos simultâneos ${m.unitId}`);moveUnits.add(m.unitId);
+    if(!Array.isArray(m.path)||m.path.length===0) errors.push(`movimento sem caminho ${m.unitId}`);
+  }
+  return errors;
+}
+
+function destinationReason(s,u,target){
+  if(!u) return 'unidade não encontrada';
+  if(!inBounds(target)) return 'destino fora do mapa';
+  if(isUnitMoving(s,u.id)) return 'unidade já está em movimento';
+  if(u.spd<1) return 'SPD abaixo de 1: novo movimento bloqueado';
+  if(baseAt(s,target)) return 'base sólida: destino ilegal';
+  if(obstacleAt(s,target)) return 'obstáculo: destino ilegal';
+  if(isImpassable(s,target)) return hasGlider(u)?'GLIDER pode atravessar terreno impassável, mas não terminar nele':'terreno impassável: destino ilegal';
+  const occ=unitAt(s,target,u.id);
+  if(occ){
+    if(occ.playerId===u.playerId) return 'aliado pode ser atravessado, mas não pode ser destino final';
+    return 'inimigo bloqueia passagem e destino';
+  }
+  if(target.x===u.x&&target.y===u.y) return 'origem não é um novo destino';
+  return null;
+}
+
+function traversalBlocked(s,u,p){
+  if(!inBounds(p)||baseAt(s,p)||obstacleAt(s,p)) return true;
+  if(isImpassable(s,p)&&!hasGlider(u)) return true;
+  const occ=unitAt(s,p,u.id);
+  return !!(occ&&occ.playerId!==u.playerId);
+}
+function neighborsFor(u,node){
+  const out=CARDINALS.map(n=>({...n,x:node.x+n.dx,y:node.y+n.dy,diagUsed:node.diagUsed}));
+  const budget=leaperBudget(u);
+  if(node.diagUsed<budget){
+    for(const n of DIAGONALS) out.push({...n,x:node.x+n.dx,y:node.y+n.dy,diagUsed:node.diagUsed+1});
+  }
+  return out;
+}
+
+function computeRoutes(s,unitId,maxCost=Infinity){
+  const u=getUnit(s,unitId);if(!u)return {u:null,best:new Map(),nodes:new Map(),prev:new Map()};
+  let serial=0;
+  const start={x:u.x,y:u.y,diagUsed:0,cost:0,serial:serial++};
+  const open=[start],best=new Map([[stateKey(start,0),0]]),nodes=new Map([[stateKey(start,0),start]]),prev=new Map([[stateKey(start,0),null]]);
+  while(open.length){
+    open.sort((a,b)=>a.cost-b.cost||a.serial-b.serial);
+    const cur=open.shift(),curKey=stateKey(cur,cur.diagUsed);
+    if(best.get(curKey)!==cur.cost) continue;
+    for(const n of neighborsFor(u,cur)){
+      const p={x:n.x,y:n.y};if(traversalBlocked(s,u,p))continue;
+      const sc=stepCost(s,u,p),cost=cur.cost+sc;if(cost>maxCost)continue;
+      const next={x:n.x,y:n.y,diagUsed:n.diagUsed,cost,stepCost:sc,dir:n.name,diagonal:n.diagonal,serial:serial++};
+      const sk=stateKey(next,next.diagUsed),old=best.get(sk);
+      if(old!==undefined&&old<=cost)continue;
+      best.set(sk,cost);nodes.set(sk,next);prev.set(sk,curKey);open.push(next);
+    }
+  }
+  return {u,best,nodes,prev};
+}
+function reconstructRoute(routes,target){
+  let foundKey=null,found=null;
+  for(const [sk,n] of routes.nodes){
+    if(n.x===target.x&&n.y===target.y&&(!found||n.cost<found.cost)){found=n;foundKey=sk;}
+  }
+  if(!foundKey)return null;
+  const rev=[];let k=foundKey;
+  while(routes.prev.get(k)!==null){const n=routes.nodes.get(k);rev.push({x:n.x,y:n.y,diagonal:n.diagonal,dir:n.dir,stepCost:n.stepCost,cumulativeCost:n.cost});k=routes.prev.get(k);}
+  return rev.reverse();
+}
+function shortestPath(s,unitId,target,maxCost=Infinity){return reconstructRoute(computeRoutes(s,unitId,maxCost),target);}
+function negativeFinalEntryAllowed(s,u,path){
+  if(!path?.length||u.spd<1)return false;
+  const last=path[path.length-1],prefix=path.length>1?path[path.length-2].cumulativeCost:0;
+  return prefix<=u.spd&&last.cumulativeCost>u.spd&&last.stepCost>1&&isQaCostFieldTile(s,last)&&!hasGlider(u)&&!isImpassable(s,last);
+}
+function planMovement(s,unitId,target){
+  const u=getUnit(s,unitId),reason=destinationReason(s,u,target);
+  if(reason) return {ok:false,reason,path:[],cost:null,spdAfter:u?u.spd:null,target:clone(target)};
+  const path=shortestPath(s,unitId,target,Infinity);
+  if(!path) return {ok:false,reason:'nenhum caminho permitido até o destino',path:[],cost:null,spdAfter:u.spd,target:clone(target)};
+  const cost=path[path.length-1]?.cumulativeCost||0,negativeEntry=cost>u.spd&&negativeFinalEntryAllowed(s,u,path);
+  if(cost>u.spd&&!negativeEntry) return {ok:false,reason:`SPD insuficiente: custo ${cost} > SPD ${u.spd}`,path,cost,spdAfter:u.spd-cost,target:clone(target)};
+  return {ok:true,reason:negativeEntry?'entrada legal: custo do terreno deixará SPD negativo':'destino válido',path,cost,spdAfter:u.spd-cost,target:clone(target),leaperBudget:leaperBudget(u),negativeEntry};
+}
+function reachableTiles(s,unitId){
+  const u=getUnit(s,unitId);if(!u||u.spd<1||isUnitMoving(s,unitId))return [];
+  const routes=computeRoutes(s,unitId,u.spd),bestByTile=new Map();
+  for(const n of routes.nodes.values()){
+    if(n.x===u.x&&n.y===u.y)continue;
+    const p={x:n.x,y:n.y},reason=destinationReason(s,u,p);if(reason)continue;
+    const old=bestByTile.get(key(p));if(!old||n.cost<old.cost)bestByTile.set(key(p),{x:p.x,y:p.y,cost:n.cost,spdAfter:u.spd-n.cost,negativeEntry:false});
+  }
+  for(const n of routes.nodes.values()){
+    if(n.cost>u.spd)continue;
+    for(const nb of neighborsFor(u,n)){
+      const p={x:nb.x,y:nb.y};if(traversalBlocked(s,u,p))continue;
+      if(destinationReason(s,u,p))continue;
+      const sc=stepCost(s,u,p),total=n.cost+sc;
+      if(sc<=1||total<=u.spd||!isQaCostFieldTile(s,p)||hasGlider(u)||isImpassable(s,p))continue;
+      const old=bestByTile.get(key(p));if(!old||total<old.cost)bestByTile.set(key(p),{x:p.x,y:p.y,cost:total,spdAfter:u.spd-total,negativeEntry:true});
+    }
+  }
+  return [...bestByTile.values()].sort((a,b)=>a.cost-b.cost||a.y-b.y||a.x-b.x);
+}
+
+function canUseReactionMovement(s,u){
+  if(!s.qa?.reactionWindowOpen)return {ok:false,reason:'janela de Reação QA está fechada'};
+  const n=s.qa?.reactionsByPlayer?.[u.playerId]??0;
+  if(n<1)return {ok:false,reason:'sem Reação QA disponível'};
+  return {ok:true,reason:'Reação QA disponível'};
+}
+function markMovementActivity(s,u){
+  const r=recoveryRecord(s,u);if(r){r.started=true;r.lastActivityTick=s.tick;}
+}
+function registerUnitAction(s,unitId){
+  const u=getUnit(s,unitId);if(!u)return {ok:false,reason:'unidade não encontrada'};
+  const r=recoveryRecord(s,u);if(r?.started)r.lastActivityTick=s.tick;
+  return {ok:true,event:{type:'QA_ACTION_RECORDED',unitId:u.id,tick:s.tick,recoveryStarted:!!r?.started}};
+}
+function beginMovementCommand(s,command){
+  if(!command||command.type!=='MOVE') return {ok:false,reason:'comando inválido'};
+  if(!Number.isSafeInteger(command.seq)) return {ok:false,reason:'comando MOVE sem sequência determinística válida'};
+  const u=getUnit(s,command.unitId);if(!u)return {ok:false,reason:'unidade não encontrada'};
+  const mode=command.mode==='REACTION'?'REACTION':'NORMAL';
+  if(mode==='REACTION'){const rr=canUseReactionMovement(s,u);if(!rr.ok)return {ok:false,reason:rr.reason};}
+  const plan=planMovement(s,command.unitId,command.target);if(!plan.ok)return {ok:false,reason:plan.reason,plan};
+  if((s.movements||[]).some(m=>m.seq===command.seq)) return {ok:false,reason:`sequência duplicada ${command.seq}`};
+  const before=clone(s),origin={x:u.x,y:u.y};
+  const movement={seq:command.seq,unitId:u.id,mode,target:clone(command.target),origin,path:clone(plan.path),nextIndex:0,spent:0,confirmedCost:plan.cost,issuedAtTick:Number.isSafeInteger(command.issuedAtTick)?command.issuedAtTick:s.tick,startedAtTick:s.tick,lastTraversed:clone(origin)};
+  s.movements=s.movements||[];s.movements.push(movement);s.movements.sort((a,b)=>a.seq-b.seq);
+  if(mode==='REACTION')s.qa.reactionsByPlayer[u.playerId]-=1;
+  const errors=validateState(s);
+  if(errors.length){Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,before);return {ok:false,reason:`invariante violada ao iniciar movimento: ${errors.join('; ')}`};}
+  const events=[];
+  if(mode==='REACTION')events.push({type:'REACTION_SPENT',seq:movement.seq,unitId:u.id,playerId:u.playerId,amount:1,remaining:s.qa.reactionsByPlayer[u.playerId]});
+  events.push({type:'MOVE_STARTED',seq:movement.seq,unitId:u.id,mode,origin:clone(origin),target:clone(command.target),pathLength:plan.path.length,confirmedCost:plan.cost});
+  return {ok:true,plan,movement:clone(movement),events};
+}
+function removeMovement(s,seq){const i=(s.movements||[]).findIndex(m=>m.seq===seq);if(i>=0)s.movements.splice(i,1);}
+function stopMovement(s,m,reason){const u=getUnit(s,m.unitId),event={type:'MOVE_STOPPED',seq:m.seq,unitId:m.unitId,mode:m.mode,reason,spent:m.spent,position:u?{x:u.x,y:u.y}:null,lastTraversed:clone(m.lastTraversed)};removeMovement(s,m.seq);return event;}
+function stepOneMovement(s,m){
+  const u=getUnit(s,m.unitId);if(!u)return [stopMovement(s,m,'unidade não existe mais')];
+  if(m.nextIndex>=m.path.length){removeMovement(s,m.seq);return [{type:'MOVE_COMPLETED',seq:m.seq,unitId:m.unitId,mode:m.mode,spent:m.spent,position:{x:u.x,y:u.y}}];}
+  if(u.spd<1)return [stopMovement(s,m,'SPD abaixo de 1 durante o movimento')];
+  const planned=m.path[m.nextIndex],to={x:planned.x,y:planned.y},from=clone(m.lastTraversed),isFinal=m.nextIndex===m.path.length-1;
+  if(!inBounds(to))return [stopMovement(s,m,'próximo bloco saiu do mapa')];
+  if(baseAt(s,to))return [stopMovement(s,m,'base sólida bloqueou o próximo bloco')];
+  if(obstacleAt(s,to))return [stopMovement(s,m,'obstáculo bloqueou o próximo bloco')];
+  if(isImpassable(s,to)&&!hasGlider(u))return [stopMovement(s,m,'terreno impassável bloqueou o próximo bloco')];
+  if(isImpassable(s,to)&&isFinal)return [stopMovement(s,m,'GLIDER não pode terminar em terreno impassável')];
+  const costNow=stepCost(s,u,to);
+  if(costNow>u.spd&&!(isFinal&&costNow>1&&isQaCostFieldTile(s,to)&&!hasGlider(u)))return [stopMovement(s,m,`SPD insuficiente antes do próximo bloco: custo ${costNow} > SPD ${u.spd}`)];
+  const occ=unitAt(s,to,u.id);
+  if(occ){
+    if(occ.playerId!==u.playerId)return [stopMovement(s,m,`inimigo ${occ.id} bloqueou o próximo bloco`)];
+    if(isFinal)return [stopMovement(s,m,`aliado ${occ.id} ocupa o destino final`)];
+    u.spd-=costNow;m.spent+=costNow;m.nextIndex+=1;m.lastTraversed=clone(to);markMovementActivity(s,u);
+    const ev={type:'PASS_ALLY',seq:m.seq,unitId:u.id,mode:m.mode,step:m.nextIndex,x:to.x,y:to.y,allyId:occ.id,cost:costNow,from,to:clone(to),physicalPosition:{x:u.x,y:u.y},spdAfter:u.spd};
+    if(m.nextIndex>=m.path.length){ev.completed=true;removeMovement(s,m.seq);}return [ev];
+  }
+  u.x=to.x;u.y=to.y;u.spd-=costNow;m.spent+=costNow;m.nextIndex+=1;m.lastTraversed=clone(to);markMovementActivity(s,u);
+  const ev={type:'ENTER_TILE',seq:m.seq,unitId:u.id,mode:m.mode,step:m.nextIndex,x:to.x,y:to.y,cost:costNow,from,to:clone(to),spdAfter:u.spd,terrain:terrainAt(s,to)?.kind||'plain',qaCostField:isQaCostFieldTile(s,to)};
+  if(m.nextIndex>=m.path.length){ev.completed=true;removeMovement(s,m.seq);}return [ev];
+}
+function stepMovements(s){
+  const events=[],ordered=[...(s.movements||[])].sort((a,b)=>a.seq-b.seq);
+  for(const snapshot of ordered){
+    const m=(s.movements||[]).find(x=>x.seq===snapshot.seq);if(!m)continue;
+    const before=clone(s),evs=stepOneMovement(s,m),errors=validateState(s);
+    if(errors.length){Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,before);const live=(s.movements||[]).find(x=>x.seq===snapshot.seq);if(live)events.push(stopMovement(s,live,`invariante violada: ${errors.join('; ')}`));continue;}
+    events.push(...evs);
+  }
+  return events;
+}
+function stepRecovery(s){
+  const events=[];
+  for(const u of s.units){
+    const r=recoveryRecord(s,u);if(!r?.started||isUnitMoving(s,u.id))continue;
+    const idle=Math.max(0,s.tick-r.lastActivityTick);
+    if(idle<SPD_RECOVERY_TICKS)continue;
+    const before=u.spd,gain=Math.min(2,Math.max(0,u.spdMax-u.spd));u.spd=Math.min(u.spdMax,u.spd+2);r.lastActivityTick=s.tick;
+    events.push({type:'SPD_RECOVERY_PACKET',unitId:u.id,playerId:u.playerId,before,after:u.spd,gained:gain,excessLost:2-gain,tick:s.tick});
+  }
+  return events;
+}
+function recoveryStatus(s,unitId){
+  const u=getUnit(s,unitId);if(!u)return null;const r=recoveryRecord(s,u);if(!r)return null;
+  const idle=r.started?Math.max(0,s.tick-r.lastActivityTick):0;
+  return {started:r.started,idleTicks:idle,ticksRemaining:r.started?Math.max(0,SPD_RECOVERY_TICKS-idle):SPD_RECOVERY_TICKS,secondsRemaining:r.started?Math.max(0,(SPD_RECOVERY_TICKS-idle)/SIMULATION_HZ):8};
+}
+function setQaCostFieldEntryCost(s,value){const n=Math.max(1,Math.trunc(Number(value)||1));s.qa.costFieldEntryCost=n;return n;}
+function setQaReactionWindow(s,open){s.qa.reactionWindowOpen=!!open;return s.qa.reactionWindowOpen;}
+function applyMovementCommand(s,command){return beginMovementCommand(s,command);}
+
+function classifyLegality(plan,reactionReady,unit){
+  if(!plan||!plan.ok||(reactionReady&&!reactionReady.ok)){
+    const reason=(!reactionReady?.ok?reactionReady.reason:plan?.reason)||'Destino inválido';
+    return {category:'ILLEGAL',label:'ILEGAL',icon:'✕',color:'#ff8585',badgeClass:'illegal',reason,canConfirm:false};
+  }
+  if(plan.negativeEntry||plan.spdAfter<1){
+    return {category:'LEGAL_WITH_CONSEQUENCE',label:'LEGAL COM CONSEQUÊNCIA',icon:'⚠',color:'#ffd083',badgeClass:'consequence',reason:'Entrada legal: custo do terreno deixará SPD negativo. Novo movimento bloqueado até SPD ≥ 1.',canConfirm:true,negativeConsequence:true};
+  }
+  return {category:'LEGAL',label:'LEGAL',icon:'✓',color:'#78dca7',badgeClass:'legal',reason:'Destino válido sem restrição.',canConfirm:true,negativeConsequence:false};
+}
+function mobilityBaseReach(u){return u?Math.max(0,u.spd):0;}
+
+function canonicalState(s){
+  const recovery={};for(const p of Object.keys(s.recovery||{}).sort())recovery[p]=Object.fromEntries(Object.entries(s.recovery[p]).sort(([a],[b])=>a.localeCompare(b)).map(([id,r])=>[id,{...r}]));
+  return {
+    schemaVersion:s.schemaVersion,scenarioId:s.scenarioId,seed:s.seed,tick:s.tick,
+    bases:s.bases.map(b=>({...b})).sort((a,b)=>a.playerId.localeCompare(b.playerId)),
+    units:s.units.map(u=>({...u,keywords:[...(u.keywords||[])]})).sort((a,b)=>a.id.localeCompare(b.id)),
+    movements:(s.movements||[]).map(m=>({...m,origin:{...m.origin},target:{...m.target},lastTraversed:{...m.lastTraversed},path:m.path.map(p=>({...p}))})).sort((a,b)=>a.seq-b.seq),
+    obstacles:s.obstacles.map(o=>({...o})).sort((a,b)=>a.y-b.y||a.x-b.x),
+    terrain:s.terrain.map(t=>({...t})).sort((a,b)=>a.y-b.y||a.x-b.x),
+    fields:s.fields.map(f=>({...f})).sort((a,b)=>a.id.localeCompare(b.id)),
+    recovery,
+    qa:{costFieldId:s.qa.costFieldId,costFieldEntryCost:s.qa.costFieldEntryCost,reactionWindowOpen:!!s.qa.reactionWindowOpen,reactionsByPlayer:{p1:s.qa.reactionsByPlayer.p1,p2:s.qa.reactionsByPlayer.p2}}
+  };
+}
+function hashState(s){
+  const str=JSON.stringify(canonicalState(s));let h=2166136261;
+  for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
+  return (h>>>0).toString(16).padStart(8,'0');
+}
+
+return Object.freeze({
+  MAP_WIDTH,MAP_HEIGHT,MAX_MONSTERS_PER_PLAYER,SIMULATION_HZ,STEP_MS,SPD_RECOVERY_TICKS,BASE_VIS_RADIUS,PROTOTYPE_TIE_BREAK,BASES,CARDINALS,DIAGONALS,
+  clone,key,inBounds,orthogonalDistance,traceTouchedTiles,hasClearAttackLine,calculateVisibility,updateFogKnowledge,classifyTarget,resolveCombatForecast,
+  createScenario,unitAt,obstacleAt,baseAt,terrainAt,getUnit,movementForUnit,isUnitMoving,leaperBudget,hasGlider,recoveryRecord,fieldAt,isQaCostFieldTile,isImpassable,
+  stepCost,validateState,destinationReason,shortestPath,planMovement,reachableTiles,canUseReactionMovement,beginMovementCommand,stepMovements,stepRecovery,
+  recoveryStatus,registerUnitAction,setQaCostFieldEntryCost,setQaReactionWindow,applyMovementCommand,classifyLegality,mobilityBaseReach,canonicalState,hashState,
+});
+});
+</script>
+
+<script>
+(()=>{'use strict';
+const C=window.MIMovementCore,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],inBounds=p=>C.inBounds(p);
+const canvases={d2:$('#canvas2d'),d3:$('#canvas3d'),q2:$('#canvas2dQA'),q3:$('#canvas3dQA')};
+const LOCAL_PLAYER='p1',clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),deg=d=>d*Math.PI/180,rad=r=>r*180/Math.PI;
+const V=(x,y,z)=>({x,y,z}),add=(a,b)=>V(a.x+b.x,a.y+b.y,a.z+b.z),sub=(a,b)=>V(a.x-b.x,a.y-b.y,a.z-b.z),mul=(a,s)=>V(a.x*s,a.y*s,a.z*s),dot=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z,cross=(a,b)=>V(a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x),norm=a=>{const l=Math.hypot(a.x,a.y,a.z)||1;return mul(a,1/l)};
+
+// Estado da apresentação
+let state=C.createScenario(),selectedId='P1-A',selectedTargetId='P2-A',view='2d',overlayStyle='A',terrainStyle='A',fogStyle='A';
+let reactionMode=false,hover=null,hoverPlan=null,pendingPlan=null,pendingTarget=null,reachable=[],paused=false,autoPaused=false;
+let showFog=true,showRange=true,showFields=true,showLabels=false,reducedInfoMode=false,reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let commandQueue=[],nextSeq=1,visualMotions=new Map(),spdPopups=[],timerResetPulses=new Map(),cameraTween=null,toastTimer=null,lastClientPointer={x:0,y:0};
+const CLICK_SLOP_PX=10;
+const visual={zoom2d:1,pan2dX:0,pan2dY:0,pointer:null};
+const camera={target:{x:15.5,y:8.5,z:0},yaw:deg(-35),pitch:deg(48),distance:37,fov:deg(42)};
+const selected=()=>C.getUnit(state,selectedId)||state.units[0];
+const selectedTarget=()=>selectedTargetId?C.getUnit(state,selectedTargetId):null;
+const controllable=()=>selected().playerId===LOCAL_PLAYER;
+
+// Cache de visão compartilhada
+let cachedVisibility=C.calculateVisibility(state,LOCAL_PLAYER);
+
+// Contrato opcional de som
+const SoundSystem={
+  enabled:false,
+  history:[],
+  play(eventName,detail={}){
+    this.history.push({eventName,detail,time:performance.now(),tick:state.tick});
+    while(this.history.length>60) this.history.shift();
+  }
+};
+
+function log(msg,cls=''){
+  const e=document.createElement('div');e.className=cls;e.textContent=`[${String(state.tick).padStart(5,'0')}] ${msg}`;$('#eventLog').prepend(e);
+  while($('#eventLog').children.length>120)$('#eventLog').lastChild.remove();
+}
+function toast(msg){
+  $('#toast').textContent=msg;$('#toast').classList.add('show');clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),1300);
+}
+function resize(c){
+  const r=c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2),w=Math.max(1,Math.round(r.width*d)),h=Math.max(1,Math.round(r.height*d));
+  if(c.width!==w||c.height!==h){c.width=w;c.height=h;}
+  return {r,dpr:d,w,h};
+}
+function fit2D(c){
+  const m=resize(c),tile=Math.max(4,Math.min((m.w-46*m.dpr)/C.MAP_WIDTH,(m.h-46*m.dpr)/C.MAP_HEIGHT)*visual.zoom2d),ox=(m.w-tile*C.MAP_WIDTH)/2+visual.pan2dX*m.dpr,oy=(m.h-tile*C.MAP_HEIGHT)/2+visual.pan2dY*m.dpr;
+  return {...m,tile,ox,oy};
+}
+function cameraBasis(c){
+  const m=resize(c),cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch),cy=Math.cos(camera.yaw),sy=Math.sin(camera.yaw),pos=V(camera.target.x+camera.distance*cp*cy,camera.target.y+camera.distance*cp*sy,camera.target.z+camera.distance*sp),fwd=norm(sub(camera.target,pos)),right=norm(cross(fwd,V(0,0,1))),up=norm(cross(right,fwd)),f=Math.min(m.w,m.h)*.5/Math.tan(camera.fov/2);
+  return {...m,pos,fwd,right,up,f,cx:m.w*.5,cy:m.h*.54};
+}
+function project(p,b){
+  const q=sub(p,b.pos),z=dot(q,b.fwd);if(z<=.05)return null;
+  return {x:b.cx+dot(q,b.right)*b.f/z,y:b.cy-dot(q,b.up)*b.f/z,z,scale:b.f/z};
+}
+function quad(x,y,z,b){return [project(V(x,y,z),b),project(V(x+1,y,z),b),project(V(x+1,y+1,z),b),project(V(x,y+1,z),b)];}
+function poly(ctx,pts,fill,stroke,width=1){
+  if(!pts.every(Boolean))return;ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);
+  ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke();}
+}
+function refreshReachable(){
+  reachable=controllable()?C.reachableTiles(state,selectedId):[];
+  cachedVisibility=C.calculateVisibility(state,LOCAL_PLAYER);
+  C.updateFogKnowledge(state,LOCAL_PLAYER);
+}
+
+function displayPlan(){
+  if(pendingPlan) return pendingPlan;
+  const active=C.movementForUnit(state,selectedId);
+  if(active){
+    return {
+      ok:true,active:true,path:active.path,nextIndex:active.nextIndex,cost:active.confirmedCost,
+      target:active.target,spdAfter:selected().spd,reason:`Comando #${active.seq} em execução (${active.nextIndex}/${active.path.length})`
+    };
+  }
+  return hoverPlan&&hoverPlan.path?.length?hoverPlan:null;
+}
+function reactionReady(){
+  const u=selected();
+  return reactionMode?C.canUseReactionMovement(state,u):{ok:true,reason:'movimento normal'};
+}
+
+function setFogStyle(v){
+  if(!['A','B','C'].includes(v))return false;
+  fogStyle=v;
+  $$('.fogStyleBtn').forEach(b=>b.classList.toggle('active',b.dataset.fogStyle===v));
+  const d={
+    A:'<b>A (Padrão aprovado pelo autor):</b> Grade Tática Estrita: névoa opaca por células quadradas; marcadores de última posição como caixas pontilhadas com [?]; retículo de cantos em alvos válidos; feixe indicado célula a célula.',
+    B:'<b>B (Não aprovada):</b> Gradiente suave com feixe dinâmico e fantasma holográfico. Mantida para comparação histórica.',
+    C:'<b>C (Não aprovada):</b> Sombra dessaturada com contornos neon e telemetria no painel. Mantida para comparação histórica.'
+  };
+  $('#fogStyleDescription').innerHTML=d[v];
+  log(`apresentação visual de Fog/Alvos alterada para Opção ${v}`,'camera');
+  return true;
+}
+
+function setTerrainStyle(v){
+  if(!['A','B','C'].includes(v))return false;
+  terrainStyle=v;
+  $$('.terrainStyleBtn').forEach(b=>b.classList.toggle('active',b.dataset.terrainStyle===v));
+  return true;
+}
+
+function setQaCost(v){
+  const n=C.setQaCostFieldEntryCost(state,v);
+  $('#qaCost').value=n;
+  refreshPlans();
+  log(`fixture QA: custo Campo A = ${n} SPD`,'command');
+  return n;
+}
+
+function updateCameraControls(){
+  const wrap=a=>{let d=rad(a);while(d>180)d-=360;while(d<-180)d+=360;return Math.round(d);};
+  $('#cameraYaw').value=wrap(camera.yaw);
+  $('#cameraPitch').value=Math.round(rad(camera.pitch));
+  $('#cameraDistance').value=Math.round(camera.distance);
+  $('#cameraReadout').innerHTML=`alvo <b>${camera.target.x.toFixed(1)}, ${camera.target.y.toFixed(1)}</b> · yaw <b>${wrap(camera.yaw)}°</b> · elev. <b>${Math.round(rad(camera.pitch))}°</b> · dist. <b>${camera.distance.toFixed(1)}</b>`;
+}
+
+// ATALHO AUXILIAR DE QA: MOVIMENTAÇÃO POR SETAS DIRECIONAIS
+function moveSelectedWithArrow(dx,dy,dirName){
+  const el=document.activeElement;
+  if(el&&['INPUT','TEXTAREA','SELECT'].includes(el.tagName)) return false;
+  const u=selected();
+  if(!u||!controllable()){
+    toast('Selecione um monstro sob seu controle (P1) para mover com as setas');
+    SoundSystem.play('ILLEGAL_MOVE',{reason:'unidade adversária'});
+    return false;
+  }
+  if(C.isUnitMoving(state,u.id)){
+    toast('Unidade já está em movimento');
+    return false;
+  }
+  if(paused||autoPaused){
+    toast(paused?'Lógica pausada · retome antes de mover':'Janela sem foco · lógica pausada');
+    return false;
+  }
+  const target={x:u.x+dx,y:u.y+dy};
+  if(!C.inBounds(target)){
+    toast(`Limite do mapa atingido (${dirName})`);
+    SoundSystem.play('ILLEGAL_MOVE',{target,reason:'fora do mapa'});
+    return false;
+  }
+  const plan=C.planMovement(state,u.id,target);
+  if(!plan.ok){
+    toast(`Movimento bloqueado (${dirName}): ${plan.reason}`);
+    SoundSystem.play('ILLEGAL_MOVE',{target,plan});
+    log(`[Seta ${dirName}] Bloqueado para (${target.x}, ${target.y}): ${plan.reason}`,'error');
+    return false;
+  }
+  if(reactionMode){
+    const rr=C.canUseReactionMovement(state,u);
+    if(!rr.ok){
+      toast(rr.reason);
+      SoundSystem.play('REACTION_BLOCKED',{reason:rr.reason});
+      return false;
+    }
+  }
+
+  // Cancela prévia travada do mouse para priorizar ação da seta
+  pendingTarget=null;
+  pendingPlan=null;
+  hoverPlan=null;
+
+  const cmd={
+    type:'MOVE',
+    mode:reactionMode?'REACTION':'NORMAL',
+    seq:nextSeq++,
+    unitId:u.id,
+    target,
+    issuedAtTick:state.tick
+  };
+  commandQueue.push(cmd);
+  log(`[Seta ${dirName}] Comando #${cmd.seq}: ${u.id} → (${target.x}, ${target.y}) [custo ${plan.cost} SPD]`,'command');
+  SoundSystem.play('CONFIRM_MOVE',cmd);
+  updateUI();
+  return true;
+}
+
+function selectTarget(targetId){
+  const enemy=C.getUnit(state,targetId);
+  if(!enemy||enemy.playerId===LOCAL_PLAYER){
+    selectedTargetId=null;
+    updateUI();
+    return;
+  }
+  selectedTargetId=enemy.id;
+  const classification=C.classifyTarget(state,selectedId,selectedTargetId,LOCAL_PLAYER);
+  log(`Alvo selecionado: ${enemy.id} (${enemy.name}) · Status: ${classification.status} (${classification.reason})`,'combat');
+  SoundSystem.play(classification.status==='LEGAL'?'TARGET_SELECTED':'TARGET_BLOCKED',{targetId,classification});
+  updateUI();
+}
+
+function cycleTarget(delta=1){
+  const enemies=state.units.filter(u=>u.playerId!==LOCAL_PLAYER);
+  if(!enemies.length) return;
+  const idx=enemies.findIndex(u=>u.id===selectedTargetId);
+  const nextIdx=(idx+delta+enemies.length)%enemies.length;
+  selectTarget(enemies[nextIdx].id);
+}
+
+function updateContextTooltip(plan,targetPos,activeMove=null){
+  const tt=$('#contextTooltip');
+  if(!targetPos||!C.inBounds(targetPos)||(!plan&&!activeMove)){
+    tt.classList.remove('show');
+    return;
+  }
+  const u=selected(),rr=reactionReady();
+  const leg=activeMove?{category:'LEGAL',label:'EM MOVIMENTO',icon:'▶',badgeClass:'legal',reason:activeMove.reason,canConfirm:false}:C.classifyLegality(plan,rr,u);
+  
+  $('#ttBadge').className=`legalityBadge ${leg.badgeClass}`;
+  $('#ttBadge').textContent=`${leg.icon} ${leg.label}`;
+  $('#ttCoord').textContent=`${targetPos.x}, ${targetPos.y}`;
+  $('#ttReason').textContent=leg.reason;
+  
+  const costVal=activeMove?activeMove.cost:plan?.cost!=null?`${plan.cost} SPD`:'—';
+  const spdBefore=u.spd;
+  const spdAfter=activeMove?activeMove.spdAfter:plan?.spdAfter!=null?plan.spdAfter:'—';
+  $('#ttCost').textContent=costVal;
+  $('#ttSpd').textContent=`${spdBefore} → ${spdAfter}`;
+  $('#ttSpd').className=typeof spdAfter==='number'&&spdAfter<0?'negativeSpd':'';
+  
+  const ter=C.terrainAt(state,targetPos);
+  const isQaField=C.isQaCostFieldTile(state,targetPos);
+  const terName=isQaField?`Campo QA (custo ×${state.qa.costFieldEntryCost})`:ter?.kind==='impassable'?'Impassável':ter?.kind==='water'?'Água':ter?.kind==='brush'?'Arbustos':'Planície';
+  $('#ttTerrain').textContent=`Terreno: ${terName}${isQaField?' · fixture QA':''}`;
+  
+  const baseReach=C.mobilityBaseReach(u);
+  $('#ttMobility').textContent=`Custo-base: até ${baseReach} blocos com SPD atual`;
+  
+  // Posicionamento do tooltip ancorado no cursor / stage
+  const stage=$('#stage').getBoundingClientRect();
+  let x=lastClientPointer.x-stage.left+16,y=lastClientPointer.y-stage.top+16;
+  if(x+280>stage.width) x=lastClientPointer.x-stage.left-286;
+  if(y+160>stage.height) y=lastClientPointer.y-stage.top-166;
+  tt.style.left=`${Math.max(8,x)}px`;
+  tt.style.top=`${Math.max(8,y)}px`;
+  tt.classList.add('show');
+}
+
+function updateUI(force=false){
+  const u=selected(),active=C.movementForUnit(state,u.id),rec=C.recoveryStatus(state,u.id),rr=reactionReady();
+  $('#selectedName').textContent=`${u.id} · ${u.name}`;
+  $('#controlState').textContent=u.playerId===LOCAL_PLAYER?'P1 · controlável':'P2 · inspeção';
+  $('#controlState').className=u.playerId===LOCAL_PLAYER?'good':'warn';
+  $('#selectedPos').textContent=`${u.x},${u.y}`;
+  $('#selectedLvlStance').textContent=`Nv ${u.level} · Postura ${u.stance}`;
+  $('#selectedHpMp').textContent=`${u.hp}/${u.hpMax} HP · ${u.mp}/${u.mpMax} MP`;
+  $('#selectedAtkDef').textContent=`${u.atk} ATK · ${u.def} DEF`;
+  $('#selectedSpdVis').textContent=`${u.spd}/${u.spdMax} SPD · ${u.vis} VIS`;
+  $('#selectedRange').textContent=`${u.attackRange||1} bloco(s)`;
+  $('#selectedKeyword').textContent=(u.keywords||[]).join(', ')||'—';
+  $('#reachableCount').textContent=reachable.length;
+  $('#tickValue').textContent=state.tick;
+  $('#queueValue').textContent=`${commandQueue.length} / ${state.movements?.length||0} ativos`;
+  $('#moveModeLabel').textContent=reactionMode?'REAÇÃO QA':'normal';
+  
+  const baseReach=C.mobilityBaseReach(u);
+  $('#mobSummary').textContent=`${u.spd} / ${u.spdMax} SPD • até ${baseReach} blocos em custo-base`;
+  $('#recoveryStatus').textContent=!rec?.started?'não iniciado':u.spd>=u.spdMax?'ativo · no máximo':`ativo · ${rec.idleTicks} ticks ocioso`;
+  $('#recoveryCountdown').textContent=!rec?.started||u.spd>=u.spdMax?'—':`${(rec.ticksRemaining/C.SIMULATION_HZ).toFixed(2)} s`;
+  
+  const errs=C.validateState(state);
+  $('#stateValidity').textContent=errs.length?`${errs.length} erro(s)`:'válido';
+  $('#stateValidity').className=errs.length?'bad':'good';
+  const hash=C.hashState(state);
+  $('#hashValue').textContent=hash;
+  $('#hashTop').textContent=hash;
+
+  // Atualização do Painel de Alvos e Combate
+  const tgt=selectedTarget();
+  if(tgt){
+    $('#targetName').textContent=`${tgt.id} (${tgt.name})`;
+    const cls=C.classifyTarget(state,u.id,tgt.id,LOCAL_PLAYER);
+    const badgeMap={LEGAL:'legal',BLOCKED:'blocked',OUT_OF_RANGE:'outOfRange',IN_FOG:'inFog'};
+    const labelMap={LEGAL:'✓ LEGAL',BLOCKED:'✕ LINHA BLOQUEADA',OUT_OF_RANGE:'FORA DE ALCANCE',IN_FOG:'NA NÉVOA'};
+    $('#targetStatusText').innerHTML=`<span class="targetBadge ${badgeMap[cls.status]||'outOfRange'}">${labelMap[cls.status]||cls.status}</span>`;
+    $('#targetDistLine').textContent=`Dist: ${cls.distance} | RNG: ${u.attackRange||1} | Linha: ${cls.lineClear?'Livre':'Bloqueada'}`;
+    
+    if(cls.status!=='IN_FOG'){
+      $('#combatBox').style.display='block';
+      const f=C.resolveCombatForecast(u,tgt);
+      $('#combatModeBadge').className=`targetBadge ${f.mode==='counterattack'?'blocked':f.mode==='defense'?'outOfRange':'legal'}`;
+      $('#combatModeBadge').textContent=f.mode.toUpperCase();
+      $('#cbAttackerName').textContent=u.id;
+      $('#cbAttackerStats').textContent=`ATK ${u.atk} · DEF ${u.def} · SPD ${u.spd}`;
+      $('#cbAttackerHp').textContent=`HP ${f.attackerHpBefore} → ${f.attackerHpAfter}${f.attackerDestroyed?' (DESTRUÍDO)':''}`;
+      $('#cbDefenderName').textContent=tgt.id;
+      $('#cbDefenderStats').textContent=`ATK ${tgt.atk} · DEF ${tgt.def} · SPD ${tgt.spd}`;
+      $('#cbDefenderHp').textContent=`HP ${f.defenderHpBefore} → ${f.defenderHpAfter}${f.defenderDestroyed?' (DESTRUÍDO)':''}`;
+      
+      let detail='';
+      if(f.mode==='defense'){
+        detail=`Postura de Defesa: P1 causa ${f.damageToDefender} de dano (ATK ${u.atk} - DEF ${tgt.def}). Sem contra-ataque.`;
+      } else if(f.mode==='counterattack'){
+        detail=`Contra-ataque Simultâneo! P2-A tem SPD maior (${tgt.spd} > ${u.spd}) e alcance. P1 causa ${f.damageToDefender} e sofre ${f.damageToAttacker}.`;
+      } else {
+        detail=`Ataque Indefeso! P2-A não pode contra-atacar. P1 causa ${f.damageToDefender} de dano direto.`;
+      }
+      $('#combatDamageDetail').textContent=detail;
+    } else {
+      $('#combatBox').style.display='none';
+    }
+  } else {
+    $('#targetName').textContent='Nenhum';
+    $('#targetStatusText').textContent='—';
+    $('#targetDistLine').textContent='—';
+    $('#combatBox').style.display='none';
+  }
+
+  // Painel de Movimento
+  const bar=$('#moveActionBar'),barConfirm=$('#confirmMoveStage'),planBox=$('#planBox');
+  const p=pendingPlan;
+  const leg=p?C.classifyLegality(p,rr,u):null;
+  const canConfirm=!!leg?.canConfirm&&!paused&&!autoPaused;
+  
+  if(pendingTarget&&p){
+    $('#lockedTarget').textContent=`${pendingTarget.x},${pendingTarget.y}`;
+    $('#lockedCost').textContent=p.cost!=null?`${p.cost} SPD`:'—';
+    $('#spdBeforeAfter').textContent=`${u.spd} → ${p.spdAfter!=null?p.spdAfter:'—'}`;
+    $('#spdBeforeAfter').className=p.spdAfter<0?'negativeSpd':'';
+    $('#pathLength').textContent=p.path?`${p.path.length} bloco(s)`:'—';
+    planBox.className=`planbox legality-${leg.badgeClass}`;
+    $('#planStatus').innerHTML=`<span class="legalityBadge ${leg.badgeClass}">${leg.icon} ${leg.label}</span>`;
+    $('#planReason').textContent=leg.reason;
+    $('#confirmMove').disabled=!canConfirm;
+    
+    bar.className=`moveActionBar show legality-${leg.badgeClass}`;
+    $('#moveActionTitle').innerHTML=`<span class="legalityBadge ${leg.badgeClass}">${leg.icon} ${leg.label}</span> Mover ${u.id} → ${pendingTarget.x},${pendingTarget.y}`;
+    $('#moveActionDetail').textContent=`Custo: ${p.cost} SPD · SPD: ${u.spd} → ${p.spdAfter} · ${leg.reason}`;
+    barConfirm.disabled=!canConfirm;
+    updateContextTooltip(p,pendingTarget);
+  } else {
+    $('#lockedTarget').textContent='—';
+    $('#lockedCost').textContent='—';
+    $('#spdBeforeAfter').textContent='—';
+    $('#spdBeforeAfter').className='';
+    $('#pathLength').textContent='—';
+    bar.className='moveActionBar';
+    barConfirm.disabled=true;
+    planBox.className='planbox';
+    if(active){
+      $('#planStatus').innerHTML='<span class="legalityBadge legal">▶ MOVENDO</span>';
+      $('#planReason').textContent=`Comando #${active.seq} em execução (${active.nextIndex}/${active.path.length}).`;
+      updateContextTooltip(null,active.target,displayPlan());
+    } else if(controllable()&&hoverPlan&&hover){
+      const hleg=C.classifyLegality(hoverPlan,rr,u);
+      planBox.className=`planbox legality-${hleg.badgeClass}`;
+      $('#planStatus').innerHTML=`<span class="legalityBadge ${hleg.badgeClass}">${hleg.icon} ${hleg.label}</span> <span style="font-size:10px;font-weight:600">CLIQUE PARA TRAVAR</span>`;
+      $('#planReason').textContent=`Custo ${hoverPlan.cost!=null?hoverPlan.cost:'—'} SPD · SPD ${u.spd} → ${hoverPlan.spdAfter!=null?hoverPlan.spdAfter:'—'} · ${hleg.reason}`;
+      updateContextTooltip(hoverPlan,hover);
+    } else {
+      $('#planStatus').textContent=controllable()?'SELECIONE UM DESTINO':'UNIDADE ADVERSÁRIA · SOMENTE INSPEÇÃO';
+      $('#planStatus').className=`planstatus ${controllable()?'':'warn'}`;
+      $('#planReason').textContent=controllable()?'Passe o cursor sobre o mapa para inspecionar rota; clique para travar, duplo clique para mover. (Atalho auxiliar QA: setas do teclado).':'Selecione um monstro de P1 para controlar.';
+      updateContextTooltip(null,null);
+    }
+    $('#confirmMove').disabled=true;
+  }
+
+  if(paused||autoPaused){
+    $('#stateValidity').textContent=paused?'PAUSADO MANUALMENTE':'PAUSADO: SEM FOCO';
+    $('#stateValidity').className='warn';
+  }
+  if(force) updateCameraControls();
+}
+
+function terrainColor(kind,alt){
+  if(kind==='impassable')return alt?'#3b2a2d':'#4a2f34';
+  if(kind==='water')return alt?'#203b51':'#24465f';
+  if(kind==='brush')return alt?'#29473b':'#2e5143';
+  return alt?'#203342':'#263b4b';
+}
+
+function motionPosition(u){
+  if(reducedMotion) return {x:u.x,y:u.y};
+  const m=visualMotions.get(u.id);
+  if(m){
+    const t=clamp((performance.now()-m.start)/m.duration,0,1),e=t*t*(3-2*t);
+    if(t>=1){visualMotions.delete(u.id);return {x:m.to.x,y:m.to.y};}
+    return {x:m.from.x+(m.to.x-m.from.x)*e,y:m.from.y+(m.to.y-m.from.y)*e};
+  }
+  const active=C.movementForUnit(state,u.id);
+  return active?{x:active.lastTraversed.x,y:active.lastTraversed.y}:{x:u.x,y:u.y};
+}
+
+function recoveryBadgeForUnit(u,st=state){
+  const rec=C.recoveryStatus(st,u.id);
+  if(!rec?.started||u.spd>=u.spdMax)return null;
+  const seconds=Math.max(0,rec.ticksRemaining/C.SIMULATION_HZ);
+  const progress=clamp((C.SPD_RECOVERY_TICKS-rec.ticksRemaining)/C.SPD_RECOVERY_TICKS,0,1);
+  return {ticksRemaining:rec.ticksRemaining,secondsRemaining:seconds,displaySeconds:Math.max(1,Math.ceil(seconds)),progress,moving:C.isUnitMoving(state,u.id)};
+}
+
+function drawSpdScreenBadge(ctx,x,y,scale,u){
+  const isNeg=u.spd<0,isMoving=C.isUnitMoving(state,u.id),badgeH=clamp(scale*.40,13,20),text=`SPD ${u.spd}`;
+  ctx.save();
+  ctx.font=`800 ${badgeH*.75}px sans-serif`;
+  const textW=ctx.measureText(text).width,badgeW=textW+14,r=badgeH*.45;
+  ctx.fillStyle=isNeg?'#331010ee':'#081219ee';
+  ctx.strokeStyle=isNeg?'#ff8585':isMoving?'#e6c468':'#529ee0';
+  ctx.lineWidth=isNeg?1.8:1.2;
+  ctx.beginPath();ctx.roundRect(x-badgeW/2,y-badgeH/2,badgeW,badgeH,r);ctx.fill();ctx.stroke();
+  ctx.fillStyle=isNeg?'#ff9b9b':'#eaf4fc';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(text,x,y);
+  ctx.restore();
+}
+
+function drawRecoveryRingAndBadge(ctx,x,y,scale,data,u){
+  if(!data)return;
+  const h=clamp(scale*.46,13,22),w=h*2.4,r=h*.5,ringR=h*.38;
+  ctx.save();
+  ctx.fillStyle='#071019e8';ctx.strokeStyle=data.moving?'#8ea2b4':'#e6c468';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.roundRect(x-w/2,y-h/2,w,h,r);ctx.fill();ctx.stroke();
+  const ix=x-w*.27,iy=y;
+  ctx.strokeStyle='#213444';ctx.lineWidth=2;ctx.beginPath();ctx.arc(ix,iy,ringR,0,Math.PI*2);ctx.stroke();
+  if(!reducedMotion||data.progress>0){
+    ctx.strokeStyle=data.moving?'#8ea2b4':'#f0d57c';ctx.lineWidth=2.2;
+    ctx.beginPath();ctx.arc(ix,iy,ringR,-Math.PI/2,-Math.PI/2+data.progress*Math.PI*2);ctx.stroke();
+  }
+  ctx.fillStyle=data.moving?'#aab9c5':'#fff1b0';
+  ctx.font=`800 ${Math.max(8,h*.52)}px monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(`${data.displaySeconds}s`,x+w*.18,y+.3);
+  ctx.restore();
+}
+
+function triggerSpdPopup(e,now=performance.now()){
+  if(!e||e.type!=='SPD_RECOVERY_PACKET'||e.gained<=0)return null;
+  const popup={unitId:e.unitId,text:`+${e.gained}SPD`,start:now,duration:900};
+  spdPopups.push(popup);
+  while(spdPopups.length>20) spdPopups.shift();
+  return popup;
+}
+function pruneSpdPopups(now=performance.now()){
+  spdPopups=spdPopups.filter(p=>now-p.start<p.duration);
+}
+function drawSpdPopup(ctx,x,y,scale,p,now){
+  const t=clamp((now-p.start)/p.duration,0,1);if(t>=1)return;
+  const rise=reducedMotion?0:t*clamp(scale*.95,18,34),alpha=1-Math.max(0,(t-.42)/.58);
+  ctx.save();ctx.globalAlpha=alpha;ctx.font=`900 ${clamp(scale*.44,12,20)}px sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='bottom';ctx.lineWidth=4;ctx.strokeStyle='#071019dd';
+  ctx.strokeText(p.text,x,y-rise);ctx.fillStyle='#8df0b7';ctx.fillText(p.text,x,y-rise);
+  ctx.restore();
+}
+
+function handleRecoveryEvent(e){
+  if(e.gained>0){triggerSpdPopup(e);SoundSystem.play('SPD_RECOVERY',e);}
+  log(`${e.unitId} recupera +${e.gained} SPD (${e.before} → ${e.after})`,'pass');
+}
+
+// -------------------------------------------------------------
+// RENDERIZAÇÃO 2D (FOG + ALCANCE + ALVOS COM OPÇÕES A, B, C)
+// -------------------------------------------------------------
+function drawAttackRange2D(ctx,m){
+  if(!showRange||!controllable()) return;
+  const u=selected(),rng=u.attackRange||1;
+  ctx.save();
+  for(let dy=-rng;dy<=rng;dy++){
+    for(let dx=-rng;dx<=rng;dx++){
+      if(Math.abs(dx)+Math.abs(dy)<=rng){
+        const x=u.x+dx,y=u.y+dy;
+        if(inBounds({x,y})){
+          const px=m.ox+x*m.tile,py=m.oy+y*m.tile;
+          if(fogStyle==='A'){
+            // Opção A: Cantos táticos estritos
+            ctx.strokeStyle='#f59e0b99';ctx.lineWidth=1.5;
+            const cs=m.tile*.25;
+            ctx.beginPath();
+            ctx.moveTo(px+2,py+2+cs);ctx.lineTo(px+2,py+2);ctx.lineTo(px+2+cs,py+2);
+            ctx.moveTo(px+m.tile-2-cs,py+2);ctx.lineTo(px+m.tile-2,py+2);ctx.lineTo(px+m.tile-2,py+2+cs);
+            ctx.moveTo(px+2,py+m.tile-2-cs);ctx.lineTo(px+2,py+m.tile-2);ctx.lineTo(px+2+cs,py+m.tile-2);
+            ctx.moveTo(px+m.tile-2-cs,py+m.tile-2);ctx.lineTo(px+m.tile-2,py+m.tile-2);ctx.lineTo(px+m.tile-2,py+m.tile-2-cs);
+            ctx.stroke();
+          } else if(fogStyle==='B'){
+            // Opção B: Preenchimento suave
+            ctx.fillStyle='#f59e0b16';ctx.fillRect(px+1,py+1,m.tile-2,m.tile-2);
+            ctx.strokeStyle='#f59e0b44';ctx.lineWidth=1;ctx.strokeRect(px+1,py+1,m.tile-2,m.tile-2);
+          } else {
+            // Opção C: Borda sutil
+            ctx.strokeStyle='#f59e0b33';ctx.lineWidth=1;ctx.setLineDash([2,2]);
+            ctx.strokeRect(px+2,py+2,m.tile-4,m.tile-4);ctx.setLineDash([]);
+          }
+        }
+      }
+    }
+  }
+  ctx.restore();
+}
+
+function drawFog2D(ctx,m){
+  if(!showFog) return;
+  const visibleSet=cachedVisibility;
+  ctx.save();
+  for(let y=0;y<C.MAP_HEIGHT;y++){
+    for(let x=0;x<C.MAP_WIDTH;x++){
+      const k=`${x},${y}`;
+      if(!visibleSet.has(k)){
+        const px=m.ox+x*m.tile,py=m.oy+y*m.tile;
+        if(fogStyle==='A'){
+          // Opção A: Células escuras opacas discretas
+          ctx.fillStyle='#050c14f0';ctx.fillRect(px,py,m.tile,m.tile);
+          ctx.strokeStyle='#0f1c2966';ctx.lineWidth=1;ctx.strokeRect(px,py,m.tile,m.tile);
+        } else if(fogStyle==='B'){
+          // Opção B: Névoa densa com gradiente escuro
+          ctx.fillStyle='#060d15e4';ctx.fillRect(px,py,m.tile,m.tile);
+        } else {
+          // Opção C: Sombra dessaturada fria
+          ctx.fillStyle='#091420b8';ctx.fillRect(px,py,m.tile,m.tile);
+        }
+      }
+    }
+  }
+  ctx.restore();
+}
+
+function drawGhostMemory2D(ctx,m){
+  const visibleSet=cachedVisibility;
+  const records=state.fogKnowledge?.[LOCAL_PLAYER]||[];
+  for(const rec of records){
+    const k=`${rec.lastKnownPosition.x},${rec.lastKnownPosition.y}`;
+    if(!visibleSet.has(k)){
+      const px=m.ox+(rec.lastKnownPosition.x+.5)*m.tile,py=m.oy+(rec.lastKnownPosition.y+.5)*m.tile;
+      ctx.save();
+      if(fogStyle==='A'){
+        // Marcador tático [?]
+        ctx.strokeStyle='#8ea2b4aa';ctx.lineWidth=1.5;ctx.setLineDash([3,3]);
+        ctx.strokeRect(px-m.tile*.3,py-m.tile*.3,m.tile*.6,m.tile*.6);
+        ctx.fillStyle='#8ea2b4dd';ctx.font=`800 ${Math.max(8,m.tile*.25)}px monospace`;
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText('?',px,py);
+      } else if(fogStyle==='B'){
+        // Fantasma holográfico suave
+        ctx.fillStyle='#72baff33';ctx.beginPath();ctx.arc(px,py,m.tile*.28,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='#72baffaa';ctx.lineWidth=1.5;ctx.setLineDash([2,3]);ctx.stroke();
+        ctx.fillStyle='#a5d8ff';ctx.font=`800 ${Math.max(7,m.tile*.18)}px sans-serif`;
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(rec.unitId.slice(-1),px,py);
+      } else {
+        // Silhueta com contorno pontilhado
+        ctx.strokeStyle='#b4c2ce88';ctx.lineWidth=1.2;ctx.setLineDash([1,3]);
+        ctx.beginPath();ctx.arc(px,py,m.tile*.26,0,Math.PI*2);ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+}
+
+function drawAttackLineAndTarget2D(ctx,m){
+  const u=selected(),tgt=selectedTarget();
+  if(!tgt) return;
+  const visibleSet=cachedVisibility;
+  const isVis=visibleSet.has(`${tgt.x},${tgt.y}`);
+  if(!isVis) return;
+
+  const classification=C.classifyTarget(state,u.id,tgt.id,LOCAL_PLAYER);
+  const p1=motionPosition(u),p2=motionPosition(tgt);
+  const cx1=m.ox+(p1.x+.5)*m.tile,cy1=m.oy+(p1.y+.5)*m.tile;
+  const cx2=m.ox+(p2.x+.5)*m.tile,cy2=m.oy+(p2.y+.5)*m.tile;
+
+  ctx.save();
+  // Traçado da Linha de Ataque
+  if(fogStyle==='B'){
+    // Opção B: Feixe dinâmico / laser vetorial
+    if(classification.lineClear){
+      ctx.strokeStyle='#52e096dd';ctx.lineWidth=Math.max(2,m.tile*.08);ctx.beginPath();ctx.moveTo(cx1,cy1);ctx.lineTo(cx2,cy2);ctx.stroke();
+    } else if(classification.blockingTile){
+      const bx=m.ox+(classification.blockingTile.x+.5)*m.tile,by=m.oy+(classification.blockingTile.y+.5)*m.tile;
+      ctx.strokeStyle='#ff6b6bdd';ctx.lineWidth=Math.max(2,m.tile*.08);ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(cx1,cy1);ctx.lineTo(bx,by);ctx.stroke();
+      // Ponto de impacto no obstáculo
+      ctx.fillStyle='#ff5252';ctx.beginPath();ctx.arc(bx,by,m.tile*.18,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.setLineDash([]);ctx.stroke();
+    }
+  } else if(fogStyle==='A'){
+    // Opção A: Células destacadas da trajetória
+    if(classification.touched){
+      for(const t of classification.touched){
+        const tx=m.ox+t.x*m.tile,ty=m.oy+t.y*m.tile;
+        ctx.fillStyle=classification.lineClear?'#52e09628':'#ff6b6b28';
+        ctx.fillRect(tx+2,ty+2,m.tile-4,m.tile-4);
+      }
+    }
+  } else {
+    // Opção C: Linha sutil
+    ctx.strokeStyle=classification.lineClear?'#78dca799':'#ff858599';ctx.lineWidth=1.5;
+    ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(cx1,cy1);ctx.lineTo(cx2,cy2);ctx.stroke();
+  }
+
+  // Destaque do Alvo Inimigo
+  const isLegal=classification.status==='LEGAL';
+  const strokeCol=isLegal?'#78dca7':classification.status==='BLOCKED'?'#ff6b6b':'#f59e0b';
+  if(fogStyle==='A'){
+    ctx.strokeStyle=strokeCol;ctx.lineWidth=2;
+    const r=m.tile*.42;
+    ctx.strokeRect(cx2-r,cy2-r,r*2,r*2);
+  } else if(fogStyle==='B'){
+    ctx.strokeStyle=strokeCol;ctx.lineWidth=2.5;
+    const r=m.tile*.40+Math.sin(performance.now()*.006)*2;
+    ctx.beginPath();ctx.arc(cx2,cy2,r,0,Math.PI*2);ctx.stroke();
+    // Retículo circular
+    ctx.beginPath();ctx.moveTo(cx2-r-4,cy2);ctx.lineTo(cx2+r+4,cy2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx2,cy2-r-4);ctx.lineTo(cx2,cy2+r+4);ctx.stroke();
+  } else {
+    // Opção C: Contorno Neon
+    ctx.strokeStyle=strokeCol;ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(cx2,cy2,m.tile*.34,0,Math.PI*2);ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function draw2D(c){
+  const ctx=c.getContext('2d'),m=fit2D(c);ctx.clearRect(0,0,m.w,m.h);
+  const tm=new Map(state.terrain.map(t=>[C.key(t),t.kind]));
+
+  // 1. Terreno base
+  for(let y=0;y<C.MAP_HEIGHT;y++) for(let x=0;x<C.MAP_WIDTH;x++){
+    const kind=tm.get(`${x},${y}`)||'plain',px=m.ox+x*m.tile,py=m.oy+y*m.tile;
+    ctx.fillStyle=terrainColor(kind,(x+y)%2);ctx.fillRect(px,py,m.tile,m.tile);
+    ctx.strokeStyle='#72879b2e';ctx.strokeRect(px,py,m.tile,m.tile);
+    if(showLabels&&m.tile>19){ctx.fillStyle='#b7c7d155';ctx.font=`${Math.max(7,m.tile*.19)}px monospace`;ctx.fillText(`${x},${y}`,px+3,py+9);}
+  }
+  drawTerrainQa2D(ctx,m);
+
+  // 2. Obstáculos e bases
+  for(const o of state.obstacles){ctx.fillStyle='#71818b';ctx.fillRect(m.ox+(o.x+.18)*m.tile,m.oy+(o.y+.18)*m.tile,m.tile*.64,m.tile*.64);}
+  for(const b of state.bases){ctx.fillStyle=b.playerId==='p1'?'#c9a34e':'#af5362';ctx.fillRect(m.ox+b.x*m.tile,m.oy+b.y*m.tile,m.tile,m.tile);}
+
+  // 3. Alcance de movimento e ataque
+  drawReach2D(ctx,m);
+  drawAttackRange2D(ctx,m);
+
+  // 4. Fog of War
+  drawFog2D(ctx,m);
+  drawGhostMemory2D(ctx,m);
+
+  // 5. Rota de movimento planejada
+  drawPlan2D(ctx,m);
+  drawPathCosts2D(ctx,m);
+
+  // 6. Linha de Ataque e Alvo
+  drawAttackLineAndTarget2D(ctx,m);
+
+  // 7. Unidades visíveis
+  const visibleSet=cachedVisibility;
+  for(const u of state.units){
+    const inFog=!visibleSet.has(`${u.x},${u.y}`);
+    if(u.playerId!=='p1'&&inFog&&!reducedInfoMode) continue;
+    if(reducedInfoMode&&u.playerId!=='p1'&&inFog) continue;
+
+    const p=motionPosition(u),cx=m.ox+(p.x+.5)*m.tile,cy=m.oy+(p.y+.5)*m.tile,r=m.tile*.29;
+    ctx.fillStyle=u.playerId==='p1'?'#4d9eea':'#d95c6b';
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=u.id===selectedId?'#f5d36c':u.id===selectedTargetId?'#ff6b6b':'#f4f8fb';
+    ctx.lineWidth=u.id===selectedId||u.id===selectedTargetId?3:1.3;
+    ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font=`800 ${Math.max(8,r*.7)}px sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(u.id.slice(-1),cx,cy);
+
+    drawSpdScreenBadge(ctx,cx,cy+r+m.tile*.22,m.tile,u);
+    drawRecoveryRingAndBadge(ctx,cx,cy-r-m.tile*.24,m.tile,recoveryBadgeForUnit(u),u);
+
+    // Stance DEF indicator
+    if(u.stance==='DEF'){
+      ctx.fillStyle='#2b3c4f';ctx.strokeStyle='#7ba0c9';ctx.lineWidth=1;
+      ctx.beginPath();ctx.roundRect(cx-m.tile*.25,cy+r+m.tile*.42,m.tile*.5,m.tile*.16,2);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#d5e4f7';ctx.font=`800 ${Math.max(6,m.tile*.12)}px sans-serif`;ctx.fillText('DEF',cx,cy+r+m.tile*.50);
+    }
+  }
+
+  const popupNow=performance.now();
+  for(const p of spdPopups){
+    const u=C.getUnit(state,p.unitId);if(!u)continue;
+    const q=motionPosition(u),cx=m.ox+(q.x+.5)*m.tile,cy=m.oy+(q.y+.5)*m.tile;
+    drawSpdPopup(ctx,cx,cy-m.tile*.60,m.tile,p,popupNow);
+  }
+}
+
+// -------------------------------------------------------------
+// RENDERIZAÇÃO 3D (FOG + ALCANCE + ALVOS COM OPÇÕES A, B, C)
+// -------------------------------------------------------------
+function drawReach2D(ctx,m){
+  if(!controllable())return;
+  for(const r of reachable){
+    const x=m.ox+r.x*m.tile,y=m.oy+r.y*m.tile;
+    ctx.fillStyle='#4d9eea28';ctx.fillRect(x+1,y+1,m.tile-2,m.tile-2);
+    ctx.strokeStyle='#72baff44';ctx.strokeRect(x+2,y+2,m.tile-4,m.tile-4);
+  }
+}
+function drawPlan2D(ctx,m){
+  const p=displayPlan();if(!p||!p.path?.length)return;
+  const u=selected(),origin={x:u.x,y:u.y},isActive=!!p.active;
+  ctx.save();
+  ctx.strokeStyle=isActive?'#f2d77f':p.ok?'#f0cc62':'#db6868';
+  ctx.lineWidth=Math.max(2,m.tile*.12);ctx.beginPath();
+  ctx.moveTo(m.ox+(origin.x+.5)*m.tile,m.oy+(origin.y+.5)*m.tile);
+  for(let i=0;i<p.path.length;i++) ctx.lineTo(m.ox+(p.path[i].x+.5)*m.tile,m.oy+(p.path[i].y+.5)*m.tile);
+  ctx.stroke();
+  const tgt=p.target||pendingTarget;
+  if(tgt){
+    const x=m.ox+tgt.x*m.tile,y=m.oy+tgt.y*m.tile;
+    ctx.strokeStyle=isActive?'#e6c468':p.ok?'#78dca7':'#ff8585';ctx.lineWidth=3;
+    ctx.strokeRect(x+2,y+2,m.tile-4,m.tile-4);
+  }
+  ctx.restore();
+}
+function drawPathCosts2D(ctx,m){
+  if(terrainStyle!=='B')return;
+  const p=displayPlan();if(!p?.path?.length)return;
+  for(let i=0;i<p.path.length;i++){
+    const q=p.path[i],x=m.ox+(q.x+.5)*m.tile,y=m.oy+(q.y+.5)*m.tile;
+    const isSpecial=q.stepCost>1,txt=isSpecial?`+${q.stepCost} (${q.cumulativeCost})`:`${q.cumulativeCost}`;
+    ctx.save();ctx.font=`800 ${Math.max(8,m.tile*.22)}px sans-serif`;
+    const tw=ctx.measureText(txt).width;
+    ctx.fillStyle=isSpecial?'#38204bee':'#0c1822ee';ctx.strokeStyle=isSpecial?'#c998f5':'#5a7b98';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(x-tw/2-3,y-m.tile*.24-7,tw+6,14,3);ctx.fill();ctx.stroke();
+    ctx.fillStyle=isSpecial?'#ffd083':'#eaf4fc';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(txt,x,y-m.tile*.24);ctx.restore();
+  }
+}
+
+function drawTerrainQa2D(ctx,m){
+  if(!showFields)return;
+  const cost=state.qa.costFieldEntryCost;
+  for(let y=0;y<C.MAP_HEIGHT;y++) for(let x=0;x<C.MAP_WIDTH;x++){
+    const p={x,y};if(!C.isQaCostFieldTile(state,p))continue;
+    const px=m.ox+x*m.tile,py=m.oy+y*m.tile;
+    if(terrainStyle==='C'){
+      ctx.strokeStyle='#b68cf255';ctx.lineWidth=1;ctx.strokeRect(px+2,py+2,m.tile-4,m.tile-4);
+    } else {
+      ctx.fillStyle=terrainStyle==='A'?'#9a72d929':'#9a72d91b';ctx.fillRect(px+1,py+1,m.tile-2,m.tile-2);
+    }
+    if(terrainStyle==='A'&&m.tile>8){
+      ctx.save();
+      const txt=`×${cost}`;
+      ctx.font=`800 ${Math.max(7,m.tile*.22)}px sans-serif`;
+      const tw=ctx.measureText(txt).width;
+      ctx.fillStyle='#2a1a3dee';ctx.strokeStyle='#b68cf2';ctx.lineWidth=1;
+      ctx.beginPath();ctx.roundRect(px+m.tile*.5-tw/2-3,py+m.tile*.5-7,tw+6,14,3);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#f0e6ff';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(txt,px+m.tile*.5,py+m.tile*.5);
+      ctx.restore();
+    }
+  }
+  for(const t of state.terrain) if(t.kind==='impassable'){
+    const px=m.ox+t.x*m.tile,py=m.oy+t.y*m.tile;
+    ctx.strokeStyle='#ff9a9a99';ctx.lineWidth=1.5;ctx.beginPath();
+    ctx.moveTo(px+3,py+3);ctx.lineTo(px+m.tile-3,py+m.tile-3);
+    ctx.moveTo(px+m.tile-3,py+3);ctx.lineTo(px+3,py+m.tile-3);
+    ctx.stroke();
+  }
+}
+
+function drawTerrainQa3D(ctx,b){
+  if(!showFields)return;
+  const cost=state.qa.costFieldEntryCost;
+  for(let y=0;y<C.MAP_HEIGHT;y++) for(let x=0;x<C.MAP_WIDTH;x++){
+    const p={x,y};if(!C.isQaCostFieldTile(state,p))continue;
+    const q=quad(x,y,.012,b);
+    poly(ctx,q,terrainStyle==='C'?null:(terrainStyle==='A'?'#9a72d929':'#9a72d91b'),'#b68cf255');
+    if(terrainStyle==='A'){
+      const z=project(V(x+.5,y+.5,.035),b);
+      if(z&&z.scale>4){
+        const txt=`×${cost}`;
+        ctx.save();
+        ctx.font='800 8.5px sans-serif';
+        const tw=ctx.measureText(txt).width;
+        ctx.fillStyle='#2a1a3dee';ctx.strokeStyle='#b68cf2';ctx.lineWidth=1;
+        ctx.beginPath();ctx.roundRect(z.x-tw/2-3,z.y-6.5,tw+6,13,3);ctx.fill();ctx.stroke();
+        ctx.fillStyle='#f0e6ff';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(txt,z.x,z.y);
+        ctx.restore();
+      }
+    }
+  }
+}
+
+function drawPathCosts3D(ctx,b){
+  if(terrainStyle!=='B')return;
+  const p=displayPlan();if(!p?.path?.length)return;
+  for(let i=0;i<p.path.length;i++){
+    const q=p.path[i],z=project(V(q.x+.5,q.y+.5,.06),b);
+    if(!z)continue;
+    const isSpecial=q.stepCost>1,txt=isSpecial?`+${q.stepCost} (${q.cumulativeCost})`:`${q.cumulativeCost}`;
+    ctx.save();
+    ctx.font='800 8.5px sans-serif';
+    const tw=ctx.measureText(txt).width;
+    ctx.fillStyle=isSpecial?'#38204bee':'#0c1822ee';
+    ctx.strokeStyle=isSpecial?'#c998f5':'#5a7b98';
+    ctx.lineWidth=isSpecial?1.5:1;
+    ctx.beginPath();ctx.roundRect(z.x-tw/2-3,z.y-14,tw+6,13,3);ctx.fill();ctx.stroke();
+    ctx.fillStyle=isSpecial?'#ffd083':'#eaf4fc';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(txt,z.x,z.y-7.5);
+    ctx.restore();
+  }
+}
+
+function draw3D(c){
+  const ctx=c.getContext('2d'),b=cameraBasis(c);ctx.clearRect(0,0,b.w,b.h);
+  const tiles=[];
+  for(let y=0;y<C.MAP_HEIGHT;y++) for(let x=0;x<C.MAP_WIDTH;x++){
+    const p=project(V(x+.5,y+.5,0),b);if(p) tiles.push({x,y,d:p.z});
+  }
+  tiles.sort((a,z)=>z.d-a.d);
+  const tm=new Map(state.terrain.map(t=>[C.key(t),t.kind]));
+  const visibleSet=cachedVisibility;
+
+  for(const t of tiles){
+    const inFog=!visibleSet.has(`${t.x},${t.y}`);
+    let col=terrainColor(tm.get(`${t.x},${t.y}`)||'plain',(t.x+t.y)%2);
+    if(showFog&&inFog){
+      col=fogStyle==='A'?'#060c14':fogStyle==='B'?'#08101a':'#101a24';
+    }
+    poly(ctx,quad(t.x,t.y,0,b),col,'#75889a27');
+  }
+
+  drawTerrainQa3D(ctx,b);
+
+  // Alcance e alvos em 3D
+  if(showRange&&controllable()){
+    const u=selected(),rng=u.attackRange||1;
+    for(let dy=-rng;dy<=rng;dy++) for(let dx=-rng;dx<=rng;dx++){
+      if(Math.abs(dx)+Math.abs(dy)<=rng&&inBounds({x:u.x+dx,y:u.y+dy})){
+        poly(ctx,quad(u.x+dx,u.y+dy,.015,b),'#f59e0b20','#f59e0b44');
+      }
+    }
+  }
+
+  // Rota 3D
+  const p=displayPlan();
+  if(p?.path?.length){
+    const u=selected(),origin={x:u.x,y:u.y};
+    let a=project(V(origin.x+.5,origin.y+.5,.07),b);
+    if(a){
+      ctx.save();ctx.strokeStyle='#f0cc62';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(a.x,a.y);
+      for(const q of p.path){const z=project(V(q.x+.5,q.y+.5,.07),b);if(z)ctx.lineTo(z.x,z.y);}
+      ctx.stroke();ctx.restore();
+    }
+    drawPathCosts3D(ctx,b);
+  }
+
+  // Feixe de ataque 3D
+  const tgt=selectedTarget();
+  if(tgt&&visibleSet.has(`${tgt.x},${tgt.y}`)){
+    const u=selected(),cls=C.classifyTarget(state,u.id,tgt.id,LOCAL_PLAYER);
+    const z1=project(V(u.x+.5,u.y+.5,.4),b),z2=project(V(tgt.x+.5,tgt.y+.5,.4),b);
+    if(z1&&z2){
+      ctx.save();
+      ctx.strokeStyle=cls.lineClear?'#52e096':'#ff6b6b';ctx.lineWidth=3;
+      if(!cls.lineClear) ctx.setLineDash([5,5]);
+      ctx.beginPath();ctx.moveTo(z1.x,z1.y);ctx.lineTo(z2.x,z2.y);ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  const objs=[];
+  for(const o of state.obstacles){const p=project(V(o.x+.5,o.y+.5,.45),b);if(p)objs.push({type:'o',v:o,d:p.z,p});}
+  for(const ba of state.bases){const p=project(V(ba.x+.5,ba.y+.5,.45),b);if(p)objs.push({type:'b',v:ba,d:p.z,p});}
+  for(const u of state.units){
+    if(u.playerId!==LOCAL_PLAYER&&!visibleSet.has(`${u.x},${u.y}`)) continue;
+    const q=motionPosition(u),p=project(V(q.x+.5,q.y+.5,.78),b);
+    if(p) objs.push({type:'u',v:u,q,d:p.z,p});
+  }
+  objs.sort((a,z)=>z.d-a.d);
+
+  for(const o of objs){
+    if(o.type!=='u'){
+      ctx.fillStyle=o.type==='b'?(o.v.playerId==='p1'?'#c9a34e':'#af5362'):'#75858e';
+      const s=clamp(o.p.scale*.28,5,15);ctx.fillRect(o.p.x-s/2,o.p.y-s/2,s,s);continue;
+    }
+    const foot=project(V(o.q.x+.5,o.q.y+.5,0),b),r=clamp(o.p.scale*.22,5,20);
+    ctx.strokeStyle='#000a';ctx.lineWidth=Math.max(2,r*.5);ctx.beginPath();ctx.moveTo(foot.x,foot.y);ctx.lineTo(o.p.x,o.p.y);ctx.stroke();
+    ctx.fillStyle=o.v.playerId==='p1'?'#4d9eea':'#d95c6b';ctx.beginPath();ctx.arc(o.p.x,o.p.y,r,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=o.v.id===selectedId?'#f5d36c':o.v.id===selectedTargetId?'#ff6b6b':'#fff';
+    ctx.lineWidth=o.v.id===selectedId||o.v.id===selectedTargetId?3:1.2;ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font='800 10px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(o.v.id.slice(-1),o.p.x,o.p.y);
+
+    const badgeScale=clamp(o.p.scale*.9,24,42);
+    drawSpdScreenBadge(ctx,o.p.x,o.p.y+r+10,badgeScale,o.v);
+    drawRecoveryRingAndBadge(ctx,o.p.x,o.p.y-r-12,badgeScale,recoveryBadgeForUnit(o.v),o.v);
+  }
+}
+
+function grid2D(c,e){
+  const m=fit2D(c),r=c.getBoundingClientRect(),px=(e.clientX-r.left)*m.dpr,py=(e.clientY-r.top)*m.dpr;
+  return {x:Math.floor((px-m.ox)/m.tile),y:Math.floor((py-m.oy)/m.tile)};
+}
+function rayToPlane(c,cx,cy){
+  const b=cameraBasis(c),r=c.getBoundingClientRect(),px=(cx-r.left)*b.dpr,py=(cy-r.top)*b.dpr,nx=(px-b.cx)/b.f,ny=-(py-b.cy)/b.f,dir=norm(add(b.fwd,add(mul(b.right,nx),mul(b.up,ny))));
+  if(Math.abs(dir.z)<1e-7)return null;const t=-b.pos.z/dir.z;if(t<=0)return null;
+  return add(b.pos,mul(dir,t));
+}
+function grid3D(c,e){
+  const h=rayToPlane(c,e.clientX,e.clientY);return h?{x:Math.floor(h.x),y:Math.floor(h.y)}:null;
+}
+function planForGrid(g){
+  if(!g||!C.inBounds(g)||!controllable())return null;
+  return C.planMovement(state,selectedId,g);
+}
+function setHover(g,clientX=null,clientY=null){
+  if(clientX!=null&&clientY!=null){lastClientPointer.x=clientX;lastClientPointer.y=clientY;}
+  hover=g&&C.inBounds(g)?g:null;
+  hoverPlan=hover?planForGrid(hover):null;
+  updateUI();
+}
+
+function chooseGrid(g){
+  if(!g||!C.inBounds(g)){cancelPlan();return;}
+  if(pendingTarget&&pendingTarget.x===g.x&&pendingTarget.y===g.y){
+    cancelPlan();return;
+  }
+  const hit=C.unitAt(state,g,null);
+  if(hit){
+    if(hit.playerId===LOCAL_PLAYER){
+      selectedId=hit.id;pendingPlan=null;pendingTarget=null;hover=g;refreshReachable();
+      log(`selecionado aliado ${hit.id} (${hit.name}) em ${hit.x},${hit.y}`);
+    } else {
+      selectTarget(hit.id);
+    }
+    updateUI();
+    return;
+  }
+  // Trava destino no bloco vazio
+  if(!controllable()) return;
+  pendingTarget={x:g.x,y:g.y};
+  pendingPlan=C.planMovement(state,selectedId,pendingTarget);
+  hover=g;hoverPlan=null;
+  updateUI();
+}
+
+function cancelPlan(){
+  pendingTarget=null;pendingPlan=null;hoverPlan=null;
+  updateUI();
+}
+function confirmPlan(){
+  if(paused||autoPaused||!pendingTarget||!pendingPlan?.ok)return false;
+  const cmd={type:'MOVE',mode:reactionMode?'REACTION':'NORMAL',seq:nextSeq++,unitId:selectedId,target:{...pendingTarget},issuedAtTick:state.tick};
+  commandQueue.push(cmd);
+  log(`comando #${cmd.seq} enfileirado: ${cmd.unitId} → ${cmd.target.x},${cmd.target.y}`,'command');
+  SoundSystem.play('CONFIRM_MOVE',cmd);
+  pendingPlan=null;pendingTarget=null;hoverPlan=null;
+  updateUI();
+  return true;
+}
+
+function processCommands(){
+  commandQueue.sort((a,b)=>a.seq-b.seq);
+  while(commandQueue.length){
+    const cmd=commandQueue.shift(),result=C.beginMovementCommand(state,cmd);
+    if(result.ok){
+      selectedId=cmd.unitId;refreshReachable();
+      log(`#${cmd.seq} aceito · custo ${result.plan.cost} SPD`,'pass');
+    } else {
+      log(`#${cmd.seq} rejeitado: ${result.reason}`,'error');
+      toast(result.reason);
+    }
+  }
+}
+
+function applyMovementVisualEvent(e){
+  if(e.type==='ENTER_TILE'||e.type==='PASS_ALLY'){
+    visualMotions.set(e.unitId,{from:{...e.from},to:{...e.to},start:performance.now(),duration:C.STEP_MS});
+    timerResetPulses.set(e.unitId,{time:performance.now(),tick:state.tick});
+  }
+}
+
+function logicStep(){
+  if(paused||autoPaused)return;
+  state.tick+=1;
+  processCommands();
+  const events=C.stepMovements(state);
+  for(const e of events) applyMovementVisualEvent(e);
+  for(const e of C.stepRecovery(state)) handleRecoveryEvent(e);
+  refreshReachable();
+  updateUI();
+}
+
+function setView(v){
+  view=v;
+  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  $('#view2d').classList.toggle('active',v==='2d');
+  $('#view3d').classList.toggle('active',v==='3d');
+  $('#viewQA').classList.toggle('active',v==='qa');
+  log(`orientação ${v} ativada`,'camera');
+}
+
+function attach(c,mode){
+  let drag=false,start={x:0,y:0},dist=0;
+  c.addEventListener('pointerdown',e=>{
+    drag=true;start={x:e.clientX,y:e.clientY};dist=0;c.setPointerCapture(e.pointerId);
+  });
+  c.addEventListener('pointermove',e=>{
+    if(drag){
+      const dx=e.clientX-start.x,dy=e.clientY-start.y;
+      dist+=Math.hypot(dx,dy);start={x:e.clientX,y:e.clientY};
+      if(mode==='3d'){
+        camera.yaw+=dx*.006;camera.pitch=clamp(camera.pitch+dy*.006,deg(20),deg(80));
+        updateCameraControls();
+      }
+    }
+    const g=mode==='2d'?grid2D(c,e):grid3D(c,e);
+    setHover(g,e.clientX,e.clientY);
+  });
+  c.addEventListener('pointerup',e=>{
+    drag=false;
+    if(dist<CLICK_SLOP_PX){
+      const g=mode==='2d'?grid2D(c,e):grid3D(c,e);
+      chooseGrid(g);
+    }
+  });
+  c.addEventListener('wheel',e=>{
+    e.preventDefault();
+    if(mode==='3d'){
+      camera.distance=clamp(camera.distance+Math.sign(e.deltaY)*2,12,75);
+      updateCameraControls();
+    }
+  },{passive:false});
+}
+
+function runTests(){
+  const results=[],test=(n,fn)=>{try{fn();results.push({name:n,ok:true});}catch(e){results.push({name:n,ok:false,error:e.message});}},assert=(c,m='assertion')=>{if(!c)throw Error(m);};
+  
+  // Testes de regressão canônicos e novos testes do VIS-005
+  test('mapa 31×17 · 20 Hz/50 ms · recuperação 160 ticks',()=>assert(C.MAP_WIDTH===31&&C.MAP_HEIGHT===17&&C.SIMULATION_HZ===20&&C.STEP_MS===50&&C.SPD_RECOVERY_TICKS===160));
+  test('atributos dos monstros no cenário de teste seguem inteiros coerentes com o GDD v0.43 (HP = Nível, MP estrutural e inteiros)',()=>{
+    const s=C.createScenario();
+    for(const u of s.units){
+      assert(Number.isSafeInteger(u.atk),`ATK ${u.atk} não inteiro`);
+      assert(Number.isSafeInteger(u.def),`DEF ${u.def} não inteiro`);
+      assert(u.hp===u.level,`HP base ${u.hp} != Nível ${u.level}`);
+      assert(u.spd>=1&&u.spd<=7,`SPD ${u.spd} fora de 1-7`);
+      assert(u.vis>=1&&u.vis<=5,`VIS ${u.vis} fora de 1-5`);
+    }
+  });
+  test('visão compartilhada une alcance dos monstros aliados e raio 5 da base',()=>{
+    const s=C.createScenario(),vis=C.calculateVisibility(s,'p1');
+    assert(vis.has('0,8'),'base p1 visível');
+    assert(vis.has('3,8'),'P1-A visível');
+    assert(vis.has('13,8'),'P2-A em (13,8) avistado por aliados');
+    assert(!vis.has('20,3'),'P2-E em (20,3) oculto no Fog');
+  });
+  test('obstáculo bloqueia linha de visão e linha de ataque',()=>{
+    const s=C.createScenario();
+    const ray=C.hasClearAttackLine({x:5,y:5},{x:9,y:5},s.obstacles);
+    assert(!ray.clear&&ray.blockingTile.x===7&&ray.blockingTile.y===5,'linha bloqueada por rocha em (7,5)');
+  });
+  test('classificação de alvo distingue LEGAL, BLOQUEADO, FORA_DE_ALCANCE e NA_NEVOA',()=>{
+    const s=C.createScenario();
+    const outOfRange=C.classifyTarget(s,'P1-B','P2-A','p1');
+    assert(outOfRange.status==='OUT_OF_RANGE','distância 8 excede RNG 3');
+    const inFog=C.classifyTarget(s,'P1-A','P2-E','p1');
+    assert(inFog.status==='IN_FOG','P2-E está na névoa');
+  });
+  test('previsão de combate calcula modo defesa subtraindo DEF do ATK',()=>{
+    const atk={id:'P1-A',x:12,y:8,atk:4,def:3,spd:5,hp:4,attackRange:1};
+    const def={id:'P2-D',x:13,y:8,atk:6,def:4,spd:5,hp:5,stance:'DEF',attackRange:1};
+    const fc=C.resolveCombatForecast(atk,def);
+    assert(fc.mode==='defense'&&fc.damageToDefender===0&&fc.damageToAttacker===0);
+  });
+  test('previsão de combate calcula contra-ataque simultâneo com SPD maior',()=>{
+    const atk={id:'P1-A',x:12,y:8,atk:4,def:3,spd:4,hp:4,attackRange:1};
+    const def={id:'P2-A',x:13,y:8,atk:5,def:3,spd:5,hp:4,stance:'ATK',attackRange:1};
+    const fc=C.resolveCombatForecast(atk,def);
+    assert(fc.mode==='counterattack'&&fc.damageToDefender===4&&fc.damageToAttacker===5);
+  });
+  test('previsão de combate calcula ataque indefeso quando defensor não alcança',()=>{
+    const atk={id:'P1-B',x:10,y:8,atk:3,def:2,spd:4,hp:3,attackRange:3};
+    const def={id:'P2-A',x:13,y:8,atk:5,def:3,spd:4,hp:4,stance:'ATK',attackRange:1};
+    const fc=C.resolveCombatForecast(atk,def);
+    assert(fc.mode==='undefended'&&fc.damageToDefender===3&&fc.damageToAttacker===0);
+  });
+  test('atalho auxiliar de QA com setas direcionais atualiza coordenadas e respeita regras',()=>{
+    const os=state;state=C.createScenario();selectedId='P1-A';
+    assert(moveSelectedWithArrow(1,0,'Leste'));
+    assert(commandQueue.length===1&&commandQueue[0].target.x===4&&commandQueue[0].target.y===8);
+    state=os;
+  });
+  test('atalho auxiliar de QA com setas bloqueado se destino for obstáculo',()=>{
+    const os=state;state=C.createScenario();
+    const u=C.getUnit(state,'P1-A');u.x=7;u.y=3;selectedId='P1-A';
+    assert(!moveSelectedWithArrow(0,1,'Sul'),'bloqueia movimento contra rocha em (7,4)');
+    state=os;
+  });
+  test('três opções A, B e C de Fog preservam o mesmo hash autoritativo',()=>{
+    const h0=C.hashState(state);
+    assert(setFogStyle('A')&&C.hashState(state)===h0);
+    assert(setFogStyle('B')&&C.hashState(state)===h0);
+    assert(setFogStyle('C')&&C.hashState(state)===h0);
+    setFogStyle('A');
+  });
+  test('opções A, B e C de terreno preservam o mesmo hash autoritativo',()=>{
+    const h0=C.hashState(state);
+    assert(setTerrainStyle('A')&&C.hashState(state)===h0);
+    assert(setTerrainStyle('B')&&C.hashState(state)===h0);
+    assert(setTerrainStyle('C')&&C.hashState(state)===h0);
+    setTerrainStyle('A');
+  });
+  test('recuperação de SPD +2 após 160 ticks de ociosidade preservada do VIS-004',()=>{
+    const s=C.createScenario(),u=C.getUnit(s,'P1-A');
+    u.spd=3;C.beginMovementCommand(s,{type:'MOVE',unitId:u.id,target:{x:4,y:8},seq:1});
+    C.stepMovements(s);s.tick=160;
+    const ev=C.stepRecovery(s);assert(ev.length===1&&ev[0].gained===2&&u.spd===4);
+  });
+  test('memória de Fog registra última posição conhecida do inimigo',()=>{
+    const s=C.createScenario();
+    const records=C.updateFogKnowledge(s,'p1');
+    assert(records.some(r=>r.unitId==='P2-A'&&r.currentlyVisible));
+  });
+  test('GLIDER atravessa terreno impassável e LEAPER 2 realiza diagonal',()=>{
+    const s=C.createScenario(),glider=C.getUnit(s,'P1-C'),leaper=C.getUnit(s,'P1-E');
+    assert(C.hasGlider(glider)&&C.leaperBudget(leaper)===2);
+  });
+  test('terrainStyle Opção A desenha badge persistente de custo no bloco (herança do VIS-004)',()=>{
+    const os=state,origStyle=terrainStyle;
+    setTerrainStyle('A');
+    assert(terrainStyle==='A');
+    const qaTiles=[];
+    for(let y=0;y<C.MAP_HEIGHT;y++) for(let x=0;x<C.MAP_WIDTH;x++){
+      if(C.isQaCostFieldTile(state,{x,y})) qaTiles.push({x,y});
+    }
+    assert(qaTiles.length>0,'deve haver blocos de Campo QA no cenário');
+    const mockCtx={
+      save(){},restore(){},measureText:()=>({width:12}),beginPath(){},roundRect(){},
+      fill(){},stroke(){},fillText(){},fillRect(){},strokeRect(){},moveTo(){},lineTo(){},
+      font:'',fillStyle:'',strokeStyle:'',lineWidth:1,textAlign:'',textBaseline:''
+    };
+    drawTerrainQa2D(mockCtx,{ox:0,oy:0,tile:24,w:800,h:600});
+    setTerrainStyle(origStyle);
+  });
+
+  const pass=results.filter(r=>r.ok).length,m=$('#testModal');
+  m.innerHTML=`<div class="testsummary">VIS-005 · ${pass}/${results.length} testes passaram</div>`+
+    results.map(r=>`<div class="testrow ${r.ok?'pass':'fail'}"><span>${r.ok?'✓':'✕'}</span><span>${r.name}${r.ok?'':` — ${r.error}`}</span></div>`).join('')+
+    `<div class="help">Clique para fechar.</div>`;
+  m.classList.add('show');
+  m.onclick=()=>m.classList.remove('show');
+  log(`testes embutidos VIS-005: ${pass}/${results.length}`,'pass');
+  return results;
+}
+
+// Listeners
+Object.values(canvases).forEach((c,i)=>attach(c,i===0||i===2?'2d':'3d'));
+$$('.nav button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+$$('.fogStyleBtn').forEach(b=>b.addEventListener('click',()=>setFogStyle(b.dataset.fogStyle)));
+$$('.terrainStyleBtn').forEach(b=>b.addEventListener('click',()=>setTerrainStyle(b.dataset.terrainStyle)));
+$('#confirmMove').addEventListener('click',confirmPlan);
+$('#confirmMoveStage').addEventListener('click',confirmPlan);
+$('#cancelPlan').addEventListener('click',cancelPlan);
+$('#cancelPlanStage').addEventListener('click',cancelPlan);
+$('#prevTargetBtn').addEventListener('click',()=>cycleTarget(-1));
+$('#nextTargetBtn').addEventListener('click',()=>cycleTarget(1));
+$('#clearTargetBtn').addEventListener('click',()=>selectTarget(null));
+$('#runTests').addEventListener('click',runTests);
+$('#qaCost').addEventListener('change',e=>setQaCost(e.target.value));
+$('#showFog').addEventListener('change',e=>{showFog=e.target.checked;updateUI();});
+$('#showRange').addEventListener('change',e=>{showRange=e.target.checked;updateUI();});
+$('#showLabels').addEventListener('change',e=>{showLabels=e.target.checked;updateUI();});
+$('#legendToggle').addEventListener('click',()=>{
+  const c=$('#legendContent'),a=$('#legendArrow');c.classList.toggle('collapsed');a.textContent=c.classList.contains('collapsed')?'▸':'▾';
+});
+$('#cameraYaw').addEventListener('input',e=>{camera.yaw=deg(Number(e.target.value));updateCameraControls();});
+$('#cameraPitch').addEventListener('input',e=>{camera.pitch=deg(Number(e.target.value));updateCameraControls();});
+$('#cameraDistance').addEventListener('input',e=>{camera.distance=Number(e.target.value);updateCameraControls();});
+$('#resetCamera').addEventListener('click',()=>{camera.yaw=deg(-35);camera.pitch=deg(48);camera.distance=37;updateCameraControls();});
+$('#togglePause').addEventListener('click',()=>{paused=!paused;$('#togglePause').textContent=paused?'retomar lógica':'pausar lógica';updateUI();});
+$('#resetScenario').addEventListener('click',()=>{state=C.createScenario();selectedId='P1-A';selectedTargetId='P2-A';refreshReachable();updateUI();log('cenário resetado');});
+
+// TECLADO: MOVIMENTAÇÃO POR SETAS DIRECIONAIS E ATALHOS
+const ARROW_MAP={
+  'ArrowUp':{dx:0,dy:-1,name:'Norte'},
+  'ArrowDown':{dx:0,dy:1,name:'Sul'},
+  'ArrowLeft':{dx:-1,dy:0,name:'Oeste'},
+  'ArrowRight':{dx:1,dy:0,name:'Leste'}
+};
+
+document.addEventListener('keydown',e=>{
+  if(ARROW_MAP[e.key]&&!e.shiftKey&&!e.ctrlKey&&!e.altKey){
+    e.preventDefault();
+    const d=ARROW_MAP[e.key];
+    moveSelectedWithArrow(d.dx,d.dy,d.name);
+    return;
+  }
+  if(e.key==='Tab'){e.preventDefault();cycleTarget(e.shiftKey?-1:1);}
+  else if(e.key==='Escape'){cancelPlan();e.preventDefault();}
+  else if(e.key==='Enter'){confirmPlan();e.preventDefault();}
+  else if(e.key.toLowerCase()==='t') runTests();
+  else if(e.key==='1') setView('2d');
+  else if(e.key==='2') setView('3d');
+  else if(e.key==='3') setView('qa');
+});
+
+function render(now){
+  pruneSpdPopups(now);
+  if(view==='2d') draw2D(canvases.d2);
+  else if(view==='3d') draw3D(canvases.d3);
+  else{draw2D(canvases.q2);draw3D(canvases.q3);}
+  requestAnimationFrame(render);
+}
+
+// API pública para automação e testes Playwright
+window.MIPrototype={
+  runTests,
+  getState:()=>C.clone(state),
+  getCamera:()=>C.clone(camera),
+  getPending:()=>C.clone(pendingPlan),
+  getReachable:()=>C.clone(reachable),
+  getSelected:()=>selectedId,
+  getSelectedTarget:()=>selectedTargetId,
+  drawTerrainQa2D,
+  drawTerrainQa3D,
+  setView,setFogStyle,setTerrainStyle,setQaCost,selectTarget,cycleTarget,
+  moveSelectedWithArrow,chooseGrid,confirmPlan,cancelPlan,
+  stepLogicForTest:n=>{
+    for(let i=0;i<n;i++) logicStep();
+    return C.clone(state);
+  },
+  flags:()=>({view,fogStyle,terrainStyle,reactionMode,paused,autoPaused,showFog,showRange,reducedInfoMode,queue:commandQueue.length})
+};
+
+setInterval(logicStep,C.STEP_MS);
+refreshReachable();
+updateUI(true);
+setView('2d');
+setFogStyle('A');
+setTerrainStyle('A');
+log('VIS-005 inicializado · Opção A aprovada pelo autor (Fog e Terreno) · herança de VIS-004 e VIS-003 preservada · controle por mouse (atalho QA por setas ativo)');
+requestAnimationFrame(render);
+if(new URLSearchParams(location.search).get('autotest')==='1') setTimeout(runTests,180);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: D.D. Telepon
+ID: 51701885
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Psychic
+Nível: 2
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+If this face-up card you control is banished: You can banish 1 Psychic-Type monster with 1500 or less ATK from your Deck. Then, during your next Standby Phase, if this card is still banished: Special Summon that monster banished by this effect.

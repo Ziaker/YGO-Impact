@@ -1,0 +1,16 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Amazoness Pet Liger
+ID: 68507541
+Categoria: Monstro
+Tipo da API: Fusion Monster
+RACE: Beast
+Nível: 7
+Tipo Monster Impact: Fusion
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+"Amazoness Tiger" + 1 "Amazoness" monster
+Once per battle, if this card attacks, during damage calculation: You can make this card gain 500 ATK during that damage calculation only. If your "Amazoness" monster attacked an opponent's monster, after damage calculation: You can target 1 face-up monster your opponent controls; it loses 800 ATK. Monsters your opponent controls cannot attack "Amazoness" monsters you control, except this one.

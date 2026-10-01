@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Altergeist Pookuery
+ID: 59185998
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Spellcaster
+Nível: 1
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+If an "Altergeist" monster you control would be used as Link Material for an "Altergeist" monster, this card in your hand can also be used as material. You can only use this effect of "Altergeist Pookuery" once per turn. If an "Altergeist" Link Monster is Link Summoned to your field, while this card is in your GY (except during the Damage Step): You can add this card to your hand. You can only use this effect of "Altergeist Pookuery" once per Duel.

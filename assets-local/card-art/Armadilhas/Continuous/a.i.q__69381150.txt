@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: A.I.Q
+ID: 69381150
+Categoria: Armadilha
+Tipo da API: Trap Card
+Subtipo: Continuous
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+Activate only if you control an "@Ignister" monster. Once per turn, during your Standby Phase, Tribute 1 Link Monster, or destroy this card. Each player can only Link Summon a monster once per turn while this card is face-up on the field.

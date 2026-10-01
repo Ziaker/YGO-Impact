@@ -10,9 +10,7 @@ Monster Impact **não reproduz automaticamente as regras tradicionais de Yu-Gi-O
 
 **Fase atual: prototipagem e implementação incremental do núcleo do primeiro protótipo.**
 
-O GDD-base está concluído na versão **0.42**, com **25 de 25 fases finalizadas e nenhuma pendência P0 ativa**. `docs/context/GDD_SOURCE.md` registra o nome, tamanho e SHA-256 do arquivo canônico efetivamente lido antes da implementação.
-
-A cópia binária `.docx` ainda não está versionada porque o conector disponível nesta sessão não permite transportar o arquivo binário preservando integralmente os bytes acima do limite do canal. O repositório não trata reconstruções ou resumos como substitutos do original enquanto o hash canônico não puder ser preservado exatamente.
+O GDD-base está concluído na versão **0.43**, com **25 de 25 fases finalizadas e nenhuma pendência P0 ativa**. docs/context/GDD_SOURCE.md registra o nome, tamanho, SHA-256 e localização da cópia canônica completa mais recente em docs/context/sources/Monster_Impact_GDD_v0.43.docx (com a v0.42 preservada como histórico). O prompt mestre completo também está preservado em docs/context/sources/PROMPT_MESTRE.txt.
 
 ### Já implementado, prototipado ou aprovado
 
@@ -21,6 +19,29 @@ A cópia binária `.docx` ainda não está versionada porque o conector disponí
 - fila pública determinística de comandos;
 - serialização/hash determinístico inicial;
 - invariantes espaciais básicas do mapa **31 × 17**, bases e ocupação;
+- primeiro turno e distribuição secreta dos **8 recursos** na Fase de Decisão;
+- consumo de Ações/Reações na confirmação e encerramento voluntário da participação;
+- conversão de recursos após Correntes e ciclo estrutural das cinco fases;
+- estado de turno integrado ao hash e à fila autoritativa compartilhada por humano e IA;
+- impactos válidos na base, vitória imediata no quinto impacto e cancelamento de comandos posteriores;
+- Token de Prioridade e desempate de quintos impactos simultâneos;
+- RNG reproduzível com fluxos derivados e sorteio inicial auditável do Token;
+- Token sorteado pela seed, registrado no estado autoritativo e alternado a cada novo turno;
+- movimento básico ortogonal com atualização atômica de SPD e posição, travessia de aliados e bloqueios físicos;
+- Invocação Normal atômica entre mão, catálogo, unidade e mapa, integrada à fila autoritativa sem custo universal de Ação;
+- VIS compartilhada calculada pela união da visão ortogonal aliada e do quadrado de raio 5 da base, com bloqueio por bases e obstáculos fixos;
+- movimento básico integrado à fila autoritativa, usando somente SPD como custo;
+- Invocação por Tributo integrada à fila, enviando os materiais físicos ao Cemitério sem custo universal de Ação;
+- memória justa de Fog of War por jogador integrada ao estado/hash, sem rastrear movimento inimigo oculto;
+- fórmulas-base e operações de HP/MP com causas distintas e piso zero;
+- distância ortogonal, alcance e linha de ataque com bloqueio por todos os blocos tocados;
+- validação completa dos três Decks e relatório individual de violações;
+- embaralhamento reproduzível dos dois Decks, mão inicial, compra e Deck Out atômico;
+- roteamento de ativações entre resolução direta, Corrente e IMEDIATO;
+- Correntes LIFO com revalidação individual, negação isolada e limite de Cross Chain;
+- tabela das 17 RACE e aplicação cumulativa dos bônus estruturais;
+- replay mínimo reproduzível por seed/comandos com comparação de hashes por passo;
+- telemetria local versionada com comandos, rejeições, contexto lógico e hashes;
 - testes automatizados do núcleo em `tests/core/`;
 - `VIS-001` para composição do campo/HUD: **versão melhorada aprovada pelo autor em 2026-09-29**;
 - `VIS-002` para mapa/câmera: **aprovado pelo autor em 2026-09-29**, com 2D top-down e 3D tático selecionáveis in-game sobre o mesmo estado lógico;
@@ -81,6 +102,10 @@ Setar uma Armadilha não abre Corrente e não paga custo de ativação. O custo 
 ## Determinismo e arquitetura
 
 Existe um único núcleo autoritativo. Interface, renderização, animação, IA e telemetria não alteram diretamente o estado; usam snapshots somente para leitura ou enviam comandos pela interface pública.
+
+**TypeScript é a linguagem principal do Monster Impact** para o núcleo, regras, IA, replay, telemetria, testes desses sistemas e aplicação web. Python fica reservado a scripts, ferramentas, processamento de dados e análises quando vantajoso, sem duplicar a simulação autoritativa.
+
+A tecnologia de UI e renderização é uma decisão separada, ainda sujeita à prototipagem A/B/C e à aprovação visual. O renderer escolhido deve consumir os contratos públicos do mesmo núcleo, de modo que possa ser substituído sem reescrever regras nem alterar o resultado da simulação.
 
 A simulação opera em **20 Hz**, com passos de **50 ms**. Humanos e IA usam a mesma fila. Com os mesmos dados, Decks, seed, comandos, ordem de entrada, configuração e versão de regras, partida, replay, headless e web devem produzir estados, eventos, hashes e resultado equivalentes.
 
@@ -194,13 +219,48 @@ prototypes/visual-002-map-camera-2d-3d/index.html
 
 VIS-002 aprova 2D top-down e 3D tático como orientações selecionáveis do mesmo estado lógico, com o contrato de câmera descrito em `docs/prototypes/VIS-002-map-camera-2d-3d.md`.
 
+### VIS-003 — alcance e alcançabilidade de movimento
+
+Aprovado formalmente com **Opção A — área cheia** como apresentação dos blocos alcançáveis em grade quadrangular (`docs/prototypes/VIS-003-movement-reachability.md`).
+
+### VIS-004 — terreno, SPD e movimento avançado
+
+O executável aprovado fica em:
+
+```text
+prototypes/visual-004-terrain-spd-advanced-movement/index.html
+```
+
+Aprovado formalmente pelo autor em 2026-09-30 com **Opção A — badge persistente de custo no bloco** (`×cost`), operando com regras de SPD negativo, recuperação de +2 SPD a 20 Hz, movimento como Reação e pacote completo de QoL (`docs/prototypes/VIS-004-terrain-spd-advanced-movement.md`).
+
+### VIS-005 — VIS compartilhada, Fog of War, alcance e alvos
+
+O executável aprovado fica em:
+
+```text
+prototypes/visual-005-fog-range-target-selection/index.html
+```
+
+Aprovado formalmente pelo autor em 2026-09-30 com **Opção A — Grade Tática Estrita com cantos de alvos e marcadores [?]**, consolidando visão compartilhada (monstros + base raio 5), linha de visão, seleção de alvos e previsão de combate (`docs/prototypes/VIS-005-fog-range-target-selection.md`).
+
+### VIS-006 — invocações, âncoras e fallback espacial
+
+O executável comparativo fica em:
+
+```text
+prototypes/visual-006-summons/index.html
+```
+
+Cobre Invocação Normal, Tributo, Ritual e Fusion, seleção de âncoras (Base e monstros aliados no campo), materiais (campo e mão), posicionamento com fallback espacial determinístico, QA de NEGAR e comparação A/B/C (`docs/prototypes/VIS-006-summons-anchors-spatial-fallback.md`).
+
+
 ## Artes das cartas
 
 O projeto utiliza ilustrações oficiais como composição visual do fangame pessoal. O downloader usa `image_url_cropped` da API do YGOPRODeck; o jogo não depende de hotlink durante a execução.
 
 Por decisão explícita do autor, as artes selecionadas e o `manifest.json` podem ser versionados no repositório.
 
-O `DEC-001-initial-card-pool.md` define atualmente uma política automática de **136 cartas**. O snapshot `assets-local/card-art/selection.json` ainda registra **96 cartas**, portanto está atrás da política atual e não deve ser tratado como materialização completa dos 136 até nova sincronização.
+O `DEC-001-initial-card-pool.md` define uma política automática de **136 cartas**. A seleção real fecha nessa quantidade após a exceção aprovada para repetição de `Psychic Musician` e `Shaman Bandit` somente nos quatro slots Psychic Rush restantes. O snapshot versionado ainda registra 96 cartas; oito novas entradas Rush aguardam ilustração limpa porque a fonte auxiliar oferece apenas a carta montada.
 
 Seleção manual de alvos do downloader:
 
@@ -284,7 +344,7 @@ O GDD exige uma build jogável estática e reproduzível no GitHub Pages usando 
 
 ## IA, telemetria e replay
 
-Os contratos conceituais estão definidos no GDD, mas documentos técnicos específicos como `TELEMETRY_SCHEMA.md` e `AI_INTERFACE.md` ainda não estão versionados e a implementação desses sistemas permanece pendente. A IA competitiva deve respeitar a mesma informação do jogador; a IA de QA será separada, mas utilizará o mesmo núcleo e interface pública. Replays e telemetria deverão registrar seed, comandos, causalidade, aleatoriedade e hashes suficientes para reprodução determinística.
+Os contratos conceituais estão definidos no GDD, mas documentos técnicos específicos como `TELEMETRY_SCHEMA.md` e `AI_INTERFACE.md` ainda não estão versionados. Replay e telemetria mínimos já estão implementados e testados; causalidade completa, snapshots de diagnóstico, IA competitiva, IA de QA e self-play continuam pendentes. A IA competitiva deve respeitar a mesma informação do jogador, e a IA de QA será separada, mas ambas utilizarão o mesmo núcleo e a mesma interface pública.
 
 ## Objetivo técnico
 

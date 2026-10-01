@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Monster Impact — VIS-007: Microprotótipos Visuais de Ataque, Contato e Dano</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #07090e;
+      --panel-bg: rgba(13, 17, 23, 0.94);
+      --border: rgba(56, 189, 248, 0.25);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --danger: #f43f5e;
+      --gold: #f59e0b;
+      --green: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background-color: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      user-select: none;
+    }
+
+    #stage-container {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    #vfx-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* BARRA SUPERIOR */
+    .top-bar {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .badge-tag {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      pointer-events: auto;
+    }
+
+    /* SELETOR DE ELEMENTO (ABAS SUPERIORES) */
+    .element-tabs {
+      display: flex;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 4px;
+      border-radius: 10px;
+      pointer-events: auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #04121e;
+      font-weight: 700;
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+
+    /* PAINEL LATERAL ESQUERDO: CONTROLE A/B/C DO ELEMENTO */
+    .left-panel {
+      position: absolute;
+      top: 76px;
+      left: 20px;
+      width: 380px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .panel-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-question {
+      font-size: 12px;
+      color: var(--accent);
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    /* SELETOR DAS 3 OPÇÕES */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .opt-btn {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      padding: 10px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .opt-btn:hover {
+      background: rgba(51, 65, 85, 0.8);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .opt-btn.active {
+      background: #38bdf8;
+      color: #04121e;
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .option-details {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+
+    .option-details b {
+      color: #fff;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .trigger-btn {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4);
+      transition: all 0.15s ease;
+    }
+
+    .trigger-btn:hover {
+      background: linear-gradient(135deg, #0369a1, #1d4ed8);
+      transform: translateY(-1px);
+    }
+
+    .trigger-btn:active {
+      transform: translateY(1px);
+    }
+
+    /* INSTRUÇÕES INFERIORES */
+    .bottom-hint {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+
+    .bottom-hint kbd {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #fff;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div id="stage-container"></div>
+  <canvas id="vfx-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="badge-tag">MONSTER IMPACT &bull; VIS-007 (Efeitos Gráficos 2D-Like de Combate)</div>
+
+    <div class="element-tabs" id="elementTabs">
+      <button class="tab-btn active" data-elem="el1">1. Foco/Seleção</button>
+      <button class="tab-btn" data-elem="el2">2. Ataque Melee</button>
+      <button class="tab-btn" data-elem="el3">3. Ataque Ranged</button>
+      <button class="tab-btn" data-elem="el4">4. Impacto / Hit</button>
+      <button class="tab-btn" data-elem="el5">5. Dano / Números</button>
+      <button class="tab-btn" data-elem="el6">6. Contra-Ataque</button>
+      <button class="tab-btn" data-elem="el7">7. Alvo Indefeso</button>
+    </div>
+  </div>
+
+  <div class="left-panel">
+    <div class="panel-header">
+      <div class="panel-title" id="panelTitle">1. Seleção de Atacante e Alvo</div>
+      <div class="panel-question" id="panelQuestion">Como destacar atacante e alvo no instante do combate?</div>
+    </div>
+
+    <div class="options-grid">
+      <button class="opt-btn active" id="btnOptA" onclick="setOption('A')">Opção A</button>
+      <button class="opt-btn" id="btnOptB" onclick="setOption('B')">Opção B</button>
+      <button class="opt-btn" id="btnOptC" onclick="setOption('C')">Opção C</button>
+    </div>
+
+    <div class="option-details" id="optionDetails">
+      <!-- Injetado dinamicamente -->
+    </div>
+
+    <button class="trigger-btn" id="btnTrigger" onclick="triggerActiveEffect()">
+      <span>&#9889; Executar Efeito no Campo</span> <kbd style="font-size:11px;opacity:0.8;background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:4px;">Espaço</kbd>
+    </button>
+  </div>
+
+  <div class="bottom-hint">
+    Teclas <kbd>1</kbd> a <kbd>7</kbd>: troca elemento &bull; Teclas <kbd>A</kbd>, <kbd>B</kbd>, <kbd>C</kbd>: seleciona opção &bull; <kbd>Espaço</kbd>: disparar
+  </div>
+
+  <!-- BIBLIOTECAS LOCAIS VENDORADAS (100% OFFLINE) -->
+  <script src="three.min.js"></script>
+  <script src="OrbitControls.js"></script>
+
+  <script>
+    // ==========================================================================
+    // 1. PALCO FIXO APROVADO (CONGELADO DO VIS-ENV-001)
+    // ==========================================================================
+    const container = document.getElementById('stage-container');
+    const vfxCanvas = document.getElementById('vfx-canvas');
+    const ctx = vfxCanvas.getContext('2d');
+
+    const BOARD_W = 31;
+    const BOARD_D = 17;
+    const TILE_SIZE = 1.0;
+    const CENTER_X = BOARD_W / 2;
+    const CENTER_Z = BOARD_D / 2;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x07090e);
+    scene.fog = new THREE.FogExp2(0x07090e, 0.012);
+
+    const aspect = window.innerWidth / window.innerHeight;
+    const persCamera = new THREE.PerspectiveCamera(40, aspect, 0.5, 500);
+    persCamera.position.set(CENTER_X, 15, CENTER_Z + 20); // Posição de referência do VIS-ENV-001
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(persCamera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.maxPolarAngle = Math.PI / 2 - 0.05;
+    controls.minDistance = 10;
+    controls.maxDistance = 100;
+    controls.target.set(CENTER_X, 0, CENTER_Z);
+    controls.update();
+
+    // Iluminação do Palco de Referência
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xfff8ee, 1.2);
+    dirLight.position.set(CENTER_X - 15, 38, CENTER_Z - 20);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // Platô em Ardósia Nobre (Plano XZ, Y=0)
+    const slabGeo = new THREE.BoxGeometry(BOARD_W + 3, 2.4, BOARD_D + 3);
+    const slabMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.65, metalness: 0.25 });
+    const slabMesh = new THREE.Mesh(slabGeo, slabMat);
+    slabMesh.position.set(CENTER_X, -1.2, CENTER_Z);
+    slabMesh.receiveShadow = true;
+    scene.add(slabMesh);
+
+    // Grade Tática
+    const gridHelper = new THREE.GridHelper(Math.max(BOARD_W, BOARD_D), Math.max(BOARD_W, BOARD_D), 0x38bdf8, 0x1e293b);
+    gridHelper.position.set(CENTER_X, 0.02, CENTER_Z);
+    scene.add(gridHelper);
+
+    // 4 Pilares Monumentais
+    const pillarPositions = [
+      { x: 3, z: 2.5 }, { x: BOARD_W - 3, z: 2.5 },
+      { x: 3, z: BOARD_D - 2.5 }, { x: BOARD_W - 3, z: BOARD_D - 2.5 }
+    ];
+    for (const pos of pillarPositions) {
+      const pGeo = new THREE.BoxGeometry(2.0, 7.0, 2.0);
+      const pMat = new THREE.MeshStandardMaterial({ color: 0x020617, roughness: 0.5 });
+      const pMesh = new THREE.Mesh(pGeo, pMat);
+      pMesh.position.set(pos.x, 3.5, pos.z);
+      pMesh.castShadow = true;
+      scene.add(pMesh);
+    }
+
+    // Unidades de Teste no Corredor Central (Desobstruído)
+    // Atacante Aliado: x=13.5, z=8.5 (Guerreiro / Terra)
+    // Alvo Inimigo:    x=18.5, z=8.5 (Guardião / Trevas)
+    const ALLY_WORLD = new THREE.Vector3(13.5, 1.1, 8.5);
+    const ENEMY_WORLD = new THREE.Vector3(18.5, 1.1, 8.5);
+
+    function createUnitFigure(worldPos, isAlly, colorHex) {
+      const g = new THREE.Group();
+
+      const pedGeo = new THREE.CylinderGeometry(0.75, 0.85, 0.35, 16);
+      const pedMat = new THREE.MeshStandardMaterial({ color: isAlly ? 0x0f2942 : 0x3b1219, roughness: 0.4 });
+      const ped = new THREE.Mesh(pedGeo, pedMat);
+      ped.position.y = 0.18;
+      g.add(ped);
+
+      const ringGeo = new THREE.TorusGeometry(0.8, 0.05, 8, 24);
+      const ringMat = new THREE.MeshBasicMaterial({ color: isAlly ? 0x38bdf8 : 0xf43f5e });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = 0.36;
+      g.add(ring);
+
+      const figGeo = new THREE.DodecahedronGeometry(0.55);
+      const figMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.3, metalness: 0.7, emissive: colorHex, emissiveIntensity: 0.2 });
+      const fig = new THREE.Mesh(figGeo, figMat);
+      fig.position.y = 1.1;
+      g.add(fig);
+
+      g.position.set(worldPos.x, 0, worldPos.z);
+      scene.add(g);
+      return g;
+    }
+
+    const allyUnit = createUnitFigure(ALLY_WORLD, true, 0xd97706);
+    const enemyUnit = createUnitFigure(ENEMY_WORLD, false, 0xa855f7);
+
+    // ==========================================================================
+    // 2. SISTEMA DE PROJEÇÃO GRÁFICA 2D-LIKE SOBRE O PALCO 3D
+    // ==========================================================================
+    function toScreen(vec3) {
+      const v = vec3.clone().project(persCamera);
+      return {
+        x: (v.x * 0.5 + 0.5) * window.innerWidth,
+        y: (-(v.y * 0.5) + 0.5) * window.innerHeight
+      };
+    }
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      vfxCanvas.width = window.innerWidth * dpr;
+      vfxCanvas.height = window.innerHeight * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', () => {
+      persCamera.aspect = window.innerWidth / window.innerHeight;
+      persCamera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      resizeCanvas();
+    });
+    resizeCanvas();
+
+    // ==========================================================================
+    // 3. DEFINIÇÃO METODOLÓGICA DOS 7 ELEMENTOS E SUAS 3 OPÇÕES (A / B / C)
+    // ==========================================================================
+    const COMBAT_ELEMENTS = {
+      el1: {
+        id: 'el1',
+        title: '1. Seleção de Atacante e Alvo',
+        question: 'Como destacar atacante e alvo no instante do combate?',
+        options: {
+          A: {
+            name: 'Retícula Tática Circular & Anel Pulsante',
+            desc: 'Retícula circular tática com miras cardeais no alvo + anel neon contínuo pulsando sob o atacante. Leitura tática limpa de comando esportivo.'
+          },
+          B: {
+            name: 'Spotlight Gráfico & Linha Vetorial',
+            desc: 'Holofote gráfico direto nas duas células + vetor tracejado discreto conectando os centros no piso. Foco direto nas coordenadas da grade.'
+          },
+          C: {
+            name: 'Molduras de Cantoneiras Táticas (Bracket Corners)',
+            desc: 'Quatro cantoneiras angulares em estilo HUD tático ao redor de cada célula de duelo, em ciano (atacante) e carmesim (alvo).'
+          }
+        }
+      },
+      el2: {
+        id: 'el2',
+        title: '2. Ataque Básico Corpo a Corpo (Melee)',
+        question: 'Como o ataque básico melee deve parecer visualmente?',
+        options: {
+          A: {
+            name: 'Slash Gráfico 2D em Arco Limpo',
+            desc: 'Lâmina estilizada de corte em arco curvo com rastro gradiente translúcido e estalo luminoso instantâneo. Silhueta puramente gráfica.'
+          },
+          B: {
+            name: 'Investida / Snap com Rastro Angular',
+            desc: 'Avanço dinâmico ultra-rápido de silhueta (snap) em direção ao alvo, deixando rastro fantasma de 2 frames e impacto frontal.'
+          },
+          C: {
+            name: 'Estocada / Thrust com Burst Focal',
+            desc: 'Linha vetorial de penetração frontal direta que culmina em um burst focal concentrado no ponto de contato.'
+          }
+        }
+      },
+      el3: {
+        id: 'el3',
+        title: '3. Ataque à Distância / Projétil (Ranged)',
+        question: 'Como ataques à distância devem parecer visualmente?',
+        options: {
+          A: {
+            name: 'Dardo Gráfico Estilizado com Rastro Sólido',
+            desc: 'Projétil em formato de ponta de seta gráfica pura de alto contraste com rastro de partículas geométricas planas (sem feixe de laser 3D).'
+          },
+          B: {
+            name: 'Feixe Retilíneo Vetorial Instantâneo',
+            desc: 'Traçado vetorial reto de 2D puro com espessura variável e pulso instantâneo de 120ms (estilo laser tático bidimensional).'
+          },
+          C: {
+            name: 'Orbe Rúnico de Pulso Concêntrico',
+            desc: 'Disco de energia plana circular acelerada que viaja em linha reta emitindo anéis concêntricos de choque gráfico.'
+          }
+        }
+      },
+      el4: {
+        id: 'el4',
+        title: '4. Impacto / Confirmação de Acerto (Hit)',
+        question: 'Como um hit confirmado deve ser percebido?',
+        options: {
+          A: {
+            name: 'Starburst Gráfico com Micro-Shake',
+            desc: 'Estrela de choque geométrica pontiaguda de alto contraste que se expande e contrai em 150ms com leve tremor na unidade atingida.'
+          },
+          B: {
+            name: 'Corte em Cruz Vetorial (Cross Slash) com Hit-Stop',
+            desc: 'Duas linhas de corte diagonais em X que se cruzam na unidade + pausa congelada (hit-stop) de 60ms para dar peso táctil ao golpe.'
+          },
+          C: {
+            name: 'Onda de Choque Plana Concêntrica',
+            desc: 'Dois anéis gráficos planos que se expandem no piso da célula com clarão branco instantâneo (flash de acerto).'
+          }
+        }
+      },
+      el5: {
+        id: 'el5',
+        title: '5. Dano Recebido / Números',
+        question: 'Como o dano numérico deve ser apresentado?',
+        options: {
+          A: {
+            name: 'Pop Flutuante Vertical Clássico',
+            desc: 'Tipografia limpa e nítida (`-800`) que sobe verticalmente com escala rápida de impacto e fade-out suave em 600ms.'
+          },
+          B: {
+            name: 'Impacto com Recuo Direcional',
+            desc: 'O número de dano é arremessado na direção do golpe sofrido (vetor inclinado) com micro-recuo visual da miniatura.'
+          },
+          C: {
+            name: 'Badge Tático em Moldura com Tag',
+            desc: 'Card compacto translúcido com moldura geométrica e indicação explícita (`-800 HP`), permanecendo estável acima da criatura.'
+          }
+        }
+      },
+      el6: {
+        id: 'el6',
+        title: '6. Contra-Ataque / Revide',
+        question: 'Como comunicar visualmente que houve contra-ataque?',
+        options: {
+          A: {
+            name: 'Badge Gráfico "REVIDE!" com Golpe Espelhado',
+            desc: 'Um selo gráfico "REVIDE" surge sobre o defensor no instante em que ele dispara imediatamente seu golpe de retorno de volta ao atacante.'
+          },
+          B: {
+            name: 'Ricochete de Faíscas no Defensor',
+            desc: 'O primeiro golpe ricocheteia gerando faíscas planas de deflexão e imediatamente impulsiona o contra-ataque do defensor.'
+          },
+          C: {
+            name: 'Vetor Luminoso de Retorno Simultâneo',
+            desc: 'Linhas vetoriais opostas se cruzam no centro do corredor enquanto as duas criaturas trocam golpes sincronizados.'
+          }
+        }
+      },
+      el7: {
+        id: 'el7',
+        title: '7. Ataque sem Defesa / Alvo Indefeso',
+        question: 'Como comunicar visualmente que o alvo não revidou / está indefeso?',
+        options: {
+          A: {
+            name: 'Ícone de Escudo Partido (Quebra de Guarda)',
+            desc: 'Um ícone estilizado de escudo rompendo-se ao meio pisca em vermelho sobre a cabeça do defensor que não pôde responder.'
+          },
+          B: {
+            name: 'Silhueta Escurecida ("Exposto / Vulnerável")',
+            desc: 'A criatura defensora sofre uma perda temporária de iluminação (silhueta opaca/vulnerável), evidenciando incapacidade de defesa.'
+          },
+          C: {
+            name: 'Flash Estendido no Atacante ("Golpe Limpo")',
+            desc: 'O atacante realiza um golpe fluido sem interrupção e uma insígnia sutil de "GOLPE LIMPO" surge na lateral da tela.'
+          }
+        }
+      }
+    };
+
+    let activeElementKey = 'el1';
+    let activeOptionKey = 'A';
+    let activeAnimations = [];
+
+    // ==========================================================================
+    // 4. INTERFACE E CONTROLES
+    // ==========================================================================
+    function updateUI() {
+      const elem = COMBAT_ELEMENTS[activeElementKey];
+      document.getElementById('panelTitle').textContent = elem.title;
+      document.getElementById('panelQuestion').textContent = elem.question;
+
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.elem === activeElementKey);
+      });
+
+      ['A', 'B', 'C'].forEach(opt => {
+        const btn = document.getElementById(`btnOpt${opt}`);
+        btn.classList.toggle('active', opt === activeOptionKey);
+      });
+
+      const optData = elem.options[activeOptionKey];
+      document.getElementById('optionDetails').innerHTML = `
+        <b>Opção ${activeOptionKey} — ${optData.name}</b>
+        ${optData.desc}
+      `;
+    }
+
+    function setElement(key) {
+      activeElementKey = key;
+      updateUI();
+      triggerActiveEffect();
+    }
+
+    function setOption(opt) {
+      activeOptionKey = opt;
+      updateUI();
+      triggerActiveEffect();
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => setElement(btn.dataset.elem));
+    });
+
+    // ==========================================================================
+    // 5. MOTOR DE EXECUÇÃO DOS EFEITOS GRÁFICOS 2D-LIKE (VFX ENGINE)
+    // ==========================================================================
+    function triggerActiveEffect() {
+      activeAnimations = []; // Limpa anteriores
+
+      const pAlly = toScreen(ALLY_WORLD);
+      const pEnemy = toScreen(ENEMY_WORLD);
+
+      if (activeElementKey === 'el1') {
+        // --- 1. SELEÇÃO / FOCO ---
+        activeAnimations.push({
+          type: 'targeting',
+          opt: activeOptionKey,
+          time: 0,
+          maxTime: 1.8,
+          pAlly,
+          pEnemy
+        });
+
+      } else if (activeElementKey === 'el2') {
+        // --- 2. ATAQUE MELEE ---
+        activeAnimations.push({
+          type: 'melee',
+          opt: activeOptionKey,
+          time: 0,
+          maxTime: 0.7,
+          pAlly,
+          pEnemy
+        });
+
+      } else if (activeElementKey === 'el3') {
+        // --- 3. ATAQUE RANGED ---
+        activeAnimations.push({
+          type: 'ranged',
+          opt: activeOptionKey,
+          time: 0,
+          maxTime: 0.7,
+          pAlly,
+          pEnemy
+        });
+
+      } else if (activeElementKey === 'el4') {
+        // --- 4. IMPACTO / HIT ---
+        activeAnimations.push({
+          type: 'hit',
+          opt: activeOptionKey,
+          time: 0,
+          maxTime: 0.6,
+          target: pEnemy
+        });
+
+      } else if (activeElementKey === 'el5') {
+        // --- 5. DANO / NÚMEROS ---
+        activeAnimations.push({
+          type: 'damage',
+          opt: activeOptionKey,
+          time: 0,
+          maxTime: 0.8,
+          target: pEnemy,
+          val: -800
+        });
+
+      } else if (activeElementKey === 'el6') {
+        // --- 6. CONTRA-ATAQUE ---
+        activeAnimations.push({
+          type: 'counter',
+          opt: activeOptionKey,
+          time: 0,
+          maxTime: 1.2,
+          pAlly,
+          pEnemy
+        });
+
+      } else if (activeElementKey === 'el7') {
+        // --- 7. ALVO INDEFESO ---
+        activeAnimations.push({
+          type: 'defenseless',
+          opt: activeOptionKey,
+          time: 0,
+          maxTime: 1.0,
+          pAlly,
+          pEnemy
+        });
+      }
+    }
+
+    // ==========================================================================
+    // 6. RENDERIZADOR GRÁFICO 2D (CANVAS OVERLAY COM GEOMETRIAS VETORIAIS PURAS)
+    // ==========================================================================
+    function renderVFX(dt) {
+      ctx.clearRect(0, 0, vfxCanvas.width, vfxCanvas.height);
+
+      const pAlly = toScreen(ALLY_WORLD);
+      const pEnemy = toScreen(ENEMY_WORLD);
+
+      for (let i = activeAnimations.length - 1; i >= 0; i--) {
+        const anim = activeAnimations[i];
+        anim.time += dt;
+        const p = Math.min(1, anim.time / anim.maxTime);
+
+        // ----------------------------------------------------
+        // EL-1: SELEÇÃO / FOCO
+        // ----------------------------------------------------
+        if (anim.type === 'targeting') {
+          if (anim.opt === 'A') {
+            // Opção A: Retícula tática circular + anel pulsante
+            const rPulse = 32 + Math.sin(anim.time * 8) * 4;
+            ctx.save();
+            // Anel no atacante
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(pAlly.x, pAlly.y + 10, rPulse, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Retícula no alvo
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(pEnemy.x, pEnemy.y + 10, 36, 0, Math.PI * 2);
+            // Miras cardeais
+            ctx.moveTo(pEnemy.x - 44, pEnemy.y + 10); ctx.lineTo(pEnemy.x - 26, pEnemy.y + 10);
+            ctx.moveTo(pEnemy.x + 44, pEnemy.y + 10); ctx.lineTo(pEnemy.x + 26, pEnemy.y + 10);
+            ctx.moveTo(pEnemy.x, pEnemy.y - 34); ctx.lineTo(pEnemy.x, pEnemy.y - 16);
+            ctx.moveTo(pEnemy.x, pEnemy.y + 54); ctx.lineTo(pEnemy.x, pEnemy.y + 36);
+            ctx.stroke();
+            ctx.restore();
+
+          } else if (anim.opt === 'B') {
+            // Opção B: Spotlight gráfico + vetor tracejado
+            ctx.save();
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+            ctx.beginPath();
+            ctx.ellipse(pAlly.x, pAlly.y + 15, 45, 20, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(244, 63, 94, 0.2)';
+            ctx.beginPath();
+            ctx.ellipse(pEnemy.x, pEnemy.y + 15, 45, 20, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Linha tracejada vetorial
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 6]);
+            ctx.beginPath();
+            ctx.moveTo(pAlly.x, pAlly.y);
+            ctx.lineTo(pEnemy.x, pEnemy.y);
+            ctx.stroke();
+            ctx.restore();
+
+          } else if (anim.opt === 'C') {
+            // Opção C: Molduras de cantoneiras táticas (bracket corners)
+            function drawBrackets(pos, color, size) {
+              ctx.save();
+              ctx.strokeStyle = color;
+              ctx.lineWidth = 3;
+              const s = size;
+              const d = 10;
+              // Top-left
+              ctx.beginPath(); ctx.moveTo(pos.x - s, pos.y - s + d); ctx.lineTo(pos.x - s, pos.y - s); ctx.lineTo(pos.x - s + d, pos.y - s); ctx.stroke();
+              // Top-right
+              ctx.beginPath(); ctx.moveTo(pos.x + s - d, pos.y - s); ctx.lineTo(pos.x + s, pos.y - s); ctx.lineTo(pos.x + s, pos.y - s + d); ctx.stroke();
+              // Bottom-left
+              ctx.beginPath(); ctx.moveTo(pos.x - s, pos.y + s - d); ctx.lineTo(pos.x - s, pos.y + s); ctx.lineTo(pos.x - s + d, pos.y + s); ctx.stroke();
+              // Bottom-right
+              ctx.beginPath(); ctx.moveTo(pos.x + s - d, pos.y + s); ctx.lineTo(pos.x + s, pos.y + s); ctx.lineTo(pos.x + s, pos.y + s - d); ctx.stroke();
+              ctx.restore();
+            }
+            drawBrackets(pAlly, '#38bdf8', 36);
+            drawBrackets(pEnemy, '#f43f5e', 36);
+          }
+
+        // ----------------------------------------------------
+        // EL-2: ATAQUE MELEE
+        // ----------------------------------------------------
+        } else if (anim.type === 'melee') {
+          if (anim.opt === 'A') {
+            // Opção A: Slash gráfico 2D em arco limpo
+            const curX = pAlly.x + (pEnemy.x - pAlly.x) * Math.min(1, p * 1.5);
+            const curY = pAlly.y + (pEnemy.y - pAlly.y) * Math.min(1, p * 1.5);
+            ctx.save();
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 6 * (1 - p);
+            ctx.beginPath();
+            ctx.arc(curX, curY, 40 * p, -Math.PI * 0.4, Math.PI * 0.4);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3 * (1 - p);
+            ctx.beginPath();
+            ctx.arc(curX, curY, 36 * p, -Math.PI * 0.35, Math.PI * 0.35);
+            ctx.stroke();
+            ctx.restore();
+
+          } else if (anim.opt === 'B') {
+            // Opção B: Investida / Snap com rastro angular
+            const snapP = p < 0.6 ? p / 0.6 : 1 - (p - 0.6) / 0.4;
+            const curX = pAlly.x + (pEnemy.x - pAlly.x - 30) * snapP;
+            ctx.save();
+            // Rastro fantasma
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+            ctx.fillRect(pAlly.x, pAlly.y - 20, (curX - pAlly.x), 40);
+
+            // Linhas de velocidade cinéticas
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            for (let k = -15; k <= 15; k += 10) {
+              ctx.beginPath();
+              ctx.moveTo(pAlly.x + 20, pAlly.y + k);
+              ctx.lineTo(curX, pAlly.y + k);
+              ctx.stroke();
+            }
+            ctx.restore();
+
+          } else if (anim.opt === 'C') {
+            // Opção C: Estocada / Thrust com burst focal
+            ctx.save();
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 4 * (1 - p);
+            ctx.beginPath();
+            ctx.moveTo(pAlly.x + 20, pAlly.y);
+            ctx.lineTo(pEnemy.x - 10, pEnemy.y);
+            ctx.stroke();
+
+            // Burst pontual
+            if (p > 0.4) {
+              ctx.fillStyle = '#ffffff';
+              ctx.beginPath();
+              ctx.arc(pEnemy.x - 10, pEnemy.y, 16 * (1 - p), 0, Math.PI * 2);
+              ctx.fill();
+            }
+            ctx.restore();
+          }
+
+        // ----------------------------------------------------
+        // EL-3: ATAQUE RANGED
+        // ----------------------------------------------------
+        } else if (anim.type === 'ranged') {
+          const curX = pAlly.x + (pEnemy.x - pAlly.x) * p;
+          const curY = pAlly.y + (pEnemy.y - pAlly.y) * p;
+
+          if (anim.opt === 'A') {
+            // Opção A: Dardo gráfico estilizado com rastro sólido
+            ctx.save();
+            // Rastro
+            ctx.strokeStyle = 'rgba(14, 165, 233, 0.5)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(Math.max(pAlly.x, curX - 50), curY);
+            ctx.lineTo(curX, curY);
+            ctx.stroke();
+
+            // Ponta de flecha vetorial
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.moveTo(curX, curY);
+            ctx.lineTo(curX - 18, curY - 7);
+            ctx.lineTo(curX - 12, curY);
+            ctx.lineTo(curX - 18, curY + 7);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+
+          } else if (anim.opt === 'B') {
+            // Opção B: Feixe retilíneo vetorial instantâneo
+            ctx.save();
+            const beamAlpha = 1 - p;
+            ctx.strokeStyle = `rgba(56, 189, 248, ${beamAlpha})`;
+            ctx.lineWidth = 8 * beamAlpha;
+            ctx.beginPath();
+            ctx.moveTo(pAlly.x + 20, pAlly.y);
+            ctx.lineTo(pEnemy.x - 10, pEnemy.y);
+            ctx.stroke();
+
+            // Linha central branca
+            ctx.strokeStyle = `rgba(255, 255, 255, ${beamAlpha})`;
+            ctx.lineWidth = 3 * beamAlpha;
+            ctx.beginPath();
+            ctx.moveTo(pAlly.x + 20, pAlly.y);
+            ctx.lineTo(pEnemy.x - 10, pEnemy.y);
+            ctx.stroke();
+            ctx.restore();
+
+          } else if (anim.opt === 'C') {
+            // Opção C: Orbe rúnico de pulso concêntrico
+            ctx.save();
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(curX, curY, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Anéis concêntricos
+            ctx.strokeStyle = 'rgba(251, 191, 36, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(curX, curY, 14, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+          }
+
+        // ----------------------------------------------------
+        // EL-4: IMPACTO / HIT
+        // ----------------------------------------------------
+        } else if (anim.type === 'hit') {
+          const t = anim.target;
+          if (anim.opt === 'A') {
+            // Opção A: Starburst geométrico
+            ctx.save();
+            ctx.fillStyle = '#f43f5e';
+            const spikes = 8;
+            const rOuter = 36 * (1 - p * 0.5);
+            const rInner = 14 * (1 - p * 0.5);
+            ctx.beginPath();
+            for (let s = 0; s < spikes * 2; s++) {
+              const r = s % 2 === 0 ? rOuter : rInner;
+              const angle = (s * Math.PI) / spikes;
+              const sx = t.x + Math.cos(angle) * r;
+              const sy = t.y + Math.sin(angle) * r;
+              if (s === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            // Miolo branco
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, 10 * (1 - p), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+          } else if (anim.opt === 'B') {
+            // Opção B: Cross Slash em X
+            ctx.save();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 5 * (1 - p);
+            const len = 35 * Math.sin(p * Math.PI);
+            ctx.beginPath();
+            ctx.moveTo(t.x - len, t.y - len); ctx.lineTo(t.x + len, t.y + len);
+            ctx.moveTo(t.x + len, t.y - len); ctx.lineTo(t.x - len, t.y + len);
+            ctx.stroke();
+            ctx.restore();
+
+          } else if (anim.opt === 'C') {
+            // Opção C: Onda de choque circular plana
+            ctx.save();
+            const r = 45 * p;
+            ctx.strokeStyle = `rgba(56, 189, 248, ${1 - p})`;
+            ctx.lineWidth = 4 * (1 - p);
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.strokeStyle = `rgba(255, 255, 255, ${1 - p})`;
+            ctx.lineWidth = 2 * (1 - p);
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, r * 0.6, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+          }
+
+        // ----------------------------------------------------
+        // EL-5: DANO / NÚMEROS
+        // ----------------------------------------------------
+        } else if (anim.type === 'damage') {
+          const t = anim.target;
+          ctx.save();
+          if (anim.opt === 'A') {
+            // Opção A: Pop flutuante vertical clássico com alto contraste
+            const offY = -45 * p;
+            ctx.font = 'bold 28px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.strokeStyle = `rgba(0, 0, 0, ${0.9 * (1 - p * 0.6)})`;
+            ctx.lineWidth = 5;
+            ctx.strokeText('-800', t.x, t.y - 25 + offY);
+            ctx.fillStyle = `rgba(255, 255, 255, ${1 - p * 0.6})`;
+            ctx.fillText('-800', t.x, t.y - 25 + offY);
+
+          } else if (anim.opt === 'B') {
+            // Opção B: Impacto com recuo direcional
+            const offX = 35 * p;
+            const offY = -30 * p + (p * p * 20); // Parábola
+            ctx.font = 'bold 30px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 5;
+            ctx.strokeText('-800', t.x + offX, t.y - 25 + offY);
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillText('-800', t.x + offX, t.y - 25 + offY);
+
+          } else if (anim.opt === 'C') {
+            // Opção C: Badge tático com moldura
+            const bx = t.x - 55;
+            const by = t.y - 65 - (15 * p);
+            ctx.fillStyle = `rgba(15, 23, 42, ${0.95 * (1 - p * 0.5)})`;
+            ctx.strokeStyle = `rgba(244, 63, 94, ${1 - p * 0.5})`;
+            ctx.lineWidth = 2.5;
+            ctx.fillRect(bx, by, 110, 30);
+            ctx.strokeRect(bx, by, 110, 30);
+
+            ctx.font = 'bold 15px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('-800 DANO', t.x, by + 21);
+          }
+          ctx.restore();
+
+        // ----------------------------------------------------
+        // EL-6: CONTRA-ATAQUE
+        // ----------------------------------------------------
+        } else if (anim.type === 'counter') {
+          ctx.save();
+          if (anim.opt === 'A') {
+            // Opção A: Badge "REVIDE!" + retorno
+            if (p < 0.5) {
+              ctx.font = 'bold 16px -apple-system, sans-serif';
+              ctx.textAlign = 'center';
+              ctx.fillStyle = '#eab308';
+              ctx.fillRect(pEnemy.x - 40, pEnemy.y - 50, 80, 24);
+              ctx.fillStyle = '#04121e';
+              ctx.fillText('REVIDE!', pEnemy.x, pEnemy.y - 33);
+            } else {
+              // Golpe de volta no aliado
+              const pBack = (p - 0.5) * 2;
+              const curX = pEnemy.x - (pEnemy.x - pAlly.x) * pBack;
+              ctx.strokeStyle = '#f43f5e';
+              ctx.lineWidth = 4;
+              ctx.beginPath();
+              ctx.moveTo(pEnemy.x, pEnemy.y);
+              ctx.lineTo(curX, pAlly.y);
+              ctx.stroke();
+            }
+
+          } else if (anim.opt === 'B') {
+            // Opção B: Ricochete de faíscas
+            if (p < 0.4) {
+              ctx.strokeStyle = '#ffffff';
+              ctx.lineWidth = 3;
+              for (let a = 0; a < 6; a++) {
+                const ang = a * Math.PI / 3;
+                ctx.beginPath();
+                ctx.moveTo(pEnemy.x, pEnemy.y);
+                ctx.lineTo(pEnemy.x + Math.cos(ang) * 25 * p, pEnemy.y + Math.sin(ang) * 25 * p);
+                ctx.stroke();
+              }
+            } else {
+              const pBack = (p - 0.4) / 0.6;
+              ctx.strokeStyle = '#eab308';
+              ctx.lineWidth = 4 * (1 - pBack);
+              ctx.beginPath();
+              ctx.moveTo(pEnemy.x, pEnemy.y);
+              ctx.lineTo(pAlly.x, pAlly.y);
+              ctx.stroke();
+            }
+
+          } else if (anim.opt === 'C') {
+            // Opção C: Vetor luminoso duplo simultâneo
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(pAlly.x, pAlly.y - 6);
+            ctx.lineTo(pEnemy.x, pEnemy.y - 6);
+            ctx.stroke();
+
+            ctx.strokeStyle = 'rgba(244, 63, 94, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(pEnemy.x, pEnemy.y + 6);
+            ctx.lineTo(pAlly.x, pAlly.y + 6);
+            ctx.stroke();
+          }
+          ctx.restore();
+
+        // ----------------------------------------------------
+        // EL-7: ALVO INDEFESO
+        // ----------------------------------------------------
+        } else if (anim.type === 'defenseless') {
+          ctx.save();
+          if (anim.opt === 'A') {
+            // Opção A: Escudo partido
+            const ex = pEnemy.x;
+            const ey = pEnemy.y - 45;
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            // Metade esquerda
+            ctx.beginPath();
+            ctx.moveTo(ex - 12 - (5 * p), ey - 10);
+            ctx.lineTo(ex - 4 - (5 * p), ey + 12);
+            ctx.lineTo(ex - 16 - (5 * p), ey + 2);
+            ctx.closePath();
+            ctx.stroke();
+            // Metade direita
+            ctx.beginPath();
+            ctx.moveTo(ex + 12 + (5 * p), ey - 10);
+            ctx.lineTo(ex + 4 + (5 * p), ey + 12);
+            ctx.lineTo(ex + 16 + (5 * p), ey + 2);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.font = 'bold 12px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('SEM DEFESA', ex, ey + 30);
+
+          } else if (anim.opt === 'B') {
+            // Opção B: Silhueta escurecida / vulnerável
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+            ctx.beginPath();
+            ctx.arc(pEnemy.x, pEnemy.y, 35, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.arc(pEnemy.x, pEnemy.y, 40, 0, Math.PI * 2);
+            ctx.stroke();
+
+          } else if (anim.opt === 'C') {
+            // Opção C: Flash estendido de Golpe Limpo
+            ctx.font = 'bold 14px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(pAlly.x - 45, pAlly.y - 45, 90, 22);
+            ctx.fillStyle = '#022c22';
+            ctx.fillText('GOLPE LIMPO', pAlly.x, pAlly.y - 29);
+          }
+          ctx.restore();
+        }
+
+        if (anim.time >= anim.maxTime) {
+          activeAnimations.splice(i, 1);
+        }
+      }
+    }
+
+    // ==========================================================================
+    // 7. LOOP PRINCIPAL DE ANIMAÇÃO
+    // ==========================================================================
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = clock.getDelta();
+      controls.update();
+      renderer.render(scene, persCamera);
+      renderVFX(dt);
+    }
+    animate();
+
+    // ==========================================================================
+    // 8. TECLAS DE ATALHO E API PARA TESTES
+    // ==========================================================================
+    window.addEventListener('keydown', e => {
+      const k = e.key.toLowerCase();
+      if (k === '1') setElement('el1');
+      else if (k === '2') setElement('el2');
+      else if (k === '3') setElement('el3');
+      else if (k === '4') setElement('el4');
+      else if (k === '5') setElement('el5');
+      else if (k === '6') setElement('el6');
+      else if (k === '7') setElement('el7');
+      else if (k === 'a') setOption('A');
+      else if (k === 'b') setOption('B');
+      else if (k === 'c') setOption('C');
+      else if (e.key === ' ') { e.preventDefault(); triggerActiveEffect(); }
+    });
+
+    window.MIVisual007 = {
+      setElement,
+      setOption,
+      trigger: triggerActiveEffect,
+      getState: () => ({
+        element: activeElementKey,
+        option: activeOptionKey,
+        animCount: activeAnimations.length
+      })
+    };
+
+    updateUI();
+  </script>
+</body>
+</html>

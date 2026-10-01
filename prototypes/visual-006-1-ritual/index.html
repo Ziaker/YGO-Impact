@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monster Impact — VIS-006.1 · Identidade Visual da Invocação Ritual</title>
+  <style>
+    :root {
+      --bg: #070b11;
+      --panel: #0d1622f2;
+      --border: #1e293b;
+      --text: #e2e8f0;
+      --text-muted: #849cb5;
+      --accent: #3b82f6; /* Azul Ritual (Aprovado) */
+      --cyan: #38bdf8;   /* Celestial */
+      --purple: #a855f7; /* Cósmico */
+      --silver: #cbd5e1; /* Prata Sincro */
+      --iron: #64748b;   /* Ferro Sincro */
+      --gold: #ffd166;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOP HEADER */
+    header {
+      height: 52px;
+      background: #09101af5;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #fff;
+    }
+    .tag-vis {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #2563eb22;
+      border: 1px solid #2563eb88;
+      color: #93c5fd;
+      letter-spacing: 0.5px;
+    }
+
+    /* STYLE SELECTOR (A / B / C) */
+    .style-selector {
+      display: flex;
+      background: #060a10;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      gap: 4px;
+    }
+    .style-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .style-btn:hover {
+      color: #fff;
+      background: #ffffff0a;
+    }
+    .style-btn.active {
+      background: #182234;
+      color: #fff;
+      border-color: #3b82f6;
+    }
+    .style-btn .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* HEADER CONTROLS */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toggle-group {
+      display: flex;
+      background: #060a10;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px;
+    }
+    .toggle-opt {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .toggle-opt.active {
+      background: #1e293b;
+      color: #fff;
+    }
+    .btn {
+      background: #141f2e;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn:hover { background: #1c2b40; }
+
+    /* WORKSPACE */
+    main {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* FLOATING OVERLAY PANEL (INFO) */
+    .option-overlay {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      width: 330px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      pointer-events: none;
+      box-shadow: 0 10px 25px #00000088;
+      backdrop-filter: blur(8px);
+      transition: border-color 0.2s;
+    }
+    .option-overlay h2 {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .option-overlay p {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+    .stage-steps {
+      display: flex;
+      gap: 6px;
+    }
+    .step-pill {
+      flex: 1;
+      text-align: center;
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 5px 2px;
+      border-radius: 5px;
+      background: #080f1a;
+      border: 1px solid #1a2838;
+      color: var(--text-muted);
+      letter-spacing: 0.2px;
+      transition: all 0.2s;
+    }
+    .step-pill.active {
+      background: #1e3a5f;
+      border-color: #38bdf8;
+      color: #fff;
+    }
+
+    /* PLAYBACK BAR */
+    .playback-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0a121ef2;
+      border: 1px solid #1e2e42;
+      padding: 8px 16px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 12px 30px #000000aa;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+    .play-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: #e11d48;
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s, background 0.15s;
+    }
+    .play-btn:hover { transform: scale(1.06); background: #f43f5e; }
+    .scrubber-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .scrubber {
+      width: 170px;
+      -webkit-appearance: none;
+      height: 5px;
+      background: #182738;
+      border-radius: 3px;
+      outline: none;
+    }
+    .scrubber::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 8px #ffffffaa;
+    }
+    .time-label {
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--text-muted);
+      width: 32px;
+    }
+
+    .unit-selector {
+      display: flex;
+      background: #080f1a;
+      border: 1px solid #182738;
+      border-radius: 6px;
+      padding: 2px;
+    }
+    .unit-opt {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .unit-opt.active {
+      background: #1e3248;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="brand-title">MONSTER IMPACT</div>
+      <div class="tag-vis">VIS-006.1 · INVOCAÇÃO RITUAL</div>
+    </div>
+
+    <!-- SELETOR DAS PROPOSTAS RITUAIS -->
+    <div class="style-selector">
+      <button class="style-btn" data-style="A" id="btnOptA">
+        <span class="dot" style="color:var(--accent)"></span>
+        A · Ritual Sacrificial [Histórico]
+      </button>
+      <button class="style-btn active" data-style="B" id="btnOptB">
+        <span class="dot" style="color:var(--cyan)"></span>
+        B · Ascensão Cerimonial [Aprovado]
+      </button>
+      <button class="style-btn" data-style="C" id="btnOptC">
+        <span class="dot" style="color:var(--purple)"></span>
+        C · Portal Arcano [Histórico]
+      </button>
+      <button class="style-btn" data-style="D" id="btnOptD" title="Exploração não-canônica / Fora do escopo do GDD v0.43">
+        <span class="dot" style="color:var(--silver)"></span>
+        D · Dupla Hélice [Não-Canônico]
+      </button>
+    </div>
+
+    <!-- CONTROLES DE CÂMERA -->
+    <div class="header-actions">
+      <div class="toggle-group">
+        <button class="toggle-opt active" id="btn3D">3D Tático</button>
+        <button class="toggle-opt" id="btn2D">2D Top-Down</button>
+      </div>
+      <button class="btn" id="btnResetCam" title="Resetar Câmera">⟲ Câmera</button>
+    </div>
+  </header>
+
+  <!-- WORKSPACE VISUAL -->
+  <main>
+    <canvas id="viewCanvas"></canvas>
+
+    <!-- PAINEL EXPLICATIVO DA DIREÇÃO ATIVA -->
+    <div class="option-overlay" id="overlayPanel" style="border-color:#0284c766;">
+      <h2 id="ovTitle" style="color:var(--cyan)">Opção B — Ascensão Cerimonial [Aprovado]</h2>
+      <p id="ovDesc">Selo azul-celeste ativa 4 pilares angulares de luz celestial. Fitas sagradas tecem um claustro volumétrico enquanto a silhueta da unidade ascende do interior do piso até repousar firme no tabuleiro.</p>
+      <div class="stage-steps">
+        <div class="step-pill active" id="pill1">1. Selo Sagrado (0-300ms)</div>
+        <div class="step-pill" id="pill2">2. Fitas de Luz (300-700ms)</div>
+        <div class="step-pill" id="pill3">3. Ascensão (700-1050ms)</div>
+        <div class="step-pill" id="pill4">4. Fixação (1050-1300ms)</div>
+      </div>
+      <div style="font-size: 9.5px; color: #849cb5cc; margin-top: 8px; border-top: 1px solid #ffffff14; padding-top: 6px; line-height: 1.35;">
+        <strong>Decisão Oficial VIS-006.1:</strong> Opção B aprovada pelo autor como padrão visual de Invocação Ritual. Opções A e C mantidas como comparadores históricos. Opção D mantida como exploração estética fora do escopo canônico.
+      </div>
+    </div>
+
+    <!-- BARRA DE REPRODUÇÃO FLUTUANTE -->
+    <div class="playback-bar">
+      <button class="play-btn" id="playBtn" title="Reproduzir / Pausar (Espaço)">❚❚</button>
+      <button class="btn" id="replayBtn" title="Reiniciar Animação (R)" style="padding:4px 8px;">↺</button>
+      
+      <div class="scrubber-container">
+        <input type="range" class="scrubber" id="scrubber" min="0" max="1000" value="0">
+        <span class="time-label" id="timeLabel">0.0s</span>
+      </div>
+
+      <div class="toggle-group">
+        <button class="toggle-opt active" id="spdNormal">1.0x</button>
+        <button class="toggle-opt" id="spdSlow">0.5x</button>
+      </div>
+
+      <div class="unit-selector">
+        <button class="unit-opt active" id="unitWarrior">Guerreiro</button>
+        <button class="unit-opt" id="unitMage">Mago</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ==========================================
+    // MONSTER IMPACT — VIS-006.1 IDENTIDADE VISUAL RITUAL
+    // Palco fixo congelado (mapa 31x17, célula (7, 8), câmera VIS-002, badges VIS-004)
+    // Duração exata: 1300 ms (mesmo timing calibrado do VIS-006)
+    // ==========================================
+
+    const MAP_W = 31;
+    const MAP_H = 17;
+    const TILE_SIZE = 56;
+    const TARGET_TILE = { x: 7, y: 8 };
+
+    let currentStyle = 'B'; // 'A' | 'B' | 'C' | 'D'
+    let is3D = true;
+    let animProgress = 0;   // 0.0 a 1.0
+    let isPlaying = true;
+    let animSpeed = 1.0;
+    let animDuration = 1300; // ms
+    let lastTime = performance.now();
+    let selectedUnitType = 'warrior';
+
+    // CÂMERA 3D (APROVADA VIS-002)
+    const camera = {
+      rotX: 54 * Math.PI / 180,
+      rotZ: -20 * Math.PI / 180,
+      zoom: 1.95,
+      panX: 0,
+      panY: 75,
+      isDragging: false,
+      lastMouseX: 0,
+      lastMouseY: 0
+    };
+
+    const canvas = document.getElementById('viewCanvas');
+    const ctx = canvas.getContext('2d');
+    const playBtn = document.getElementById('playBtn');
+    const replayBtn = document.getElementById('replayBtn');
+    const scrubber = document.getElementById('scrubber');
+    const timeLabel = document.getElementById('timeLabel');
+    const overlayPanel = document.getElementById('overlayPanel');
+    const ovTitle = document.getElementById('ovTitle');
+    const ovDesc = document.getElementById('ovDesc');
+    const pill1 = document.getElementById('pill1');
+    const pill2 = document.getElementById('pill2');
+    const pill3 = document.getElementById('pill3');
+    const pill4 = document.getElementById('pill4');
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = canvas.clientWidth * dpr;
+      canvas.height = canvas.clientHeight * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // INTERAÇÃO DE CÂMERA
+    canvas.addEventListener('mousedown', e => {
+      camera.isDragging = true;
+      camera.lastMouseX = e.clientX;
+      camera.lastMouseY = e.clientY;
+    });
+    window.addEventListener('mouseup', () => { camera.isDragging = false; });
+    window.addEventListener('mousemove', e => {
+      if (!camera.isDragging) return;
+      const dx = e.clientX - camera.lastMouseX;
+      const dy = e.clientY - camera.lastMouseY;
+      camera.lastMouseX = e.clientX;
+      camera.lastMouseY = e.clientY;
+
+      if (e.buttons === 2 || e.shiftKey) {
+        camera.panX += dx;
+        camera.panY += dy;
+      } else {
+        camera.rotZ += dx * 0.006;
+        camera.rotX = Math.max(0.2, Math.min(Math.PI * 0.46, camera.rotX + dy * 0.006));
+      }
+    });
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      camera.zoom = Math.max(0.6, Math.min(2.5, camera.zoom * (e.deltaY > 0 ? 0.92 : 1.08)));
+    });
+
+    // PROJEÇÃO 2D / 3D CANÔNICA
+    function project(x, y, z = 0) {
+      const centerX = canvas.clientWidth / 2 + camera.panX;
+      const centerY = canvas.clientHeight / 2 + camera.panY;
+
+      const worldX = (x - TARGET_TILE.x) * TILE_SIZE;
+      const worldY = (y - TARGET_TILE.y) * TILE_SIZE;
+      const worldZ = z * TILE_SIZE;
+
+      if (!is3D) {
+        return {
+          x: centerX + worldX * camera.zoom,
+          y: centerY + worldY * camera.zoom,
+          scale: camera.zoom
+        };
+      }
+
+      const cosZ = Math.cos(camera.rotZ);
+      const sinZ = Math.sin(camera.rotZ);
+      const rx = worldX * cosZ - worldY * sinZ;
+      const ry = worldX * sinZ + worldY * cosZ;
+
+      const cosX = Math.cos(camera.rotX);
+      const sinX = Math.sin(camera.rotX);
+      const py = ry * cosX - worldZ * sinX;
+      const pz = ry * sinX + worldZ * cosX;
+
+      const fov = 1100;
+      const factor = (fov / (fov + pz)) * camera.zoom;
+
+      return {
+        x: centerX + rx * factor,
+        y: centerY + py * factor,
+        scale: factor
+      };
+    }
+
+    function projectGround(dx, dy, dz = 0) {
+      return project(TARGET_TILE.x + dx / TILE_SIZE, TARGET_TILE.y + dy / TILE_SIZE, dz);
+    }
+
+    function drawGroundCircle(radius, strokeStyle, fillStyle, lineWidth = 1, shadowBlur = 0, shadowColor = null, startA = 0, endA = Math.PI * 2, segs = 40) {
+      ctx.save();
+      if (shadowBlur > 0 && shadowColor) {
+        ctx.shadowBlur = shadowBlur;
+        ctx.shadowColor = shadowColor;
+      }
+      ctx.beginPath();
+      const step = (endA - startA) / segs;
+      for (let i = 0; i <= segs; i++) {
+        const a = startA + i * step;
+        const pt = projectGround(Math.cos(a) * radius, Math.sin(a) * radius, 0);
+        if (i === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      }
+      if (fillStyle) {
+        ctx.closePath();
+        ctx.fillStyle = fillStyle;
+        ctx.fill();
+      }
+      if (strokeStyle) {
+        const p0 = projectGround(radius, 0, 0);
+        ctx.strokeStyle = strokeStyle;
+        ctx.lineWidth = lineWidth * p0.scale;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // PALCO FIXO CANÔNICO
+    function renderBoard() {
+      ctx.fillStyle = '#070b11';
+      ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+      const rangeX = 7;
+      const rangeY = 5;
+
+      for (let dy = -rangeY; dy <= rangeY; dy++) {
+        for (let dx = -rangeX; dx <= rangeX; dx++) {
+          const gx = TARGET_TILE.x + dx;
+          const gy = TARGET_TILE.y + dy;
+          if (gx < 0 || gx >= MAP_W || gy < 0 || gy >= MAP_H) continue;
+
+          const p0 = project(gx - 0.48, gy - 0.48, 0);
+          const p1 = project(gx + 0.48, gy - 0.48, 0);
+          const p2 = project(gx + 0.48, gy + 0.48, 0);
+          const p3 = project(gx - 0.48, gy + 0.48, 0);
+
+          const isTarget = (gx === TARGET_TILE.x && gy === TARGET_TILE.y);
+
+          ctx.beginPath();
+          ctx.moveTo(p0.x, p0.y);
+          ctx.lineTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.lineTo(p3.x, p3.y);
+          ctx.closePath();
+
+          if (isTarget) {
+            ctx.fillStyle = currentStyle === 'A' ? '#2563eb18' : currentStyle === 'B' ? '#0284c718' : currentStyle === 'C' ? '#9333ea18' : '#64748b18';
+            ctx.strokeStyle = currentStyle === 'A' ? '#3b82f6' : currentStyle === 'B' ? '#38bdf8' : currentStyle === 'C' ? '#a855f7' : '#cbd5e1';
+            ctx.lineWidth = 2;
+          } else {
+            ctx.fillStyle = '#0d1622';
+            ctx.strokeStyle = '#182738';
+            ctx.lineWidth = 1;
+          }
+
+          ctx.fill();
+          ctx.stroke();
+
+          // Coordenadas discretas
+          if (!isTarget && (dx % 2 === 0 && dy % 2 === 0)) {
+            ctx.fillStyle = '#2c4257';
+            ctx.font = '8px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${gx},${gy}`, p0.x + (p2.x - p0.x) * 0.5, p0.y + (p2.y - p0.y) * 0.5);
+          }
+        }
+      }
+
+      // Base P1 em (0, 8)
+      const basePos = project(0, 8, 0);
+      ctx.fillStyle = '#102436';
+      ctx.strokeStyle = '#00f0ff44';
+      ctx.beginPath();
+      ctx.arc(basePos.x, basePos.y, 22 * basePos.scale, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#00f0ffaa';
+      ctx.font = `${Math.round(8 * basePos.scale)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText('BASE P1', basePos.x, basePos.y + 3);
+    }
+
+    // RENDERIZAÇÃO DA UNIDADE SÓLIDA COM ATRIBUTOS RITUAIS
+    function renderSolidMonster(target, opacity = 1.0, scaleMod = 1.0, zOffset = 0) {
+      if (opacity <= 0.01) return;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+
+      const base = project(target.x, target.y, zOffset);
+      const top = project(target.x, target.y, zOffset + 1.5 * scaleMod);
+
+      // Sombra projetada no piso
+      const ground = project(target.x, target.y, 0);
+      const shadowScale = Math.max(0.35, 1.0 - zOffset * 0.4) * scaleMod;
+      ctx.fillStyle = `rgba(0, 0, 0, ${0.65 * opacity * Math.max(0, 1.0 - zOffset * 0.3)})`;
+      ctx.beginPath();
+      ctx.ellipse(ground.x, ground.y, 24 * ground.scale * shadowScale, 12 * ground.scale * shadowScale, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      const radius = 22 * base.scale * scaleMod;
+      const height = (base.y - top.y);
+
+      // Pedestal Ritual (Azul Ritual Clássico ou Púrpura Imperial)
+      const grad = ctx.createLinearGradient(base.x - radius, 0, base.x + radius, 0);
+      if (selectedUnitType === 'warrior') {
+        grad.addColorStop(0, '#102238');
+        grad.addColorStop(0.3, '#1d4ed8');
+        grad.addColorStop(0.7, '#3b82f6');
+        grad.addColorStop(1, '#0b1626');
+      } else {
+        grad.addColorStop(0, '#2e1040');
+        grad.addColorStop(0.3, '#7e22ce');
+        grad.addColorStop(0.7, '#a855f7');
+        grad.addColorStop(1, '#180722');
+      }
+
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = '#ffffffdd';
+      ctx.lineWidth = 2;
+      ctx.shadowColor = selectedUnitType === 'warrior' ? '#60a5fa' : '#c084fc';
+      ctx.shadowBlur = 10 * opacity;
+
+      ctx.beginPath();
+      ctx.roundRect(base.x - radius, top.y, radius * 2, height, 8 * base.scale);
+      ctx.fill();
+      ctx.stroke();
+
+      // Ícone Ritual no monstro
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${Math.round(14 * base.scale)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(selectedUnitType === 'warrior' ? '⚔' : '✦', base.x, top.y + height * 0.48);
+
+      // Tag de Atributos Táticos (Indicação Ritual)
+      ctx.fillStyle = '#09101a';
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(base.x - 30 * base.scale, top.y - 15 * base.scale, 60 * base.scale, 12 * base.scale, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#93c5fd';
+      ctx.font = `bold ${Math.round(8.5 * base.scale)}px monospace`;
+      ctx.fillText('RITUAL · N7', base.x, top.y - 6 * base.scale);
+
+      ctx.restore();
+    }
+
+    // ========================================================
+    // OPÇÃO A: RITUAL SACRIFICIAL (OFERENDA & CONVERGÊNCIA) [APROVADO]
+    // Paleta Canônica: Azul-safira (#2563eb / #3b82f6), Azul-celeste (#60a5fa / #93c5fd), Luz pura (#eff6ff)
+    // ========================================================
+    const TENDRILL_OFFERINGS = Array.from({ length: 8 }, (_, i) => ({
+      angle: (i / 8) * Math.PI * 2,
+      curve: (i % 2 === 0 ? 1 : -1) * 0.45,
+      speed: 1.0 + (i % 3) * 0.2
+    }));
+
+    function renderRitualA(p) {
+      const target = TARGET_TILE;
+      const baseGround = project(target.x, target.y, 0);
+
+      // Fases:
+      // 1. Oferenda (0 - 300 ms, p: 0.0 - 0.23): despertar dos anéis sacrificiais azuis
+      // 2. Convergência (300 - 700 ms, p: 0.23 - 0.54): vórtice de essência azul para o centro
+      // 3. Ignição (700 - 1050 ms, p: 0.54 - 0.81): coluna cônica de luz cerúlea e materialização condensada
+      // 4. Fixação (1050 - 1300 ms, p: 0.81 - 1.00): monstro sólido, brasas e glifos azuis dissipam
+
+      let sealAlpha = 1.0;
+      let rotRings = p * 1.4;
+
+      if (p < 0.23) {
+        sealAlpha = p / 0.23;
+      } else if (p > 0.81) {
+        sealAlpha = Math.max(0, 1.0 - (p - 0.81) / 0.19);
+      }
+
+      if (sealAlpha > 0.01) {
+        ctx.save();
+        ctx.globalAlpha = sealAlpha;
+
+        // Fundo com brilho azul no piso
+        const glowRad = (28 + 8 * Math.sin(p * Math.PI)) * baseGround.scale;
+        const radGrad = ctx.createRadialGradient(baseGround.x, baseGround.y, 0, baseGround.x, baseGround.y, glowRad * 1.3);
+        radGrad.addColorStop(0, 'rgba(37, 99, 235, 0.40)');
+        radGrad.addColorStop(0.5, 'rgba(59, 130, 246, 0.18)');
+        radGrad.addColorStop(1, 'rgba(37, 99, 235, 0)');
+        ctx.fillStyle = radGrad;
+        ctx.beginPath();
+        ctx.ellipse(baseGround.x, baseGround.y, glowRad * 1.3, glowRad * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Anel Externo Sacrificial (R = 40)
+        drawGroundCircle(40, '#3b82f6', null, 1.4, 6, '#2563eb');
+        drawGroundCircle(37, 'rgba(147, 197, 253, 0.70)', null, 1.0, 0, null);
+
+        // 8 Glifos de Oferenda nos anéis externos
+        for (let i = 0; i < 8; i++) {
+          const a = rotRings + (i / 8) * Math.PI * 2;
+          const pt = projectGround(Math.cos(a) * 38.5, Math.sin(a) * 38.5, 0);
+          ctx.fillStyle = (i % 2 === 0) ? '#bfdbfe' : '#60a5fa';
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 2.0 * pt.scale, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Anel Intermediário com Hexagrama Azul
+        drawGroundCircle(26, '#1d4ed8', null, 1.2, 4, '#1d4ed8');
+        for (let t = 0; t < 2; t++) {
+          const offsetA = -rotRings * 0.8 + t * (Math.PI / 3);
+          ctx.strokeStyle = '#93c5fd';
+          ctx.lineWidth = 1.2 * baseGround.scale;
+          ctx.beginPath();
+          for (let v = 0; v < 3; v++) {
+            const a = offsetA + v * (Math.PI * 2 / 3);
+            const pt = projectGround(Math.cos(a) * 24, Math.sin(a) * 24, 0);
+            if (v === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+          }
+          ctx.closePath();
+          ctx.stroke();
+        }
+
+        // Núcleo Sacrificial em Luz Azul
+        const coreRad = 9 + 2 * Math.sin(p * Math.PI * 6);
+        drawGroundCircle(coreRad, '#eff6ff', 'rgba(37, 99, 235, 0.45)', 1.5, 10, '#3b82f6');
+
+        // Fase 2 e 3: Linhas espirais de essência/oferenda convergindo para o centro
+        if (p >= 0.20 && p < 0.75) {
+          const pConv = (p - 0.20) / 0.55;
+          ctx.save();
+          ctx.shadowBlur = 6;
+          ctx.shadowColor = '#3b82f6';
+          for (const tend of TENDRILL_OFFERINGS) {
+            ctx.beginPath();
+            const startDist = 38 * (1.0 - pConv * 0.85);
+            const endDist = Math.max(2, startDist - 16);
+            for (let step = 0; step <= 8; step++) {
+              const f = step / 8;
+              const r = startDist - (startDist - endDist) * f;
+              const a = tend.angle + (1.0 - f) * tend.curve * Math.PI + pConv * 4.0;
+              const pt = projectGround(Math.cos(a) * r, Math.sin(a) * r, 0.05 + f * 0.3);
+              if (step === 0) ctx.moveTo(pt.x, pt.y);
+              else ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.strokeStyle = `rgba(96, 165, 250, ${0.80 * Math.sin(pConv * Math.PI)})`;
+            ctx.lineWidth = 1.6 * baseGround.scale;
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        ctx.restore();
+      }
+
+      // Fase 3 (700 - 1050 ms): Ignição Central e Materialização a partir da luz cerúlea
+      if (p >= 0.54 && p < 0.85) {
+        const p3 = (p - 0.54) / 0.27;
+        const flameHeight = 2.4 * Math.sin(p3 * Math.PI);
+        const topFlame = project(target.x, target.y, flameHeight);
+
+        // Coluna cônica de luz cerúlea sacrificial
+        const gradFlame = ctx.createLinearGradient(0, baseGround.y, 0, topFlame.y);
+        gradFlame.addColorStop(0, 'rgba(255, 255, 255, 0.90)');
+        gradFlame.addColorStop(0.3, 'rgba(147, 197, 253, 0.75)');
+        gradFlame.addColorStop(0.7, 'rgba(37, 99, 235, 0.45)');
+        gradFlame.addColorStop(1, 'rgba(29, 78, 216, 0)');
+
+        ctx.save();
+        ctx.fillStyle = gradFlame;
+        ctx.beginPath();
+        const pL = projectGround(-18, 0, 0);
+        const pR = projectGround(18, 0, 0);
+        ctx.moveTo(pL.x, pL.y);
+        ctx.lineTo(pR.x, pR.y);
+        ctx.lineTo(topFlame.x, topFlame.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Monstro emergindo através da condensação da luz
+        const monsterProg = Math.max(0, (p3 - 0.2) / 0.8);
+        renderSolidMonster(target, monsterProg * 1.2, 1.0, (1.0 - monsterProg) * 0.8);
+      }
+
+      // Fase 4: Monstro Sólido
+      if (p >= 0.81) {
+        renderSolidMonster(target, 1.0, 1.0, 0);
+      }
+    }
+
+    // ========================================================
+    // OPÇÃO B: ASCENSÃO CERIMONIAL (PILARES & FITAS DE LUZ)
+    // Paleta: Azul celeste (#38bdf8), Platina (#f8fafc), Ouro pálido (#fef08a)
+    // ========================================================
+    function renderRitualB(p) {
+      const target = TARGET_TILE;
+      const baseGround = project(target.x, target.y, 0);
+
+      // Fases:
+      // 1. Selo Cerimonial (0 - 300 ms, p: 0.0 - 0.23): ativação com 4 pilares angulares
+      // 2. Fitas de Luz em Espiral (300 - 700 ms, p: 0.23 - 0.54): fitas verticais tecem o claustro
+      // 3. Ascensão da Silhueta (700 - 1050 ms, p: 0.54 - 0.81): silhueta sobe DO CHÃO para cima
+      // 4. Fixação Soberana (1050 - 1300 ms, p: 0.81 - 1.00): fitas se dissolvem em pó celestial
+
+      let sealAlpha = 1.0;
+      if (p < 0.23) sealAlpha = p / 0.23;
+      else if (p > 0.81) sealAlpha = Math.max(0, 1.0 - (p - 0.81) / 0.19);
+
+      if (sealAlpha > 0.01) {
+        ctx.save();
+        ctx.globalAlpha = sealAlpha;
+
+        // Fundo azul celeste translúcido
+        drawGroundCircle(36, '#38bdf8', 'rgba(56, 189, 248, 0.12)', 1.5, 8, '#38bdf8');
+        drawGroundCircle(33, 'rgba(254, 240, 138, 0.5)', null, 1.0, 0, null);
+        drawGroundCircle(18, '#0284c7', null, 1.2, 4, '#0284c7');
+
+        // Cruz Celestial no piso
+        const rotB = p * 0.6;
+        for (let i = 0; i < 4; i++) {
+          const a = rotB + (i / 4) * Math.PI * 2;
+          const p1 = projectGround(Math.cos(a) * 8, Math.sin(a) * 8, 0);
+          const p2 = projectGround(Math.cos(a) * 32, Math.sin(a) * 32, 0);
+          ctx.strokeStyle = '#bae6fd';
+          ctx.lineWidth = 1.2 * baseGround.scale;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+
+        // 4 Pilares Angulares de Luz projetando-se nos 4 cantos do selo
+        const pillarHeight = Math.min(2.5, p * 4.5);
+        for (let i = 0; i < 4; i++) {
+          const a = rotB + (i / 4) * Math.PI * 2 + Math.PI / 4;
+          const pB = projectGround(Math.cos(a) * 28, Math.sin(a) * 28, 0);
+          const pT = projectGround(Math.cos(a) * 28, Math.sin(a) * 28, pillarHeight);
+          
+          const gradPil = ctx.createLinearGradient(0, pB.y, 0, pT.y);
+          gradPil.addColorStop(0, 'rgba(56, 189, 248, 0.7)');
+          gradPil.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.strokeStyle = gradPil;
+          ctx.lineWidth = 2.5 * pB.scale;
+          ctx.beginPath();
+          ctx.moveTo(pB.x, pB.y);
+          ctx.lineTo(pT.x, pT.y);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      // Fase 2 e 3: Fitas de Luz em Espiral Ascendente
+      if (p >= 0.23 && p < 0.85) {
+        const pRibbon = (p - 0.23) / 0.62;
+        ctx.save();
+        for (let rib = 0; rib < 3; rib++) {
+          ctx.beginPath();
+          const baseA = rib * (Math.PI * 2 / 3) + pRibbon * 5.0;
+          for (let step = 0; step <= 20; step++) {
+            const f = step / 20;
+            const z = f * 2.6;
+            const r = 20 * (1.0 - f * 0.25);
+            const a = baseA + f * Math.PI * 2.2;
+            const pt = projectGround(Math.cos(a) * r, Math.sin(a) * r, z);
+            if (step === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+          }
+          ctx.strokeStyle = `rgba(186, 230, 253, ${0.65 * Math.sin(pRibbon * Math.PI)})`;
+          ctx.lineWidth = 2.0 * baseGround.scale;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = '#38bdf8';
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // Fase 3 (700 - 1050 ms): ASCENSÃO DA SILHUETA (Surge do piso e ascende até repousar)
+      if (p >= 0.45 && p < 0.85) {
+        const pRise = (p - 0.45) / 0.40;
+        // Monstro sobe do chão: z de -0.6 até 0.0
+        const zAscend = (pRise < 0.75) ? (-0.6 * (1.0 - pRise / 0.75)) : (0.1 * Math.sin((pRise - 0.75) / 0.25 * Math.PI));
+        const alphaAscend = Math.min(1.0, pRise * 1.5);
+        renderSolidMonster(target, alphaAscend, 1.0, Math.max(0, zAscend));
+      }
+
+      // Fase 4: Monstro Sólido e Estabelecido
+      if (p >= 0.81) {
+        renderSolidMonster(target, 1.0, 1.0, 0);
+      }
+    }
+
+    // ========================================================
+    // OPÇÃO C: PORTAL ARCANO (ABISMO ESPELHADO / FENDA CÓSMICA)
+    // Paleta: Roxo abissal (#9333ea), Ciano cósmico (#06b6d4), Vórtice escuro
+    // ========================================================
+    const STAR_FIELD = Array.from({ length: 24 }, (_, i) => ({
+      x: ((i * 17) % 36) - 18,
+      y: ((i * 23) % 20) - 10,
+      size: 0.8 + (i % 3) * 0.5,
+      blink: i * 0.3
+    }));
+
+    function renderRitualC(p) {
+      const target = TARGET_TILE;
+      const baseGround = project(target.x, target.y, 0);
+
+      // Fases:
+      // 1. Abertura do Abismo (0 - 300 ms, p: 0.0 - 0.23): solo se rasga e revela poço estelar
+      // 2. Vórtice Dimensional (300 - 700 ms, p: 0.23 - 0.54): horizonte de eventos gira no chão
+      // 3. Emergência Abissal (700 - 1050 ms, p: 0.54 - 0.81): monstro cruza a membrana do portal
+      // 4. Fechamento da Fenda (1050 - 1300 ms, p: 0.81 - 1.00): portal fecha, chão restaura-se
+
+      let portalOpen = 1.0;
+      if (p < 0.23) portalOpen = p / 0.23;
+      else if (p > 0.81) portalOpen = Math.max(0, 1.0 - (p - 0.81) / 0.19);
+
+      if (portalOpen > 0.01) {
+        ctx.save();
+
+        const rx = 34 * portalOpen * baseGround.scale;
+        const ry = 17 * portalOpen * baseGround.scale;
+
+        // Furo / Abismo Cósmico no Solo (Escuridão e estrelas no fundo)
+        ctx.save();
+        ctx.beginPath();
+        ctx.ellipse(baseGround.x, baseGround.y, rx, ry, 0, 0, Math.PI * 2);
+        ctx.clip();
+
+        // Fundo do poço dimensional
+        ctx.fillStyle = '#030014';
+        ctx.fillRect(baseGround.x - rx - 5, baseGround.y - ry - 5, rx * 2 + 10, ry * 2 + 10);
+
+        // Nebulosa interior profunda
+        const nebGrad = ctx.createRadialGradient(baseGround.x, baseGround.y, 0, baseGround.x, baseGround.y, rx);
+        nebGrad.addColorStop(0, 'rgba(147, 51, 234, 0.5)');
+        nebGrad.addColorStop(0.5, 'rgba(6, 182, 212, 0.3)');
+        nebGrad.addColorStop(1, 'rgba(3, 0, 20, 0.9)');
+        ctx.fillStyle = nebGrad;
+        ctx.fill();
+
+        // Estrelas cintilando dentro do abismo
+        for (const st of STAR_FIELD) {
+          const a = p * 1.5 + st.blink;
+          const sx = baseGround.x + st.x * portalOpen * baseGround.scale;
+          const sy = baseGround.y + st.y * portalOpen * baseGround.scale;
+          ctx.fillStyle = (Math.sin(a) > 0) ? '#ffffff' : '#a855f7';
+          ctx.beginPath();
+          ctx.arc(sx, sy, st.size * baseGround.scale, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+
+        // Borda do Horizonte de Eventos (Anel Cósmico Giratório)
+        ctx.save();
+        ctx.strokeStyle = '#a855f7';
+        ctx.lineWidth = 2.0 * baseGround.scale;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#06b6d4';
+        ctx.beginPath();
+        ctx.ellipse(baseGround.x, baseGround.y, rx, ry, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Anel secundário de ondulação dimensional
+        ctx.strokeStyle = 'rgba(6, 182, 212, 0.7)';
+        ctx.lineWidth = 1.0 * baseGround.scale;
+        ctx.beginPath();
+        ctx.ellipse(baseGround.x, baseGround.y, rx * 1.15, ry * 1.15, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.restore();
+      }
+
+      // Fase 3 (700 - 1050 ms): EMERGÊNCIA ABISSAL (Monstro sobe de DENTRO do portal)
+      if (p >= 0.45 && p < 0.85) {
+        const pEmerg = (p - 0.45) / 0.40;
+        // O monstro ascende de z = -0.9 até romper a membrana em z = 0.0
+        const zCross = (1.0 - pEmerg) * -0.7;
+        const alphaEmerg = Math.min(1.0, pEmerg * 1.4);
+        renderSolidMonster(target, alphaEmerg, 1.0, zCross);
+
+        // Ondas de choque gravitacional no portal quando rompe a superfície
+        if (pEmerg > 0.4 && pEmerg < 0.9) {
+          const pWave = (pEmerg - 0.4) / 0.5;
+          ctx.save();
+          ctx.strokeStyle = `rgba(168, 85, 247, ${0.7 * (1.0 - pWave)})`;
+          ctx.lineWidth = 2.0 * (1.0 - pWave) * baseGround.scale;
+          ctx.beginPath();
+          ctx.ellipse(baseGround.x, baseGround.y, 42 * pWave * baseGround.scale, 21 * pWave * baseGround.scale, 0, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // Fase 4: Monstro Sólido no Chão Reconstituído
+      if (p >= 0.81) {
+        renderSolidMonster(target, 1.0, 1.0, 0);
+      }
+    }
+
+    // ========================================================
+    // OPÇÃO D: SINCRO (DUPLA HÉLICE METÁLICA / PRATA & FERRO)
+    // Paleta Sincro: Prata lustrosa (#f8fafc / #cbd5e1), Ferro forjado (#64748b / #334155), Centelhas puras (#ffffff)
+    // ========================================================
+    const HELIX_PARTICLES = Array.from({ length: 32 }, (_, i) => ({
+      strand: i % 2, // 0: prata, 1: ferro
+      offsetH: (i / 32),
+      driftSpeed: 0.8 + (i % 5) * 0.15,
+      size: 1.2 + (i % 3) * 0.6
+    }));
+
+    function renderRitualD(p) {
+      const target = TARGET_TILE;
+      const baseGround = project(target.x, target.y, 0);
+
+      // Fases:
+      // 1. Selo Duplo & Ignição Focal (0 - 300 ms, p: 0.0 - 0.23): anéis metálicos concêntricos + 2 focos em rotação
+      // 2. Ascensão da Dupla Hélice (300 - 700 ms, p: 0.23 - 0.54): filamentos de prata e ferro com degraus de ressonância
+      // 3. Vórtice Central & Condensação (700 - 1050 ms, p: 0.54 - 0.81): alinhamento no ápice, monstro desce (z = 1.1 -> 0)
+      // 4. Fixação & Dissipação de Poeira (1050 - 1300 ms, p: 0.81 - 1.00): monstro sólido, fagulhas metálicas se dissipam
+
+      let sealAlpha = 1.0;
+      if (p < 0.23) sealAlpha = p / 0.23;
+      else if (p > 0.81) sealAlpha = Math.max(0, 1.0 - (p - 0.81) / 0.19);
+
+      if (sealAlpha > 0.01) {
+        ctx.save();
+        ctx.globalAlpha = sealAlpha;
+
+        // Brilho difuso prateado/metálico no piso
+        const glowRad = 36 * baseGround.scale;
+        const radGrad = ctx.createRadialGradient(baseGround.x, baseGround.y, 0, baseGround.x, baseGround.y, glowRad);
+        radGrad.addColorStop(0, 'rgba(203, 213, 225, 0.28)');
+        radGrad.addColorStop(0.5, 'rgba(100, 116, 139, 0.15)');
+        radGrad.addColorStop(1, 'rgba(15, 23, 42, 0)');
+        ctx.fillStyle = radGrad;
+        ctx.beginPath();
+        ctx.ellipse(baseGround.x, baseGround.y, glowRad * 1.3, glowRad * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Anel Externo R = 38 (Prata) e R = 34 (Ferro)
+        drawGroundCircle(38, '#cbd5e1', 'rgba(148, 163, 184, 0.08)', 1.5, 8, '#f8fafc');
+        drawGroundCircle(34, 'rgba(100, 116, 139, 0.75)', null, 1.0, 0, null);
+        drawGroundCircle(16, '#94a3b8', null, 1.2, 4, '#cbd5e1');
+
+        // Glifos metálicos ao longo da borda
+        const rotSeal = p * 1.2;
+        for (let i = 0; i < 8; i++) {
+          const a = rotSeal + (i / 8) * Math.PI * 2;
+          const pt = projectGround(Math.cos(a) * 36, Math.sin(a) * 36, 0);
+          ctx.fillStyle = (i % 2 === 0) ? '#f8fafc' : '#64748b';
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 1.8 * pt.scale, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 2 Focos de Ignição / Emitter points na base que giram e alimentam as 2 fitas (1 Prata, 1 Ferro)
+        const rotEmitters = p * 4.5;
+        for (let strand = 0; strand < 2; strand++) {
+          const a = rotEmitters + strand * Math.PI;
+          const ep = projectGround(Math.cos(a) * 22, Math.sin(a) * 22, 0);
+          ctx.fillStyle = strand === 0 ? '#f8fafc' : '#64748b';
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = strand === 0 ? '#e2e8f0' : '#475569';
+          ctx.beginPath();
+          ctx.arc(ep.x, ep.y, 3.2 * ep.scale, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+
+        ctx.restore();
+      }
+
+      // Fase 2 e 3: A DUPLA HÉLICE ASCENDENTE COM DEGRAUS TRANSVERSAIS
+      if (p >= 0.15 && p < 0.88) {
+        // Crescimento vertical da hélice: sobe de 0 até altura máxima (2.8 tiles)
+        let helixProg = 1.0;
+        if (p < 0.50) {
+          helixProg = (p - 0.15) / 0.35; // 0 -> 1 subindo
+        } else if (p > 0.75) {
+          helixProg = Math.max(0, 1.0 - (p - 0.75) / 0.13); // colapso suave
+        }
+
+        const maxSteps = 36;
+        const visibleSteps = Math.floor(maxSteps * Math.min(1.0, helixProg));
+        const rotBase = p * 6.5; // rotação contínua ao longo do tempo
+
+        ctx.save();
+
+        // Armazenar os pontos para desenhar as pontes transversais
+        const strand1Points = [];
+        const strand2Points = [];
+
+        for (let step = 0; step <= visibleSteps; step++) {
+          const f = step / maxSteps; // fração de altura 0.0 -> 1.0
+          const z = f * 2.8;
+
+          // Gradiente de velocidade: acelera angularmente conforme sobe
+          // Conicidade sutil: raio afunila de 24 para 14
+          const r = 24 - f * 10;
+          const theta = rotBase + f * Math.PI * 4.5 + f * f * 1.8;
+
+          // Fita 1: Prata lustrosa
+          const p1 = projectGround(Math.cos(theta) * r, Math.sin(theta) * r, z);
+          strand1Points.push(p1);
+
+          // Fita 2: Ferro forjado (defasagem exata de 180° = Math.PI)
+          const p2 = projectGround(Math.cos(theta + Math.PI) * r, Math.sin(theta + Math.PI) * r, z);
+          strand2Points.push(p2);
+        }
+
+        // Desenhar Pontes / Degraus Transversais de Ressonância (estilo DNA metálico)
+        // a cada 4 passos conectando strand1 (prata) e strand2 (ferro)
+        if (visibleSteps >= 4) {
+          ctx.save();
+          for (let s = 2; s < visibleSteps; s += 4) {
+            const pt1 = strand1Points[s];
+            const pt2 = strand2Points[s];
+            if (!pt1 || !pt2) continue;
+
+            const rungAlpha = Math.min(1.0, helixProg * 1.2) * 0.75;
+            const gradRung = ctx.createLinearGradient(pt1.x, pt1.y, pt2.x, pt2.y);
+            gradRung.addColorStop(0, `rgba(248, 250, 252, ${rungAlpha})`);
+            gradRung.addColorStop(0.5, `rgba(203, 213, 225, ${rungAlpha * 0.9})`);
+            gradRung.addColorStop(1, `rgba(100, 116, 139, ${rungAlpha})`);
+
+            ctx.strokeStyle = gradRung;
+            ctx.lineWidth = 1.4 * baseGround.scale;
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = '#cbd5e1';
+            ctx.beginPath();
+            ctx.moveTo(pt1.x, pt1.y);
+            ctx.lineTo(pt2.x, pt2.y);
+            ctx.stroke();
+
+            // Nós de conexão luminosos nas pontas dos degraus
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(pt1.x, pt1.y, 1.3 * pt1.scale, 0, Math.PI * 2);
+            ctx.arc(pt2.x, pt2.y, 1.3 * pt2.scale, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        // Desenhar Fita 1 (Prata Lustrosa)
+        if (strand1Points.length > 1) {
+          ctx.save();
+          ctx.beginPath();
+          for (let i = 0; i < strand1Points.length; i++) {
+            if (i === 0) ctx.moveTo(strand1Points[i].x, strand1Points[i].y);
+            else ctx.lineTo(strand1Points[i].x, strand1Points[i].y);
+          }
+          ctx.strokeStyle = `rgba(241, 245, 249, ${0.90 * Math.min(1.0, helixProg * 1.3)})`;
+          ctx.lineWidth = 2.4 * baseGround.scale;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = '#cbd5e1';
+          ctx.stroke();
+
+          // Núcleo branco interno da fita para intensidade de brilho prateado
+          ctx.strokeStyle = `rgba(255, 255, 255, ${0.8 * Math.min(1.0, helixProg * 1.3)})`;
+          ctx.lineWidth = 1.0 * baseGround.scale;
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Desenhar Fita 2 (Ferro Forjado)
+        if (strand2Points.length > 1) {
+          ctx.save();
+          ctx.beginPath();
+          for (let i = 0; i < strand2Points.length; i++) {
+            if (i === 0) ctx.moveTo(strand2Points[i].x, strand2Points[i].y);
+            else ctx.lineTo(strand2Points[i].x, strand2Points[i].y);
+          }
+          ctx.strokeStyle = `rgba(100, 116, 139, ${0.90 * Math.min(1.0, helixProg * 1.3)})`;
+          ctx.lineWidth = 2.4 * baseGround.scale;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = '#334155';
+          ctx.stroke();
+
+          // Núcleo metálico cinza-aço
+          ctx.strokeStyle = `rgba(148, 163, 184, ${0.7 * Math.min(1.0, helixProg * 1.3)})`;
+          ctx.lineWidth = 1.0 * baseGround.scale;
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Partículas em órbita helicoidal ao longo das fitas (centelhas de prata e ferro)
+        for (const pt of HELIX_PARTICLES) {
+          const partH = ((pt.offsetH + p * pt.driftSpeed) % 1.0);
+          if (partH > helixProg) continue;
+
+          const zP = partH * 2.8;
+          const rP = (24 - partH * 10);
+          const thetaP = rotBase + partH * Math.PI * 4.5 + partH * partH * 1.8 + (pt.strand === 1 ? Math.PI : 0);
+          const pos = projectGround(Math.cos(thetaP) * rP, Math.sin(thetaP) * rP, zP);
+
+          const partAlpha = Math.sin(partH * Math.PI) * 0.85;
+          ctx.fillStyle = pt.strand === 0 ? `rgba(248, 250, 252, ${partAlpha})` : `rgba(148, 163, 184, ${partAlpha})`;
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, pt.size * pos.scale, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      // Fase 3 (700 - 1050 ms, p: 0.54 - 0.81): DESCIDA/MATERIALIZAÇÃO CONDENSADA NO CENTRO
+      // O monstro desce suavemente do centro superior convergente (z = 1.1 -> 0.0)
+      if (p >= 0.50 && p < 0.85) {
+        const pDescend = (p - 0.50) / 0.35; // 0.0 -> 1.0
+        // Desce de z = 1.1 até 0.0 com desaceleração suave
+        const easeOutQuad = 1.0 - Math.pow(1.0 - pDescend, 2);
+        const zPos = 1.1 * (1.0 - easeOutQuad);
+        const alphaMonster = Math.min(1.0, pDescend * 1.5);
+        renderSolidMonster(target, alphaMonster, 1.0, zPos);
+
+        // Flash de ressonância no ápice do alinhamento (em torno de p = 0.72)
+        if (p >= 0.68 && p <= 0.78) {
+          const flashP = Math.sin((p - 0.68) / 0.10 * Math.PI);
+          ctx.save();
+          const apex = project(target.x, target.y, 1.4);
+          ctx.fillStyle = `rgba(255, 255, 255, ${0.45 * flashP})`;
+          ctx.beginPath();
+          ctx.arc(apex.x, apex.y, 25 * apex.scale * flashP, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // Fase 4 (1050 - 1300 ms, p: 0.81 - 1.00): MONSTRO CONSOLIDADO NO TABULEIRO
+      if (p >= 0.81) {
+        renderSolidMonster(target, 1.0, 1.0, 0);
+
+        // Poeira residual metálica dissipando-se suavemente
+        const pDissipate = (p - 0.81) / 0.19;
+        const dustAlpha = (1.0 - pDissipate) * 0.65;
+        if (dustAlpha > 0.01) {
+          ctx.save();
+          for (let i = 0; i < 12; i++) {
+            const ang = (i / 12) * Math.PI * 2 + pDissipate * 0.8;
+            const dist = 18 + i * 2 + pDissipate * 15;
+            const zD = 0.2 + (i % 4) * 0.25 + pDissipate * 0.4;
+            const pDust = projectGround(Math.cos(ang) * dist, Math.sin(ang) * dist, zD);
+            ctx.fillStyle = (i % 2 === 0) ? `rgba(248, 250, 252, ${dustAlpha})` : `rgba(148, 163, 184, ${dustAlpha})`;
+            ctx.beginPath();
+            ctx.arc(pDust.x, pDust.y, 1.2 * pDust.scale, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+      }
+    }
+
+    // ATUALIZAÇÃO DO OVERLAY E ETAPAS
+    function updateOverlay() {
+      if (currentStyle === 'A') {
+        ovTitle.textContent = 'Opção A — Ritual Sacrificial [Histórico]';
+        ovTitle.style.color = 'var(--accent)';
+        ovDesc.textContent = 'Anéis concêntricos azul-safira com runas e hexagrama místico. Essências vitais em vórtice azul convergem acelerando em direção ao centro em coluna de luz cerúlea onde o monstro condensa-se solidamente.';
+        overlayPanel.style.borderColor = '#2563eb66';
+        pill1.textContent = '1. Oferenda (0-300ms)';
+        pill2.textContent = '2. Convergência (300-700ms)';
+        pill3.textContent = '3. Ignição (700-1050ms)';
+        pill4.textContent = '4. Fixação (1050-1300ms)';
+      } else if (currentStyle === 'B') {
+        ovTitle.textContent = 'Opção B — Ascensão Cerimonial [Aprovado]';
+        ovTitle.style.color = 'var(--cyan)';
+        ovDesc.textContent = 'Selo azul-celeste ativa 4 pilares angulares de luz celestial. Fitas sagradas tecem um claustro volumétrico enquanto a silhueta da unidade ascende do interior do piso até repousar firme no tabuleiro.';
+        overlayPanel.style.borderColor = '#0284c766';
+        pill1.textContent = '1. Selo Sagrado (0-300ms)';
+        pill2.textContent = '2. Fitas de Luz (300-700ms)';
+        pill3.textContent = '3. Ascensão (700-1050ms)';
+        pill4.textContent = '4. Fixação (1050-1300ms)';
+      } else if (currentStyle === 'C') {
+        ovTitle.textContent = 'Opção C — Portal Arcano [Histórico]';
+        ovTitle.style.color = 'var(--purple)';
+        ovDesc.textContent = 'O solo da célula racha-se em um abismo espelhado cósmico com estrelas no fundo. A unidade emerge das profundezas dimensionais rompendo a superfície do portal antes que a fenda se feche.';
+        overlayPanel.style.borderColor = '#9333ea66';
+        pill1.textContent = '1. Fenda Cósmica (0-300ms)';
+        pill2.textContent = '2. Horizonte (300-700ms)';
+        pill3.textContent = '3. Emergência (700-1050ms)';
+        pill4.textContent = '4. Fechamento (1050-1300ms)';
+      } else if (currentStyle === 'D') {
+        ovTitle.textContent = 'Opção D — Dupla Hélice [Não-Canônico]';
+        ovTitle.style.color = 'var(--silver)';
+        ovDesc.textContent = 'Exploração visual suplementar fora do escopo do GDD v0.43: dois filamentos metálicos entrelaçados (prata lustrosa e ferro forjado) ascendem em dupla hélice com degraus de ressonância transversais. O monstro materializa-se condensando no foco convergente superior.';
+        overlayPanel.style.borderColor = '#64748b66';
+        pill1.textContent = '1. Selo & Ignição (0-300ms)';
+        pill2.textContent = '2. Sintonia & Pontes (300-700ms)';
+        pill3.textContent = '3. Vórtice & Descida (700-1050ms)';
+        pill4.textContent = '4. Fixação (1050-1300ms)';
+      }
+
+      pill1.className = `step-pill ${animProgress < 0.23 ? 'active' : ''}`;
+      pill2.className = `step-pill ${animProgress >= 0.23 && animProgress < 0.54 ? 'active' : ''}`;
+      pill3.className = `step-pill ${animProgress >= 0.54 && animProgress < 0.81 ? 'active' : ''}`;
+      pill4.className = `step-pill ${animProgress >= 0.81 ? 'active' : ''}`;
+    }
+
+    // LOOP PRINCIPAL
+    function loop(now) {
+      const dt = (now - lastTime);
+      lastTime = now;
+
+      if (isPlaying) {
+        animProgress += (dt / (animDuration / animSpeed));
+        if (animProgress > 1.0) {
+          animProgress = 1.0;
+          isPlaying = false;
+          playBtn.textContent = '↺';
+        }
+        scrubber.value = Math.round(animProgress * 1000);
+        timeLabel.textContent = `${(animProgress * (animDuration / 1000)).toFixed(1)}s`;
+      }
+
+      renderBoard();
+
+      if (currentStyle === 'A') renderRitualA(animProgress);
+      else if (currentStyle === 'B') renderRitualB(animProgress);
+      else if (currentStyle === 'C') renderRitualC(animProgress);
+      else if (currentStyle === 'D') renderRitualD(animProgress);
+
+      updateOverlay();
+
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    // CONTROLES DE REPRODUÇÃO
+    function triggerSummon() {
+      animProgress = 0.0;
+      isPlaying = true;
+      playBtn.textContent = '❚❚';
+      lastTime = performance.now();
+    }
+
+    playBtn.onclick = () => {
+      if (animProgress >= 1.0) {
+        triggerSummon();
+      } else {
+        isPlaying = !isPlaying;
+        playBtn.textContent = isPlaying ? '❚❚' : '▶';
+        lastTime = performance.now();
+      }
+    };
+
+    replayBtn.onclick = () => triggerSummon();
+
+    scrubber.oninput = e => {
+      animProgress = parseFloat(e.target.value) / 1000;
+      isPlaying = false;
+      playBtn.textContent = '▶';
+      timeLabel.textContent = `${(animProgress * (animDuration / 1000)).toFixed(1)}s`;
+    };
+
+    window.addEventListener('keydown', e => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        triggerSummon();
+      } else if (e.key === 'r' || e.key === 'R') {
+        triggerSummon();
+      } else if (e.key === 'a' || e.key === 'A') {
+        setStyle('A');
+      } else if (e.key === 'b' || e.key === 'B') {
+        setStyle('B');
+      } else if (e.key === 'c' || e.key === 'C') {
+        setStyle('C');
+      } else if (e.key === 'd' || e.key === 'D') {
+        setStyle('D');
+      } else if (e.key === 'v' || e.key === 'V') {
+        setView3D(!is3D);
+      }
+    });
+
+    function setStyle(style) {
+      currentStyle = style;
+      document.querySelectorAll('.style-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.style === style);
+      });
+      triggerSummon();
+    }
+
+    document.getElementById('btnOptA').onclick = () => setStyle('A');
+    document.getElementById('btnOptB').onclick = () => setStyle('B');
+    document.getElementById('btnOptC').onclick = () => setStyle('C');
+    document.getElementById('btnOptD').onclick = () => setStyle('D');
+
+    function setView3D(val) {
+      is3D = val;
+      document.getElementById('btn3D').classList.toggle('active', val);
+      document.getElementById('btn2D').classList.toggle('active', !val);
+    }
+    document.getElementById('btn3D').onclick = () => setView3D(true);
+    document.getElementById('btn2D').onclick = () => setView3D(false);
+
+    document.getElementById('btnResetCam').onclick = () => {
+      camera.rotX = 54 * Math.PI / 180;
+      camera.rotZ = -20 * Math.PI / 180;
+      camera.zoom = 1.95;
+      camera.panX = 0;
+      camera.panY = 75;
+    };
+
+    document.getElementById('spdNormal').onclick = () => {
+      animSpeed = 1.0;
+      document.getElementById('spdNormal').classList.add('active');
+      document.getElementById('spdSlow').classList.remove('active');
+    };
+    document.getElementById('spdSlow').onclick = () => {
+      animSpeed = 0.5;
+      document.getElementById('spdSlow').classList.add('active');
+      document.getElementById('spdNormal').classList.remove('active');
+    };
+
+    document.getElementById('unitWarrior').onclick = () => {
+      selectedUnitType = 'warrior';
+      document.getElementById('unitWarrior').classList.add('active');
+      document.getElementById('unitMage').classList.remove('active');
+      triggerSummon();
+    };
+    document.getElementById('unitMage').onclick = () => {
+      selectedUnitType = 'mage';
+      document.getElementById('unitMage').classList.add('active');
+      document.getElementById('unitWarrior').classList.remove('active');
+      triggerSummon();
+    };
+
+    // API GLOBAL PARA PLAYWRIGHT
+    window.MIVisual = {
+      setStyle,
+      setView3D,
+      triggerSummon,
+      setUnitType: type => { selectedUnitType = type; },
+      setProgress: p => {
+        animProgress = Math.max(0, Math.min(1.0, p));
+        isPlaying = false;
+        playBtn.textContent = '▶';
+        scrubber.value = Math.round(animProgress * 1000);
+        timeLabel.textContent = `${(animProgress * (animDuration / 1000)).toFixed(1)}s`;
+      },
+      getState: () => ({ currentStyle, is3D, animProgress, isPlaying, selectedUnitType })
+    };
+  </script>
+</body>
+</html>

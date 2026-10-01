@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: A.I.'s Show
+ID: 54374642
+Categoria: Armadilha
+Tipo da API: Trap Card
+Subtipo: Normal
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+While you control a Link-3 or higher "@Ignister" monster in the Extra Monster Zone, when an opponent's monster declares an attack: Special Summon from your Extra Deck any number of non-Link Cyberse monster(s) with 2300 ATK, whose combined ATK is less than or equal to the attacking monster's ATK, then end the Battle Phase.

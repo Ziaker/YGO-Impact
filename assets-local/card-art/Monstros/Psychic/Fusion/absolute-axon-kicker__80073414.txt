@@ -1,0 +1,16 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Absolute Axon Kicker
+ID: 80073414
+Categoria: Monstro
+Tipo da API: Fusion Monster
+RACE: Psychic
+Nível: 11
+Tipo Monster Impact: Fusion
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+1 Psychic Synchro Monster + 1 Synchro Monster
+Must first be Fusion Summoned. Cannot be destroyed by card effects. If this card is Fusion Summoned: You can pay 2000 LP; banish all face-up cards your opponent controls. If this card is in your GY, except the turn it was sent there: You can banish it; Special Summon 1 Level 10 Psychic Fusion Monster from your Extra Deck (this is treated as a Fusion Summon). You can only use this effect of "Absolute Axon Kicker" once per turn.

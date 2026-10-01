@@ -1,0 +1,18 @@
+{
+  "asset_name": "4 summoning circles",
+  "author": "Luke.RUSTLTD",
+  "origin_url": "https://opengameart.org/content/4-summoning-circles",
+  "license": "CC0 1.0 Universal (Public Domain Dedication)",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "files_stored": [
+    "circle4.svg",
+    "circle5.svg",
+    "circle6.svg",
+    "circle7.svg",
+    "circle4.png",
+    "circle5.png",
+    "circle6.png",
+    "circle7.png"
+  ],
+  "usage_in_project": "Reference vector assets and SVG rune glyphs for Monster Impact VIS-006 (Option B: Summoning Circle)."
+}

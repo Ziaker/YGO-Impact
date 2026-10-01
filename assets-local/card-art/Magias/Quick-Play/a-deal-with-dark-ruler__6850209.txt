@@ -1,0 +1,14 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: A Deal with Dark Ruler
+ID: 6850209
+Categoria: Magia
+Tipo da API: Spell Card
+Subtipo: Quick-Play
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+(This card is always treated as an "Archfiend" card.)
+If a Level 8 or higher monster under your control was sent to the Graveyard this turn: Special Summon 1 "Berserk Dragon" from your hand or Deck.

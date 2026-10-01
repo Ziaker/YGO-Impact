@@ -37,7 +37,8 @@ RITUAL_TARGET_PER_RACE = 1
 RITUAL_TARGET_RACES = ("Beast", "Fiend", "Spellcaster")
 RITUAL_SPELL_COMPATIBILITY = "generic-any-ritual-monster"
 MONSTER_ARCHETYPE_POLICY = "prefer-no-archetype-max-one-monster-per-named-archetype"
-NORMAL_SOURCE_POLICY = "standard-catalog-plus-rush-duel-normal-only-supplement"
+PSYCHIC_NORMAL_REPEATABLE_ARCHETYPES = frozenset({"Psychic Musician", "Shaman Bandit"})
+NORMAL_SOURCE_POLICY = "ygoprodeck-primary-rushcard-psychic-normal-supplement"
 RUSH_DUEL_URL = f"{base.API_URL}?format=Rush%20Duel"
 
 TOTAL_MONSTER_QUOTAS = {
@@ -237,11 +238,33 @@ def _select_normals_for_race(
     race: str,
     used_archetypes: set[str],
 ) -> list[dict[str, Any]]:
-    return _choose_unique(
-        _normal_candidates(compatible, race),
-        NORMAL_TARGET_PER_RACE,
-        used_archetypes,
-        context=f"Normal Monsters {race} Níveis {NORMAL_LEVEL_MIN}-{NORMAL_LEVEL_MAX}",
+    candidates = _normal_candidates(compatible, race)
+    chosen: list[dict[str, Any]] = []
+    for card in candidates:
+        if not _archetype_available(card, used_archetypes):
+            continue
+        chosen.append(card)
+        _record_archetype(card, used_archetypes)
+        if len(chosen) == NORMAL_TARGET_PER_RACE:
+            return chosen
+
+    if race == "Psychic":
+        chosen_ids = {int(card["id"]) for card in chosen}
+        for card in candidates:
+            if int(card["id"]) in chosen_ids:
+                continue
+            if str(card.get("_monster_impact_source")) != "rushcard":
+                continue
+            if archetype_name(card) not in PSYCHIC_NORMAL_REPEATABLE_ARCHETYPES:
+                continue
+            chosen.append(card)
+            chosen_ids.add(int(card["id"]))
+            if len(chosen) == NORMAL_TARGET_PER_RACE:
+                return chosen
+
+    raise base.DownloaderError(
+        f"Pool insuficiente para Normal Monsters {race} Níveis {NORMAL_LEVEL_MIN}-{NORMAL_LEVEL_MAX}: "
+        f"necessários {NORMAL_TARGET_PER_RACE}, encontrados {len(chosen)} após aplicar a política de arquétipos."
     )
 
 
@@ -331,8 +354,12 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
         archetype_name(card) for card in monster_cards if archetype_name(card) is not None
     )
     duplicated = {name: count for name, count in archetype_counts.items() if count > 1}
-    if duplicated:
-        raise base.DownloaderError(f"Seleção contém arquétipos repetidos: {duplicated}")
+    disallowed_duplicates = {
+        name: count for name, count in duplicated.items()
+        if name not in PSYCHIC_NORMAL_REPEATABLE_ARCHETYPES
+    }
+    if disallowed_duplicates:
+        raise base.DownloaderError(f"Seleção contém arquétipos repetidos fora da exceção: {disallowed_duplicates}")
 
     psychic_non_normals = sorted(
         (
@@ -344,7 +371,7 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
     )
 
     document["selection_rule"] = (
-        "deterministic-prefer-no-archetype-max-one-per-archetype-with-10-normals-level-2-4-per-race"
+        "deterministic-prefer-no-archetype-with-authorized-psychic-rushcard-archetype-exception"
     )
     document["requested"]["monster_races"] = TOTAL_MONSTER_QUOTAS
     document["requested"]["core_non_normal_quotas"] = CORE_NON_NORMAL_QUOTAS
@@ -370,7 +397,8 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
     }
     document["summary"]["archetyped_monsters_selected"] = sum(archetype_counts.values())
     document["summary"]["named_archetypes_selected"] = dict(sorted(archetype_counts.items()))
-    document["summary"]["duplicated_named_archetypes"] = {}
+    document["requested"]["psychic_normal_repeatable_archetypes"] = sorted(PSYCHIC_NORMAL_REPEATABLE_ARCHETYPES)
+    document["summary"]["duplicated_named_archetypes"] = dict(sorted(duplicated.items()))
     document["summary"]["psychic_high_level_reserved"] = [
         {
             "id": int(card["id"]),

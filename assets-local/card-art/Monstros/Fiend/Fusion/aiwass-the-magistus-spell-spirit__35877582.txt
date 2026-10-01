@@ -1,0 +1,16 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Aiwass, the Magistus Spell Spirit
+ID: 35877582
+Categoria: Monstro
+Tipo da API: Fusion Monster
+RACE: Fiend
+Nível: 8
+Tipo Monster Impact: Fusion
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+1 "Magistus" monster + 1 Spellcaster monster
+While this card is an Equip Card, the equipped monster gains 1000 ATK/DEF. During the Main Phase (Quick Effect): You can target 1 other face-up monster on the field; equip this card you control to it. If this card was equipped to an opponent's monster by this effect, take control of the equipped monster, also it cannot activate its effects. You can only use this effect of "Aiwass, the Magistus Spell Spirit" once per turn.

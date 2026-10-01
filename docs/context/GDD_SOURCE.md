@@ -1,25 +1,24 @@
 # GDD canônico
 
-O GDD canônico atual do primeiro protótipo foi revisado em 2026-09-29 por instrução explícita do autor, a partir do documento-base fornecido originalmente.
+O GDD canônico mais recente do primeiro protótipo foi lido integralmente a partir do arquivo fornecido pelo autor:
 
-## Versão atual
-
-- nome do arquivo revisado: `Monster_Impact_GDD_v0.43.docx`;
-- versão interna: **0.43 — GDD final do primeiro protótipo**;
+- nome de origem: `Monster_Impact_GDD_v0.43.docx`;
+- versão interna: **0.43 — GDD do primeiro protótipo**;
 - tamanho: **97.352 bytes**;
 - SHA-256: `6e40f214f2a254f5a30f54d64b4c74cccc352df1785e340e9eb4736a06c17fa9`.
 
-A revisão 0.43 acrescenta uma decisão normativa de governança do projeto: commits necessários para executar tarefas solicitadas pelo autor estão permanentemente autorizados no YGO Impact e não exigem nova confirmação. Essa autorização permanente não se estende automaticamente a push, Pull Request, merge, publicação, release ou deploy, que continuam exigindo autorização explícita quando aplicáveis.
+O conteúdo desse documento é a fonte de verdade para gameplay e escopo, subordinado apenas às instruções explícitas e correções posteriores do autor conforme as regras de precedência do próprio projeto.
 
-## Proveniência
+## Arquivos versionados
 
-O arquivo 0.43 deriva do documento-base fornecido pelo autor:
+A cópia canônica mais recente está versionada em:
 
-- nome de origem: `Monster_Impact_GDD INAL.docx`;
-- versão de origem: **0.42 — GDD final do primeiro protótipo**;
-- tamanho de origem: **96.807 bytes**;
-- SHA-256 de origem: `0a18e151aa844abcc57eb1b06611eb711c977f36c58ff98b9e937aed34e4f963`.
+`docs/context/sources/Monster_Impact_GDD_v0.43.docx`
 
-O conteúdo do GDD continua sendo a fonte de verdade para gameplay e escopo, subordinado apenas às instruções explícitas e correções posteriores do autor conforme as regras de precedência do próprio projeto.
+A versão imediatamente anterior (v0.42) permanece preservada como histórico em:
 
-O binário revisado `.docx` ainda precisa ser incorporado em `docs/context/` preservando exatamente os bytes e o hash acima. Até essa incorporação ser confirmada no Git, este registro identifica de forma inequívoca a revisão canônica; regras específicas continuam devendo ser conferidas contra o arquivo canônico revisado.
+`docs/context/sources/Monster_Impact_GDD_v0.42.docx` (96.807 bytes, SHA-256: `0a18e151aa844abcc57eb1b06611eb711c977f36c58ff98b9e937aed34e4f963`).
+
+Ambas devem permanecer byte a byte idênticas aos arquivos de origem. Os tamanhos e os hashes SHA-256 acima são os critérios de integridade verificados pelo script `scripts/verify_context_sources.py`. Regras específicas devem ser conferidas diretamente no documento; resumos não o substituem.
+
+O prompt mestre completo fornecido pelo autor está preservado separadamente em `docs/context/sources/PROMPT_MESTRE.txt`.

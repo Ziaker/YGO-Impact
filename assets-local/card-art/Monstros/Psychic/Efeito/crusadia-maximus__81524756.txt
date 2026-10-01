@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Crusadia Maximus
+ID: 81524756
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Psychic
+Nível: 4
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+You can Special Summon this card (from your hand) in Defense Position to your zone a Link Monster points to. You can only Special Summon "Crusadia Maximus" once per turn this way. You can target 1 "Crusadia" Link Monster you control; this turn, if it battles an opponent's monster, any battle damage it inflicts to your opponent is doubled, also other monsters you control cannot attack. You can only use this effect of "Crusadia Maximus" once per turn.

@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Altergeist Kunquery
+ID: 52927340
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Spellcaster
+Nível: 5
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+When an opponent's monster declares an attack, if you control an "Altergeist" card: You can Special Summon this card from your hand, and if you do, negate that attack. If this card is Special Summoned: You can target 1 face-up card your opponent controls; negate the effects of that card while it and this monster are face-up on the field.

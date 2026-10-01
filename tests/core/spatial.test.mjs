@@ -7,6 +7,7 @@ import {
   MAX_MONSTERS_PER_PLAYER,
   SpatialInvariantError,
   createSpatialState,
+  createInitialSpatialState,
   isInBounds,
   isTilePhysicallyFree,
 } from "../../src/core/index.ts";
@@ -93,4 +94,26 @@ test("physical free-tile helper is deliberately narrower than movement legality"
   assert.equal(isTilePhysicallyFree(state, { x: 31, y: 8 }), false);
   assert.equal(Object.isFrozen(state), true);
   assert.equal(Object.isFrozen(state.units[0].position), true);
+});
+
+test("initial bases may use either axis but must be centered on opposite edges", () => {
+  const horizontal = createInitialSpatialState(["p1", "p2"], bases);
+  const vertical = createInitialSpatialState(["p1", "p2"], [
+    { playerId: "p1", position: { x: 15, y: 0 } },
+    { playerId: "p2", position: { x: 15, y: 16 } },
+  ]);
+
+  assert.deepEqual(horizontal.units, []);
+  assert.deepEqual(vertical.units, []);
+  assert.throws(
+    () => createInitialSpatialState(["p1", "p2"], [
+      { playerId: "p1", position: { x: 0, y: 7 } },
+      { playerId: "p2", position: { x: 30, y: 8 } },
+    ]),
+    /centers of two opposite map edges/,
+  );
+  assert.throws(
+    () => createInitialSpatialState(["p1", "p2"], [bases[0], { ...bases[1], playerId: "p1" }]),
+    /Every match player/,
+  );
 });

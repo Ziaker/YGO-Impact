@@ -23,6 +23,7 @@ htmlcov/
 # Saídas locais e diagnósticos volumosos
 reports/
 artifacts/
+scratch/
 *.log
 *.part
 *.tmp

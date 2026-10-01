@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Archfiend's Awakening
+ID: 95825679
+Categoria: Monstro
+Tipo da API: Ritual Effect Monster
+RACE: Fiend
+Nível: 6
+Tipo Monster Impact: Ritual
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+You can Ritual Summon this card with "Contract with the Abyss". This card's name becomes "Summoned Skull" on the field, but is still treated as an "Archfiend" card. Cannot be destroyed by battle, except by battle with a Ritual Monster, and cannot be destroyed by monster effects, except those of Ritual Monsters. If this Ritual Summoned card you control is sent to your GY by an opponent's card: You can Special Summon 1 "Summoned Skull" from your hand, Deck, or GY.

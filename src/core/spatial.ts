@@ -145,6 +145,32 @@ export function createSpatialState(
   return deepFreeze(state) as SpatialState;
 }
 
+export function createInitialSpatialState(
+  playerIds: readonly string[],
+  bases: readonly BasePlacement[],
+): SpatialState {
+  if (playerIds.length !== 2 || new Set(playerIds).size !== 2) {
+    throw new SpatialInvariantError("Initial spatial state requires exactly two distinct players.");
+  }
+  if (
+    bases.length !== 2 ||
+    !playerIds.every((playerId) => bases.some((base) => base.playerId === playerId))
+  ) {
+    throw new SpatialInvariantError("Every match player must have exactly one initial base.");
+  }
+  const keys = new Set(bases.map((base) => positionKey(base.position)));
+  const horizontal = new Set([`0,${Math.floor(MAP_HEIGHT / 2)}`, `${MAP_WIDTH - 1},${Math.floor(MAP_HEIGHT / 2)}`]);
+  const vertical = new Set([`${Math.floor(MAP_WIDTH / 2)},0`, `${Math.floor(MAP_WIDTH / 2)},${MAP_HEIGHT - 1}`]);
+  const matches = (expected: Set<string>) =>
+    keys.size === expected.size && [...keys].every((key) => expected.has(key));
+  if (!matches(horizontal) && !matches(vertical)) {
+    throw new SpatialInvariantError(
+      "Initial bases must occupy the centers of two opposite map edges.",
+    );
+  }
+  return createSpatialState(bases, []);
+}
+
 export function isTilePhysicallyFree(state: SpatialState, position: Position): boolean {
   if (!isInBounds(position)) return false;
   const tile = positionKey(position);

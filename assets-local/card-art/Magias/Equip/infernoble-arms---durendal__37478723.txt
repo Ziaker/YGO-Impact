@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: "Infernoble Arms - Durendal"
+ID: 37478723
+Categoria: Magia
+Tipo da API: Spell Card
+Subtipo: Equip
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+While this card is equipped to a monster: You can add 1 Level 5 or lower FIRE Warrior monster from your Deck to your hand, then destroy this card. If this card is sent to the GY because the equipped monster is sent to the GY: You can target 1 Level 5 or lower FIRE Warrior monster in your GY; Special Summon it, also you cannot Special Summon monsters for the rest of the turn, except Warrior monsters. You can only use 1 ""Infernoble Arms - Durendal"" effect per turn, and only once that turn.

@@ -1,0 +1,2113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Monster Impact — VIS-004 · Terreno, SPD e movimento avançado</title>
+  <style>
+:root{
+  color-scheme:dark;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --bg:#070b10;--panel:#0f1821;--panel2:#15222d;--line:#2d4355;--ink:#edf5fb;--muted:#8ea2b4;
+  --accent:#e6c468;--good:#78dca7;--bad:#ff8585;--warn:#ffd083;--p1:#4d9eea;--p2:#d95c6b;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:radial-gradient(circle at 50% -15%,#20364a 0,#0a1118 34%,#070b10 70%);color:var(--ink);overflow:hidden}
+button,input{font:inherit}
+button{color:inherit}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+.topbar{display:flex;gap:10px;align-items:center;padding:8px 12px;background:#071019ef;border-bottom:1px solid var(--line);backdrop-filter:blur(12px);z-index:20}
+.brand{font-weight:900;letter-spacing:.07em;white-space:nowrap}
+.tag{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 7px;white-space:nowrap}
+.nav,.buttonrow,.styles{display:flex;gap:6px;flex-wrap:wrap}
+.nav button,.btn,.stylebtn{cursor:pointer;background:#13212d;border:1px solid var(--line);border-radius:6px;padding:6px 9px;transition:background .12s,border-color .12s}
+.nav button:hover,.btn:hover,.stylebtn:hover{background:#1a2b39}
+.nav button.active,.stylebtn.active,.btn.primary{outline:2px solid var(--accent);background:#1d2f3d}
+.btn[disabled]{opacity:.42;cursor:not-allowed;outline:none}
+.btn.small,.stylebtn{font-size:10px;padding:4px 7px}
+.topmeta{margin-left:auto;font-size:11px;color:var(--muted);display:flex;gap:10px;align-items:center;white-space:nowrap}
+.topmeta b{color:var(--ink)}
+.workspace{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:8px;padding:8px}
+.stage{position:relative;min-width:0;min-height:0;border:1px solid var(--line);border-radius:9px;background:#04080d;overflow:hidden;box-shadow:0 18px 50px #0007}
+.view{position:absolute;inset:0;display:none}
+.view.active{display:block}
+.view.split.active{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+.half{position:relative;min-width:0;overflow:hidden;background:#05090e}
+.view canvas,.half canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;user-select:none;outline:none}
+.viewlabel,.statuspill{position:absolute;z-index:4;font-size:10px;background:#071019dc;border:1px solid var(--line);padding:4px 7px;pointer-events:none}
+.viewlabel{top:9px;left:9px;border-radius:4px;letter-spacing:.08em;text-transform:uppercase;color:#cbd8e2}
+.statuspill{right:9px;top:9px;border-radius:99px;border-color:#2d8b62;color:#8ee2b3}
+.reducedInfoBanner{position:absolute;top:38px;left:9px;z-index:4;font-size:9.5px;font-weight:750;background:#2c1f10ee;border:1px solid #c98836;border-radius:4px;padding:3px 7px;color:#ffd182;display:none;pointer-events:none}
+.reducedInfoBanner.show{display:block}
+.cameraHint{position:absolute;left:10px;bottom:10px;z-index:4;max-width:min(690px,78%);background:#071019df;border:1px solid var(--line);border-radius:7px;padding:6px 8px;font-size:9px;line-height:1.55;color:#adbdc9;pointer-events:none}
+.cameraHint b{color:#eef5fa}
+.kbd{border:1px solid #405365;border-bottom-width:2px;border-radius:3px;padding:1px 4px;color:#d1dde7;background:#101a23;white-space:nowrap}
+.crosshair{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px;z-index:3;pointer-events:none;opacity:.42}
+.crosshair:before,.crosshair:after{content:"";position:absolute;background:#d7e4ed}
+.crosshair:before{left:6px;top:0;width:1px;height:14px}
+.crosshair:after{top:6px;left:0;height:1px;width:14px}
+.side{display:flex;flex-direction:column;overflow-y:auto;min-height:0;padding-right:2px;gap:8px}
+.side>.panel{flex:0 0 auto}
+.side>.logpanel{min-height:180px;flex:1 0 180px}
+.panel{background:linear-gradient(180deg,#131f29,#0e171f);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.panel h2{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:#a9b8c5;margin:0;padding:7px 9px;border-bottom:1px solid #263b4b}
+.panelbody{padding:8px;font-size:11px;line-height:1.46}
+.big{font-size:18px;font-weight:850}
+.kv{display:grid;grid-template-columns:1fr auto;gap:2px 10px}
+.kv span:nth-child(odd){color:var(--muted)}
+.coord{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.good{color:var(--good)}
+.bad{color:var(--bad)}
+.warn{color:var(--warn)}
+.muted{color:var(--muted)}
+.help{color:var(--muted);font-size:9.5px;line-height:1.48;margin-top:6px}
+.sectionSep{height:1px;background:#263b4b;margin:8px -8px}
+.toggle,.control{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0}
+.toggle input{accent-color:var(--accent)}
+.range{width:145px}
+.readout{margin-top:6px;padding:6px;border:1px solid #294052;border-radius:6px;background:#0a1219;font-size:9.5px;color:#9fb0be}
+.readout b{color:#dbe7ef}
+.planbox{margin-top:7px;padding:7px;border:1px solid #314b5e;border-radius:7px;background:#09131b;transition:border-color .15s}
+.planbox.legality-legal{border-color:#387a58}
+.planbox.legality-consequence{border-color:#a87d2b;background:#181409}
+.planbox.legality-illegal{border-color:#8d3f3f;background:#1a0c0c}
+.planstatus{font-weight:850;letter-spacing:.04em;display:flex;align-items:center;gap:6px}
+.legalityBadge{display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:4px;font-size:9.5px;font-weight:850;text-transform:uppercase}
+.legalityBadge.legal{background:#153825;color:#85f0b5;border:1px solid #2c774d}
+.legalityBadge.consequence{background:#3b2a0c;color:#ffd083;border:1px solid #8e6824}
+.legalityBadge.illegal{background:#3b1414;color:#ff9b9b;border:1px solid #822e2e}
+.log{height:100%;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9.3px;padding:7px 8px}
+.log div{padding:2px 0;border-bottom:1px dotted #24313d}
+.log .error{color:#ff9b9b}
+.log .pass{color:#91e4b6}
+.log .camera{color:#9ecaff}
+.log .command{color:#f2d77f}
+.footer{display:flex;gap:14px;align-items:center;padding:6px 10px;background:#071019;border-top:1px solid var(--line);font-size:10px;color:var(--muted)}
+.footer b{color:#dce8f1}
+.footer .grow{margin-left:auto}
+.modal{position:absolute;inset:auto 10px 10px 10px;max-height:65%;overflow:auto;background:#071019f7;border:1px solid var(--line);border-radius:8px;padding:9px;z-index:30;display:none;box-shadow:0 12px 40px #000a}
+.modal.show{display:block}
+.testrow{display:grid;grid-template-columns:18px 1fr;gap:6px;padding:3px 0;font-size:10px}
+.testrow.pass{color:#9be2bb}
+.testrow.fail{color:#ff9b9b}
+.testsummary{font-weight:800;margin-bottom:5px}
+.toast{position:absolute;top:48px;left:50%;transform:translateX(-50%);z-index:25;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:#071019ec;font-size:10px;color:#d8e4ed;opacity:0;pointer-events:none;transition:opacity .15s}
+.toast.show{opacity:1}
+
+/* Move action bar */
+.moveActionBar{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);z-index:13;display:none;align-items:center;gap:12px;min-width:min(640px,calc(100% - 24px));max-width:780px;padding:8px 12px;border:1px solid #54738a;border-radius:9px;background:#071019f2;box-shadow:0 12px 32px #0009;backdrop-filter:blur(10px)}
+.moveActionBar.show{display:flex}
+.moveActionText{display:flex;flex-direction:column;min-width:0;flex:1}
+.moveActionText b{font-size:11px;display:flex;align-items:center;gap:6px}
+.moveActionText span{font-size:9.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.moveActionBar.legality-legal{border-color:#387a58}
+.moveActionBar.legality-consequence{border-color:#c99335}
+.moveActionBar.legality-consequence .moveActionText b{color:#ffd083}
+.moveActionBar.legality-illegal{border-color:#9b5555}
+.moveActionBar.legality-illegal .moveActionText b{color:var(--bad)}
+
+/* Contextual floating tooltip / card */
+.contextTooltip{position:absolute;z-index:20;background:#071019f7;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:10px;color:var(--ink);box-shadow:0 10px 32px #000c;pointer-events:none;max-width:280px;line-height:1.42;display:none;backdrop-filter:blur(8px)}
+.contextTooltip.show{display:block}
+.contextTooltipHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid #243545}
+.contextTooltipBody{display:flex;flex-direction:column;gap:3px}
+.contextTooltipStats{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:2px;background:#0e1720;padding:4px 6px;border-radius:4px;border:1px solid #1e2e3d}
+.contextTooltipNote{color:#ffd083;font-size:9px;margin-top:3px;padding:2px 4px;background:#2d210c;border-radius:3px;border-left:2px solid #e5a435}
+.contextTooltipReaction{color:#8ed1fc;font-size:9px;margin-top:2px}
+
+/* Collapsible Floating Legend */
+.collapsibleLegend{position:absolute;right:10px;bottom:10px;z-index:12;background:#071019f2;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:9.5px;max-width:310px;backdrop-filter:blur(8px);box-shadow:0 8px 24px #0008}
+.legendHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;font-weight:800;color:#c8d7e3}
+.legendHeader:hover{color:#fff}
+.legendContent{display:grid;grid-template-columns:auto 1fr;gap:3px 7px;margin-top:6px}
+.legendContent.collapsed{display:none}
+.swatch{width:14px;height:10px;border-radius:2px;margin-top:2px;border:1px solid #ffffff55}
+.sReach{background:#4d9eea55}
+.sPath{background:#e6c468}
+.sTarget{background:#78dca7}
+.sCost{background:#9a72d955}
+.sImpass{background:repeating-linear-gradient(135deg,#2b3238,#2b3238 3px,#8d5555 3px,#8d5555 6px)}
+.sAlly{background:#66c4ff66}
+.sEnemy{background:#d95c6b66}
+.sBase{background:#c9a34e}
+
+/* Terrain styles */
+.terrainStyleBtn{cursor:pointer;background:#13212d;border:1px solid var(--line);border-radius:6px;padding:4px 7px;font-size:10px;color:inherit}
+.terrainStyleBtn.active{outline:2px solid #a98cf2;background:#29213a}
+.warningBox{padding:6px 7px;border:1px solid #8b6e3d;border-radius:6px;background:#2c2415;color:#f2d691;font-size:9px;line-height:1.4;margin-bottom:7px}
+.negativeSpd{color:#ff8585!important;font-weight:850}
+.mobilityCard{background:#0a131b;border:1px solid #233748;border-radius:6px;padding:6px;margin-top:6px;font-size:9.5px;line-height:1.4}
+.mobilityCard b{color:#e3eef6}
+
+@media(max-width:1120px){.workspace{grid-template-columns:minmax(0,1fr) 300px}.range{width:115px}.topmeta .hide-small{display:none}}
+@media(max-width:860px){
+  body{overflow:auto}.app{min-height:1050px}.workspace{grid-template-columns:1fr;grid-template-rows:600px auto}
+  .side{display:flex!important;overflow:visible}.side>.logpanel{min-height:190px}
+  .topbar{flex-wrap:wrap}.topmeta{margin-left:0;width:100%}.view.split.active{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
+  .cameraHint{max-width:92%}
+  .moveActionBar{position:fixed;left:10px;right:10px;bottom:10px;transform:none;min-width:0;max-width:none}
+  .moveActionBar .buttonrow{flex-wrap:nowrap}.moveActionBar .btn.primary{white-space:nowrap}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand">MONSTER IMPACT · VIS-004</div><span class="tag">Parte 2/5 · terreno + SPD</span>
+  <nav class="nav" aria-label="Orientação aprovada"><button data-view="2d" class="active">2D</button><button data-view="3d">3D</button><button data-view="qa">QA 2D+3D</button></nav>
+  <div class="topmeta"><span>Mapa <b>31×17</b></span><span class="hide-small">Simulação <b>20 Hz</b></span><span>Hash <b id="hashTop" class="coord">--------</b></span></div>
+</header>
+<main class="workspace"><section class="stage" id="stage">
+  <div id="view2d" class="view active"><canvas id="canvas2d" tabindex="0"></canvas><div class="viewlabel">2D · orientação aprovada</div><div class="statuspill">área cheia · VIS-003 herdado</div><div class="cameraHint"><b>2D:</b> clique trava destino · 2º clique no mesmo cancela · Enter/botão confirma · duplo clique move · arraste faz pan · roda zoom.</div></div>
+  <div id="view3d" class="view"><canvas id="canvas3d" tabindex="0"></canvas><div class="viewlabel">3D · orientação aprovada</div><div class="statuspill">mesmo estado autoritativo</div><div class="crosshair"></div><div class="cameraHint"><b>3D:</b> duplo clique destino = mover · duplo clique monstro = foco traseiro · arraste = órbita · Shift/dir.+arraste = pan · roda = zoom · WASD/QE.</div></div>
+  <div id="viewQA" class="view split"><div class="half"><canvas id="canvas2dQA" tabindex="0"></canvas><div class="viewlabel">QA · 2D</div></div><div class="half"><canvas id="canvas3dQA" tabindex="0"></canvas><div class="viewlabel">QA · 3D</div><div class="crosshair"></div></div><div class="statuspill">mesmo estado · comparação de terreno</div></div>
+  <div id="reducedInfoBanner" class="reducedInfoBanner">[QA] MODO INFORMAÇÃO REDUZIDA ATIVO (Fog de Guerra)</div>
+  
+  <!-- Floating screen-space Contextual Tooltip -->
+  <div id="contextTooltip" class="contextTooltip" aria-live="polite">
+    <div class="contextTooltipHeader"><span id="ttBadge" class="legalityBadge legal">✓ LEGAL</span><b id="ttCoord" class="coord">12, 8</b></div>
+    <div class="contextTooltipBody">
+      <div id="ttReason">Destino válido</div>
+      <div class="contextTooltipStats">
+        <div>Custo: <b id="ttCost">2 SPD</b></div>
+        <div>SPD: <b id="ttSpd">7 → 5</b></div>
+      </div>
+      <div id="ttTerrain" class="muted">Terreno: Planície</div>
+      <div id="ttMobility" class="muted">Custo-base: 2 blocos</div>
+      <div id="ttNote" class="contextTooltipNote" style="display:none"></div>
+      <div id="ttReaction" class="contextTooltipReaction" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Collapsible Legend -->
+  <div id="collapsibleLegend" class="collapsibleLegend">
+    <div class="legendHeader" id="legendToggle" title="Clique ou pressione L para recolher/expandir"><span>Legenda do campo</span><span id="legendArrow">▾</span></div>
+    <div class="legendContent" id="legendContent">
+      <span class="swatch sReach"></span><span>área cheia aprovada (VIS-003)</span>
+      <span class="swatch sPath"></span><span>rota ponderada</span>
+      <span class="swatch sTarget"></span><span>destino legal</span>
+      <span class="swatch sCost"></span><span>Campo de custo QA</span>
+      <span class="swatch sImpass"></span><span>terreno impassável</span>
+      <span class="swatch sAlly"></span><span>aliado (atravessável, não destino)</span>
+      <span class="swatch sEnemy"></span><span>inimigo (bloqueio total)</span>
+      <span class="swatch sBase"></span><span>base sólida (não ocupável)</span>
+    </div>
+  </div>
+
+  <div id="moveActionBar" class="moveActionBar" aria-live="polite">
+    <div class="moveActionText"><b id="moveActionTitle">Destino</b><span id="moveActionDetail">—</span></div>
+    <div class="buttonrow"><button class="btn primary" id="confirmMoveStage">CONFIRMAR MOVIMENTO</button><button class="btn small" id="cancelPlanStage">cancelar</button></div>
+  </div>
+  <div id="testModal" class="modal"></div>
+  <div id="toast" class="toast"></div>
+</section>
+
+<aside class="side">
+<section class="panel"><h2>Planejamento · contrato aprovado</h2><div class="panelbody">
+  <div class="big" id="selectedName">P1-A</div>
+  <div class="kv"><span>Controle</span><b id="controlState">P1</b><span>Origem</span><b id="selectedPos" class="coord">3,8</b><span>SPD</span><b id="selectedSpd">7 / 7</b><span>Keyword</span><b id="selectedKeyword">—</b><span>Hover</span><b id="hoverPos" class="coord">—</b><span>Alcançáveis</span><b id="reachableCount">0</b></div>
+  
+  <div class="mobilityCard" id="selectedMobilityCard">
+    <div>Mobilidade: <b id="mobSummary">7 / 7 SPD • até 7 blocos em custo-base</b></div>
+    <div class="help" style="margin-top:2px">Terrenos, obstáculos, aliados e efeitos alteram o caminho e o custo real.</div>
+  </div>
+
+  <div class="planbox" id="planBox">
+    <div class="planstatus" id="planStatus">SELECIONE UM DESTINO</div>
+    <div class="kv" style="margin-top:4px">
+      <span>Destino travado</span><b id="lockedTarget" class="coord">—</b>
+      <span>Custo total</span><b id="lockedCost">—</b>
+      <span>Transição SPD</span><b id="spdBeforeAfter">—</b>
+      <span>Caminho</span><b id="pathLength">—</b>
+      <span>Modo</span><b id="moveModeLabel">normal</b>
+    </div>
+    <div class="help" id="planReason">Nada é pago antes da confirmação.</div>
+  </div>
+  <div class="buttonrow" style="margin-top:7px">
+    <button class="btn primary" id="confirmMove" disabled>CONFIRMAR</button>
+    <button class="btn small" id="cancelPlan">cancelar prévia</button>
+    <button class="btn small" id="focusSelected">focar</button>
+  </div>
+</div></section>
+
+<section class="panel"><h2>VIS-004 · leitura de terreno (Opção A padrão aprovado)</h2><div class="panelbody">
+  <div class="styles terrainStyles">
+    <button class="terrainStyleBtn active" data-terrain-style="A">A · badge persistente (padrão aprovado)</button>
+    <button class="terrainStyleBtn" data-terrain-style="B">B · custo no caminho (histórico)</button>
+    <button class="terrainStyleBtn" data-terrain-style="C">C · sutil / painel (histórico)</button>
+  </div>
+  <div class="help" id="terrainStyleDescription"><b>A (Padrão aprovado pelo autor):</b> Campo QA recebe tint + badge de custo persistente no bloco. B e C permanecem disponíveis para comparação histórica.</div>
+</div></section>
+
+<section class="panel"><h2>Fixture QA · custo e SPD</h2><div class="panelbody">
+  <div class="warningBox"><b>QA, NÃO REGRA:</b> o GDD v0.43 não define um custo genérico de terreno. Este valor exercita regras de custo e SPD negativo sem ser regra canônica.</div>
+  <div class="control"><label for="qaCost">Custo entrada Campo A</label><input id="qaCost" type="number" min="1" max="20" step="1" value="1"></div>
+  <div class="buttonrow"><button class="btn small" id="negativeStress">stress SPD negativo</button><button class="btn small" id="qaAction">registrar Ação QA</button></div>
+  <div class="kv" style="margin-top:7px"><span>Timer recuperação</span><b id="recoveryStatus">não iniciado</b><span>Próximo pacote</span><b id="recoveryCountdown">—</b><span>Regra</span><b>+2 / 8 s (160 ticks)</b></div>
+  <div class="help">Regeneração só inicia após o primeiro gasto de SPD; movimento ou Ação reinicia o timer; excedente ao máximo é perdido.</div>
+</div></section>
+
+<section class="panel"><h2>Movimento como Reação · harness QA</h2><div class="panelbody">
+  <div class="toggle"><label>Janela de Reação QA</label><input id="reactionWindow" type="checkbox"></div>
+  <div class="toggle"><label>Confirmar MOVE como Reação</label><input id="reactionMode" type="checkbox"></div>
+  <div class="kv"><span>Reações QA P1</span><b id="reactionCount">2</b><span>Custo quando permitido</span><b>1 Reação + SPD</b></div>
+  <div class="help">Testa custo e validação espacial sem simular Correntes completas nesta etapa.</div>
+</div></section>
+
+<section class="panel"><h2>Câmera / estado / QA</h2><div class="panelbody">
+  <div class="toggle"><label>Fog de teste</label><input id="showFog" type="checkbox" checked></div>
+  <div class="toggle"><label>Campos</label><input id="showFields" type="checkbox" checked></div>
+  <div class="toggle"><label>Coordenadas</label><input id="showLabels" type="checkbox"></div>
+  <div class="toggle"><label>Modo QA informação reduzida</label><input id="reducedInfoToggle" type="checkbox"></div>
+  <div class="toggle"><label>Reduzir animação</label><input id="reducedMotion" type="checkbox"></div>
+  <div class="toggle"><label>Efeitos sonoros (contrato QA)</label><input id="soundToggle" type="checkbox"></div>
+  <div class="sectionSep"></div>
+  <div class="control"><label>Yaw</label><input id="cameraYaw" class="range" type="range" min="-180" max="180" value="-35"></div>
+  <div class="control"><label>Elevação</label><input id="cameraPitch" class="range" type="range" min="20" max="80" value="48"></div>
+  <div class="control"><label>Distância</label><input id="cameraDistance" class="range" type="range" min="12" max="75" value="37"></div>
+  <div class="readout" id="cameraReadout"></div>
+  <div class="sectionSep"></div>
+  <div class="kv"><span>Tick</span><b id="tickValue">0</b><span>Fila comandos</span><b id="queueValue">0</b><span>Estado</span><b id="stateValidity" class="good">válido</b><span>Hash</span><b id="hashValue" class="coord">--------</b><span>Desempate path</span><b class="warn">provisório</b></div>
+  <div class="buttonrow" style="margin-top:7px">
+    <button class="btn small" id="resetCamera">reset câmera</button>
+    <button class="btn small" id="togglePause">pausar lógica</button>
+    <button class="btn small" id="resetScenario">reset cenário</button>
+    <button class="btn" id="runTests">testes</button>
+  </div>
+</div></section>
+<section class="panel logpanel"><h2>Log determinístico</h2><div id="eventLog" class="log"></div></section>
+</aside></main>
+<footer class="footer"><span><b>VIS-004</b> · APROVADO</span><span>herda A-área cheia + 2D/3D</span><span class="grow">Opção B aprovada pelo autor em 2026-09-30 (custo incremental + acumulado na rota) · valores de custo são fixture QA</span></footer>
+</div>
+
+<script>
+(function(root,factory){
+  const api=factory();
+  if(typeof module==='object'&&module.exports) module.exports=api;
+  root.MIMovementCore=api;
+})(typeof globalThis!=='undefined'?globalThis:this,function(){
+'use strict';
+
+const MAP_WIDTH=31;
+const MAP_HEIGHT=17;
+const MAX_MONSTERS_PER_PLAYER=5;
+const SIMULATION_HZ=20;
+const STEP_MS=50;
+const SPD_RECOVERY_TICKS=160; // 8 s * 20 Hz
+const PROTOTYPE_TIE_BREAK='N,E,S,W,NE,SE,SW,NW';
+const BASES=Object.freeze([
+  Object.freeze({playerId:'p1',x:0,y:8}),
+  Object.freeze({playerId:'p2',x:30,y:8}),
+]);
+const CARDINALS=Object.freeze([
+  Object.freeze({dx:0,dy:-1,name:'N',diagonal:false}),
+  Object.freeze({dx:1,dy:0,name:'E',diagonal:false}),
+  Object.freeze({dx:0,dy:1,name:'S',diagonal:false}),
+  Object.freeze({dx:-1,dy:0,name:'W',diagonal:false}),
+]);
+const DIAGONALS=Object.freeze([
+  Object.freeze({dx:1,dy:-1,name:'NE',diagonal:true}),
+  Object.freeze({dx:1,dy:1,name:'SE',diagonal:true}),
+  Object.freeze({dx:-1,dy:1,name:'SW',diagonal:true}),
+  Object.freeze({dx:-1,dy:-1,name:'NW',diagonal:true}),
+]);
+const clone=v=>JSON.parse(JSON.stringify(v));
+const key=p=>`${p.x},${p.y}`;
+const stateKey=(p,d)=>`${p.x},${p.y}|${d}`;
+const inBounds=p=>Number.isSafeInteger(p.x)&&Number.isSafeInteger(p.y)&&p.x>=0&&p.x<MAP_WIDTH&&p.y>=0&&p.y<MAP_HEIGHT;
+const orthogonalDistance=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
+
+function createScenario(){
+  const terrain=[];
+  for(let y=0;y<MAP_HEIGHT;y++) for(let x=0;x<MAP_WIDTH;x++){
+    let kind='plain';
+    if((x>=13&&x<=16&&y>=6&&y<=10)||(x>=25&&x<=27&&y<=3)) kind='water';
+    else if((x+y)%11===0||(x>=3&&x<=5&&y>=11&&y<=14)) kind='brush';
+    if((x===15&&y>=2&&y<=4)||(x===19&&y>=11&&y<=13)||(x===7&&y>=12&&y<=13)) kind='impassable';
+    terrain.push({x,y,kind});
+  }
+  const units=[
+    {id:'P1-A',playerId:'p1',x:3,y:8,hp:8,mp:4,spd:7,spdMax:7,vis:5,stance:'ATK',keywords:[]},
+    {id:'P1-B',playerId:'p1',x:5,y:8,hp:6,mp:2,spd:5,spdMax:5,vis:4,stance:'DEF',keywords:[]},
+    {id:'P1-C',playerId:'p1',x:6,y:12,hp:7,mp:3,spd:6,spdMax:6,vis:4,stance:'ATK',keywords:['GLIDER']},
+    {id:'P1-D',playerId:'p1',x:11,y:8,hp:9,mp:2,spd:4,spdMax:4,vis:3,stance:'DEF',keywords:[]},
+    {id:'P1-E',playerId:'p1',x:10,y:14,hp:5,mp:5,spd:8,spdMax:8,vis:6,stance:'ATK',keywords:['LEAPER 2']},
+    {id:'P2-A',playerId:'p2',x:13,y:8,hp:9,mp:3,spd:6,spdMax:6,vis:5,stance:'ATK',keywords:[]},
+    {id:'P2-B',playerId:'p2',x:25,y:5,hp:7,mp:4,spd:7,spdMax:7,vis:4,stance:'DEF',keywords:[]},
+    {id:'P2-C',playerId:'p2',x:24,y:12,hp:6,mp:5,spd:5,spdMax:5,vis:5,stance:'ATK',keywords:[]},
+    {id:'P2-D',playerId:'p2',x:21,y:8,hp:8,mp:2,spd:4,spdMax:4,vis:3,stance:'DEF',keywords:[]},
+    {id:'P2-E',playerId:'p2',x:20,y:3,hp:5,mp:6,spd:8,spdMax:8,vis:6,stance:'ATK',keywords:[]},
+  ];
+  const recovery={p1:{},p2:{}};
+  for(const u of units) recovery[u.playerId][u.id]={started:false,lastActivityTick:0};
+  return {
+    schemaVersion:5,
+    scenarioId:'VIS-004-P2-TERRAIN-SPD-STRESS-31x17',
+    seed:20260929,
+    tick:0,
+    bases:clone(BASES),
+    units,
+    movements:[],
+    obstacles:[
+      {x:7,y:4,kind:'rock'},{x:7,y:5,kind:'rock'},{x:7,y:6,kind:'rock'},
+      {x:11,y:10,kind:'ruin'},{x:12,y:10,kind:'ruin'},
+      {x:18,y:6,kind:'rock'},{x:18,y:7,kind:'rock'},{x:18,y:8,kind:'rock'},
+      {x:23,y:11,kind:'ruin'},{x:23,y:12,kind:'ruin'},
+    ],
+    terrain,
+    fields:[
+      {id:'field-a',cx:14,cy:8,radius:2,owner:'p1'},
+      {id:'field-b',cx:17,cy:8,radius:2,owner:'p2'},
+    ],
+    recovery,
+    qa:{
+      costFieldId:'field-a',
+      costFieldEntryCost:1, // 1 = sem modificador; valores >1 são fixture QA, nunca regra canônica.
+      reactionWindowOpen:false,
+      reactionsByPlayer:{p1:2,p2:2}, // fixture QA para exercitar o custo canônico de 1 Reação.
+    },
+    lastKnown:[{id:'ghost-p2',x:22,y:14,playerId:'p2'}],
+  };
+}
+
+function unitAt(s,p,exceptId){return s.units.find(u=>u.id!==exceptId&&u.x===p.x&&u.y===p.y)||null;}
+function obstacleAt(s,p){return s.obstacles.find(o=>o.x===p.x&&o.y===p.y)||null;}
+function baseAt(s,p){return s.bases.find(b=>b.x===p.x&&b.y===p.y)||null;}
+function terrainAt(s,p){return s.terrain.find(t=>t.x===p.x&&t.y===p.y)||null;}
+function getUnit(s,id){return s.units.find(u=>u.id===id)||null;}
+function movementForUnit(s,id){return (s.movements||[]).find(m=>m.unitId===id)||null;}
+function isUnitMoving(s,id){return !!movementForUnit(s,id);}
+function leaperBudget(u){
+  const vals=(u.keywords||[]).map(k=>/^LEAPER\s+(\d+)$/i.exec(k)).filter(Boolean).map(m=>Number(m[1]));
+  return vals.length?vals[0]:0;
+}
+function hasKeyword(u,name){return (u?.keywords||[]).some(k=>k.toUpperCase()===name.toUpperCase());}
+function hasGlider(u){return hasKeyword(u,'GLIDER');}
+function recoveryRecord(s,u){return s.recovery?.[u.playerId]?.[u.id]||null;}
+function fieldAt(s,p,fieldId){const f=(s.fields||[]).find(x=>x.id===fieldId);if(!f)return false;return Math.max(Math.abs(p.x-f.cx),Math.abs(p.y-f.cy))<=f.radius;}
+function isQaCostFieldTile(s,p){return !!(s.qa&&fieldAt(s,p,s.qa.costFieldId));}
+function isImpassable(s,p){return terrainAt(s,p)?.kind==='impassable';}
+function specialTerrainCost(s,u,p){
+  if(hasGlider(u)) return 1;
+  if(isQaCostFieldTile(s,p)) return Math.max(1,Math.trunc(Number(s.qa?.costFieldEntryCost)||1));
+  return 1;
+}
+function stepCost(s,u,p){return specialTerrainCost(s,u,p);}
+
+function validateState(s){
+  const errors=[]; const ids=new Set(),tiles=new Set(),baseTiles=new Set(),basePlayers=new Set(),counts=new Map();
+  for(const b of s.bases){
+    if(!inBounds(b)) errors.push(`base ${b.playerId} fora do mapa`);
+    if(basePlayers.has(b.playerId)) errors.push(`base duplicada ${b.playerId}`);
+    if(baseTiles.has(key(b))) errors.push(`bases sobrepostas ${key(b)}`);
+    basePlayers.add(b.playerId);baseTiles.add(key(b));
+  }
+  for(const u of s.units){
+    if(!inBounds(u)) errors.push(`${u.id} fora do mapa`);
+    if(ids.has(u.id)) errors.push(`id duplicado ${u.id}`);
+    if(tiles.has(key(u))) errors.push(`duas unidades em ${key(u)}`);
+    if(baseTiles.has(key(u))) errors.push(`${u.id} ocupa base`);
+    if(!Number.isSafeInteger(u.spd)||!Number.isSafeInteger(u.spdMax)) errors.push(`${u.id} SPD não inteiro`);
+    if(u.spdMax<0) errors.push(`${u.id} SPD máximo negativo`);
+    if(u.spd>u.spdMax) errors.push(`${u.id} SPD atual excede máximo`);
+    const n=(counts.get(u.playerId)||0)+1;counts.set(u.playerId,n);if(n>MAX_MONSTERS_PER_PLAYER)errors.push(`${u.playerId} excede ${MAX_MONSTERS_PER_PLAYER}`);
+    ids.add(u.id);tiles.add(key(u));
+  }
+  const moveUnits=new Set(),seqs=new Set();
+  for(const m of (s.movements||[])){
+    if(!Number.isSafeInteger(m.seq)) errors.push(`movimento sem seq válida para ${m.unitId}`);
+    if(seqs.has(m.seq)) errors.push(`seq de movimento duplicada ${m.seq}`);seqs.add(m.seq);
+    if(!getUnit(s,m.unitId)) errors.push(`movimento referencia unidade ausente ${m.unitId}`);
+    if(moveUnits.has(m.unitId)) errors.push(`unidade com movimentos simultâneos ${m.unitId}`);moveUnits.add(m.unitId);
+    if(!Array.isArray(m.path)||m.path.length===0) errors.push(`movimento sem caminho ${m.unitId}`);
+    if(!Number.isSafeInteger(m.nextIndex)||m.nextIndex<0||m.nextIndex>(m.path?.length||0)) errors.push(`índice de movimento inválido ${m.unitId}`);
+  }
+  if(!Number.isSafeInteger(s.qa?.costFieldEntryCost)||s.qa.costFieldEntryCost<1) errors.push('fixture QA de custo precisa ser inteiro >= 1');
+  for(const p of ['p1','p2']) if(!Number.isSafeInteger(s.qa?.reactionsByPlayer?.[p])||s.qa.reactionsByPlayer[p]<0) errors.push(`Reações QA inválidas para ${p}`);
+  return errors;
+}
+
+function destinationReason(s,u,target){
+  if(!u) return 'unidade não encontrada';
+  if(!inBounds(target)) return 'destino fora do mapa';
+  if(isUnitMoving(s,u.id)) return 'unidade já está em movimento';
+  if(u.spd<1) return 'SPD abaixo de 1: novo movimento bloqueado';
+  if(baseAt(s,target)) return 'base sólida: destino ilegal';
+  if(obstacleAt(s,target)) return 'obstáculo: destino ilegal';
+  if(isImpassable(s,target)) return hasGlider(u)?'GLIDER pode atravessar terreno impassável, mas não terminar nele':'terreno impassável: destino ilegal';
+  const occ=unitAt(s,target,u.id);
+  if(occ){
+    if(occ.playerId===u.playerId) return 'aliado pode ser atravessado, mas não pode ser destino final';
+    return 'inimigo bloqueia passagem e destino';
+  }
+  if(target.x===u.x&&target.y===u.y) return 'origem não é um novo destino';
+  return null;
+}
+
+function traversalBlocked(s,u,p){
+  if(!inBounds(p)||baseAt(s,p)||obstacleAt(s,p)) return true;
+  if(isImpassable(s,p)&&!hasGlider(u)) return true;
+  const occ=unitAt(s,p,u.id);
+  return !!(occ&&occ.playerId!==u.playerId);
+}
+function neighborsFor(u,node){
+  const out=CARDINALS.map(n=>({...n,x:node.x+n.dx,y:node.y+n.dy,diagUsed:node.diagUsed}));
+  const budget=leaperBudget(u);
+  if(node.diagUsed<budget){
+    for(const n of DIAGONALS) out.push({...n,x:node.x+n.dx,y:node.y+n.dy,diagUsed:node.diagUsed+1});
+  }
+  return out;
+}
+
+function computeRoutes(s,unitId,maxCost=Infinity){
+  const u=getUnit(s,unitId);if(!u)return {u:null,best:new Map(),nodes:new Map(),prev:new Map()};
+  let serial=0;
+  const start={x:u.x,y:u.y,diagUsed:0,cost:0,serial:serial++};
+  const open=[start],best=new Map([[stateKey(start,0),0]]),nodes=new Map([[stateKey(start,0),start]]),prev=new Map([[stateKey(start,0),null]]);
+  while(open.length){
+    open.sort((a,b)=>a.cost-b.cost||a.serial-b.serial);
+    const cur=open.shift(),curKey=stateKey(cur,cur.diagUsed);
+    if(best.get(curKey)!==cur.cost) continue;
+    for(const n of neighborsFor(u,cur)){
+      const p={x:n.x,y:n.y};if(traversalBlocked(s,u,p))continue;
+      const sc=stepCost(s,u,p),cost=cur.cost+sc;if(cost>maxCost)continue;
+      const next={x:n.x,y:n.y,diagUsed:n.diagUsed,cost,stepCost:sc,dir:n.name,diagonal:n.diagonal,serial:serial++};
+      const sk=stateKey(next,next.diagUsed),old=best.get(sk);
+      if(old!==undefined&&old<=cost)continue;
+      best.set(sk,cost);nodes.set(sk,next);prev.set(sk,curKey);open.push(next);
+    }
+  }
+  return {u,best,nodes,prev};
+}
+function reconstructRoute(routes,target){
+  let foundKey=null,found=null;
+  for(const [sk,n] of routes.nodes){
+    if(n.x===target.x&&n.y===target.y&&(!found||n.cost<found.cost)){found=n;foundKey=sk;}
+  }
+  if(!foundKey)return null;
+  const rev=[];let k=foundKey;
+  while(routes.prev.get(k)!==null){const n=routes.nodes.get(k);rev.push({x:n.x,y:n.y,diagonal:n.diagonal,dir:n.dir,stepCost:n.stepCost,cumulativeCost:n.cost});k=routes.prev.get(k);}
+  return rev.reverse();
+}
+function shortestPath(s,unitId,target,maxCost=Infinity){return reconstructRoute(computeRoutes(s,unitId,maxCost),target);}
+function negativeFinalEntryAllowed(s,u,path){
+  if(!path?.length||u.spd<1)return false;
+  const last=path[path.length-1],prefix=path.length>1?path[path.length-2].cumulativeCost:0;
+  return prefix<=u.spd&&last.cumulativeCost>u.spd&&last.stepCost>1&&isQaCostFieldTile(s,last)&&!hasGlider(u)&&!isImpassable(s,last);
+}
+function planMovement(s,unitId,target){
+  const u=getUnit(s,unitId),reason=destinationReason(s,u,target);
+  if(reason) return {ok:false,reason,path:[],cost:null,spdAfter:u?u.spd:null,target:clone(target)};
+  const path=shortestPath(s,unitId,target,Infinity);
+  if(!path) return {ok:false,reason:'nenhum caminho permitido até o destino',path:[],cost:null,spdAfter:u.spd,target:clone(target)};
+  const cost=path[path.length-1]?.cumulativeCost||0,negativeEntry=cost>u.spd&&negativeFinalEntryAllowed(s,u,path);
+  if(cost>u.spd&&!negativeEntry) return {ok:false,reason:`SPD insuficiente: custo ${cost} > SPD ${u.spd}`,path,cost,spdAfter:u.spd-cost,target:clone(target)};
+  return {ok:true,reason:negativeEntry?'entrada legal: custo do terreno deixará SPD negativo':'destino válido',path,cost,spdAfter:u.spd-cost,target:clone(target),leaperBudget:leaperBudget(u),negativeEntry};
+}
+function reachableTiles(s,unitId){
+  const u=getUnit(s,unitId);if(!u||u.spd<1||isUnitMoving(s,unitId))return [];
+  const routes=computeRoutes(s,unitId,u.spd),bestByTile=new Map();
+  for(const n of routes.nodes.values()){
+    if(n.x===u.x&&n.y===u.y)continue;
+    const p={x:n.x,y:n.y},reason=destinationReason(s,u,p);if(reason)continue;
+    const old=bestByTile.get(key(p));if(!old||n.cost<old.cost)bestByTile.set(key(p),{x:p.x,y:p.y,cost:n.cost,spdAfter:u.spd-n.cost,negativeEntry:false});
+  }
+  for(const n of routes.nodes.values()){
+    if(n.cost>u.spd)continue;
+    for(const nb of neighborsFor(u,n)){
+      const p={x:nb.x,y:nb.y};if(traversalBlocked(s,u,p))continue;
+      if(destinationReason(s,u,p))continue;
+      const sc=stepCost(s,u,p),total=n.cost+sc;
+      if(sc<=1||total<=u.spd||!isQaCostFieldTile(s,p)||hasGlider(u)||isImpassable(s,p))continue;
+      const old=bestByTile.get(key(p));if(!old||total<old.cost)bestByTile.set(key(p),{x:p.x,y:p.y,cost:total,spdAfter:u.spd-total,negativeEntry:true});
+    }
+  }
+  return [...bestByTile.values()].sort((a,b)=>a.cost-b.cost||a.y-b.y||a.x-b.x);
+}
+
+function canUseReactionMovement(s,u){
+  if(!s.qa?.reactionWindowOpen)return {ok:false,reason:'janela de Reação QA está fechada'};
+  const n=s.qa?.reactionsByPlayer?.[u.playerId]??0;
+  if(n<1)return {ok:false,reason:'sem Reação QA disponível'};
+  return {ok:true,reason:'Reação QA disponível'};
+}
+function markMovementActivity(s,u){
+  const r=recoveryRecord(s,u);if(r){r.started=true;r.lastActivityTick=s.tick;}
+}
+function registerUnitAction(s,unitId){
+  const u=getUnit(s,unitId);if(!u)return {ok:false,reason:'unidade não encontrada'};
+  const r=recoveryRecord(s,u);if(r?.started)r.lastActivityTick=s.tick;
+  return {ok:true,event:{type:'QA_ACTION_RECORDED',unitId:u.id,tick:s.tick,recoveryStarted:!!r?.started}};
+}
+function beginMovementCommand(s,command){
+  if(!command||command.type!=='MOVE') return {ok:false,reason:'comando inválido'};
+  if(!Number.isSafeInteger(command.seq)) return {ok:false,reason:'comando MOVE sem sequência determinística válida'};
+  const u=getUnit(s,command.unitId);if(!u)return {ok:false,reason:'unidade não encontrada'};
+  const mode=command.mode==='REACTION'?'REACTION':'NORMAL';
+  if(mode==='REACTION'){const rr=canUseReactionMovement(s,u);if(!rr.ok)return {ok:false,reason:rr.reason};}
+  const plan=planMovement(s,command.unitId,command.target);if(!plan.ok)return {ok:false,reason:plan.reason,plan};
+  if((s.movements||[]).some(m=>m.seq===command.seq)) return {ok:false,reason:`sequência duplicada ${command.seq}`};
+  const before=clone(s),origin={x:u.x,y:u.y};
+  const movement={seq:command.seq,unitId:u.id,mode,target:clone(command.target),origin,path:clone(plan.path),nextIndex:0,spent:0,confirmedCost:plan.cost,issuedAtTick:Number.isSafeInteger(command.issuedAtTick)?command.issuedAtTick:s.tick,startedAtTick:s.tick,lastTraversed:clone(origin)};
+  s.movements=s.movements||[];s.movements.push(movement);s.movements.sort((a,b)=>a.seq-b.seq);
+  if(mode==='REACTION')s.qa.reactionsByPlayer[u.playerId]-=1;
+  const errors=validateState(s);
+  if(errors.length){Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,before);return {ok:false,reason:`invariante violada ao iniciar movimento: ${errors.join('; ')}`};}
+  const events=[];
+  if(mode==='REACTION')events.push({type:'REACTION_SPENT',seq:movement.seq,unitId:u.id,playerId:u.playerId,amount:1,remaining:s.qa.reactionsByPlayer[u.playerId]});
+  events.push({type:'MOVE_STARTED',seq:movement.seq,unitId:u.id,mode,origin:clone(origin),target:clone(command.target),pathLength:plan.path.length,confirmedCost:plan.cost});
+  return {ok:true,plan,movement:clone(movement),events};
+}
+function removeMovement(s,seq){const i=(s.movements||[]).findIndex(m=>m.seq===seq);if(i>=0)s.movements.splice(i,1);}
+function stopMovement(s,m,reason){const u=getUnit(s,m.unitId),event={type:'MOVE_STOPPED',seq:m.seq,unitId:m.unitId,mode:m.mode,reason,spent:m.spent,position:u?{x:u.x,y:u.y}:null,lastTraversed:clone(m.lastTraversed)};removeMovement(s,m.seq);return event;}
+function stepOneMovement(s,m){
+  const u=getUnit(s,m.unitId);if(!u)return [stopMovement(s,m,'unidade não existe mais')];
+  if(m.nextIndex>=m.path.length){removeMovement(s,m.seq);return [{type:'MOVE_COMPLETED',seq:m.seq,unitId:m.unitId,mode:m.mode,spent:m.spent,position:{x:u.x,y:u.y}}];}
+  if(u.spd<1)return [stopMovement(s,m,'SPD abaixo de 1 durante o movimento')];
+  const planned=m.path[m.nextIndex],to={x:planned.x,y:planned.y},from=clone(m.lastTraversed),isFinal=m.nextIndex===m.path.length-1;
+  if(!inBounds(to))return [stopMovement(s,m,'próximo bloco saiu do mapa')];
+  if(baseAt(s,to))return [stopMovement(s,m,'base sólida bloqueou o próximo bloco')];
+  if(obstacleAt(s,to))return [stopMovement(s,m,'obstáculo bloqueou o próximo bloco')];
+  if(isImpassable(s,to)&&!hasGlider(u))return [stopMovement(s,m,'terreno impassável bloqueou o próximo bloco')];
+  if(isImpassable(s,to)&&isFinal)return [stopMovement(s,m,'GLIDER não pode terminar em terreno impassável')];
+  const costNow=stepCost(s,u,to);
+  if(costNow>u.spd&&!(isFinal&&costNow>1&&isQaCostFieldTile(s,to)&&!hasGlider(u)))return [stopMovement(s,m,`SPD insuficiente antes do próximo bloco: custo ${costNow} > SPD ${u.spd}`)];
+  const occ=unitAt(s,to,u.id);
+  if(occ){
+    if(occ.playerId!==u.playerId)return [stopMovement(s,m,`inimigo ${occ.id} bloqueou o próximo bloco`)];
+    if(isFinal)return [stopMovement(s,m,`aliado ${occ.id} ocupa o destino final`)];
+    u.spd-=costNow;m.spent+=costNow;m.nextIndex+=1;m.lastTraversed=clone(to);markMovementActivity(s,u);
+    const ev={type:'PASS_ALLY',seq:m.seq,unitId:u.id,mode:m.mode,step:m.nextIndex,x:to.x,y:to.y,allyId:occ.id,cost:costNow,from,to:clone(to),physicalPosition:{x:u.x,y:u.y},spdAfter:u.spd};
+    if(m.nextIndex>=m.path.length){ev.completed=true;removeMovement(s,m.seq);}return [ev];
+  }
+  u.x=to.x;u.y=to.y;u.spd-=costNow;m.spent+=costNow;m.nextIndex+=1;m.lastTraversed=clone(to);markMovementActivity(s,u);
+  const ev={type:'ENTER_TILE',seq:m.seq,unitId:u.id,mode:m.mode,step:m.nextIndex,x:to.x,y:to.y,cost:costNow,from,to:clone(to),spdAfter:u.spd,terrain:terrainAt(s,to)?.kind||'plain',qaCostField:isQaCostFieldTile(s,to)};
+  if(m.nextIndex>=m.path.length){ev.completed=true;removeMovement(s,m.seq);}return [ev];
+}
+function stepMovements(s){
+  const events=[],ordered=[...(s.movements||[])].sort((a,b)=>a.seq-b.seq);
+  for(const snapshot of ordered){
+    const m=(s.movements||[]).find(x=>x.seq===snapshot.seq);if(!m)continue;
+    const before=clone(s),evs=stepOneMovement(s,m),errors=validateState(s);
+    if(errors.length){Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,before);const live=(s.movements||[]).find(x=>x.seq===snapshot.seq);if(live)events.push(stopMovement(s,live,`invariante violada: ${errors.join('; ')}`));continue;}
+    events.push(...evs);
+  }
+  return events;
+}
+function stepRecovery(s){
+  const events=[];
+  for(const u of s.units){
+    const r=recoveryRecord(s,u);if(!r?.started||isUnitMoving(s,u.id))continue;
+    const idle=Math.max(0,s.tick-r.lastActivityTick);
+    if(idle<SPD_RECOVERY_TICKS)continue;
+    const before=u.spd,gain=Math.min(2,Math.max(0,u.spdMax-u.spd));u.spd=Math.min(u.spdMax,u.spd+2);r.lastActivityTick=s.tick;
+    events.push({type:'SPD_RECOVERY_PACKET',unitId:u.id,playerId:u.playerId,before,after:u.spd,gained:gain,excessLost:2-gain,tick:s.tick});
+  }
+  return events;
+}
+function recoveryStatus(s,unitId){
+  const u=getUnit(s,unitId);if(!u)return null;const r=recoveryRecord(s,u);if(!r)return null;
+  const idle=r.started?Math.max(0,s.tick-r.lastActivityTick):0;
+  return {started:r.started,idleTicks:idle,ticksRemaining:r.started?Math.max(0,SPD_RECOVERY_TICKS-idle):SPD_RECOVERY_TICKS,secondsRemaining:r.started?Math.max(0,(SPD_RECOVERY_TICKS-idle)/SIMULATION_HZ):8};
+}
+function setQaCostFieldEntryCost(s,value){const n=Math.max(1,Math.trunc(Number(value)||1));s.qa.costFieldEntryCost=n;return n;}
+function setQaReactionWindow(s,open){s.qa.reactionWindowOpen=!!open;return s.qa.reactionWindowOpen;}
+function applyMovementCommand(s,command){return beginMovementCommand(s,command);}
+
+// Novas funções auxiliares QoL no core
+function classifyLegality(plan,reactionReady,unit){
+  if(!plan||!plan.ok||(reactionReady&&!reactionReady.ok)){
+    const reason=(!reactionReady?.ok?reactionReady.reason:plan?.reason)||'Destino inválido';
+    return {
+      category:'ILLEGAL',
+      label:'ILEGAL',
+      icon:'✕',
+      color:'#ff8585',
+      badgeClass:'illegal',
+      reason,
+      canConfirm:false
+    };
+  }
+  if(plan.negativeEntry||plan.spdAfter<1){
+    return {
+      category:'LEGAL_WITH_CONSEQUENCE',
+      label:'LEGAL COM CONSEQUÊNCIA',
+      icon:'⚠',
+      color:'#ffd083',
+      badgeClass:'consequence',
+      reason:'Entrada legal: custo do terreno deixará SPD negativo. Novo movimento bloqueado até SPD ≥ 1.',
+      canConfirm:true,
+      negativeConsequence:true
+    };
+  }
+  return {
+    category:'LEGAL',
+    label:'LEGAL',
+    icon:'✓',
+    color:'#78dca7',
+    badgeClass:'legal',
+    reason:'Destino válido sem restrição.',
+    canConfirm:true,
+    negativeConsequence:false
+  };
+}
+
+function mobilityBaseReach(u){
+  return u?Math.max(0,u.spd):0;
+}
+
+function isTileVisibleForP1(s,p){
+  // Base P1 (0,8) visão em raio quadrado 2 (área 5x5) conforme DEC-002
+  if(p.x<=2&&Math.abs(p.y-8)<=2) return true;
+  for(const u of s.units){
+    if(u.playerId==='p1'){
+      const d=Math.abs(u.x-p.x)+Math.abs(u.y-p.y);
+      if(d<=u.vis) return true;
+    }
+  }
+  return false;
+}
+
+function canonicalState(s){
+  const recovery={};for(const p of Object.keys(s.recovery||{}).sort())recovery[p]=Object.fromEntries(Object.entries(s.recovery[p]).sort(([a],[b])=>a.localeCompare(b)).map(([id,r])=>[id,{...r}]));
+  return {schemaVersion:s.schemaVersion,scenarioId:s.scenarioId,seed:s.seed,tick:s.tick,bases:s.bases.map(b=>({...b})).sort((a,b)=>a.playerId.localeCompare(b.playerId)),units:s.units.map(u=>({...u,keywords:[...(u.keywords||[])]})).sort((a,b)=>a.id.localeCompare(b.id)),movements:(s.movements||[]).map(m=>({...m,origin:{...m.origin},target:{...m.target},lastTraversed:{...m.lastTraversed},path:m.path.map(p=>({...p}))})).sort((a,b)=>a.seq-b.seq),obstacles:s.obstacles.map(o=>({...o})).sort((a,b)=>a.y-b.y||a.x-b.x),terrain:s.terrain.map(t=>({...t})).sort((a,b)=>a.y-b.y||a.x-b.x),fields:s.fields.map(f=>({...f})).sort((a,b)=>a.id.localeCompare(b.id)),recovery,qa:{costFieldId:s.qa.costFieldId,costFieldEntryCost:s.qa.costFieldEntryCost,reactionWindowOpen:!!s.qa.reactionWindowOpen,reactionsByPlayer:{p1:s.qa.reactionsByPlayer.p1,p2:s.qa.reactionsByPlayer.p2}}};
+}
+function hashState(s){const str=JSON.stringify(canonicalState(s));let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0).toString(16).padStart(8,'0');}
+
+return Object.freeze({
+  MAP_WIDTH,MAP_HEIGHT,MAX_MONSTERS_PER_PLAYER,SIMULATION_HZ,STEP_MS,SPD_RECOVERY_TICKS,PROTOTYPE_TIE_BREAK,BASES,CARDINALS,DIAGONALS,
+  clone,key,inBounds,orthogonalDistance,createScenario,unitAt,obstacleAt,baseAt,terrainAt,getUnit,movementForUnit,isUnitMoving,leaperBudget,hasGlider,recoveryRecord,fieldAt,isQaCostFieldTile,isImpassable,stepCost,validateState,destinationReason,shortestPath,planMovement,reachableTiles,canUseReactionMovement,beginMovementCommand,stepMovements,stepRecovery,recoveryStatus,registerUnitAction,setQaCostFieldEntryCost,setQaReactionWindow,applyMovementCommand,classifyLegality,mobilityBaseReach,isTileVisibleForP1,canonicalState,hashState,
+});
+});
+</script>
+
+<script>
+(()=>{'use strict';
+const C=window.MIMovementCore,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const canvases={d2:$('#canvas2d'),d3:$('#canvas3d'),q2:$('#canvas2dQA'),q3:$('#canvas3dQA')};
+const LOCAL_PLAYER='p1',clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),deg=d=>d*Math.PI/180,rad=r=>r*180/Math.PI;
+const V=(x,y,z)=>({x,y,z}),add=(a,b)=>V(a.x+b.x,a.y+b.y,a.z+b.z),sub=(a,b)=>V(a.x-b.x,a.y-b.y,a.z-b.z),mul=(a,s)=>V(a.x*s,a.y*s,a.z*s),dot=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z,cross=(a,b)=>V(a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x),norm=a=>{const l=Math.hypot(a.x,a.y,a.z)||1;return mul(a,1/l)};
+
+// Estado da apresentação
+let state=C.createScenario(),selectedId='P1-A',view='2d',overlayStyle='A',terrainStyle='A',reactionMode=false,hover=null,hoverPlan=null,pendingPlan=null,pendingTarget=null,reachable=[],paused=false,autoPaused=false,showFog=true,showFields=true,showLabels=false,reducedInfoMode=false,reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches,commandQueue=[],nextSeq=1,visualMotions=new Map(),spdPopups=[],timerResetPulses=new Map(),cameraTween=null,toastTimer=null,lastClientPointer={x:0,y:0};
+const CLICK_SLOP_PX=10;
+const visual={zoom2d:1,pan2dX:0,pan2dY:0,pointer:null};
+const camera={target:{x:15.5,y:8.5,z:0},yaw:deg(-35),pitch:deg(48),distance:37,fov:deg(42)};
+const selected=()=>C.getUnit(state,selectedId)||state.units[0];
+const controllable=()=>selected().playerId===LOCAL_PLAYER;
+
+// Contrato opcional de som
+const SoundSystem={
+  enabled:false,
+  history:[],
+  play(eventName,detail={}){
+    this.history.push({eventName,detail,time:performance.now(),tick:state.tick});
+    while(this.history.length>60) this.history.shift();
+    if(this.enabled){
+      // Contrato de áudio: por padrão silencioso; consome eventos da apresentação sem alterar estado autoritativo
+    }
+  }
+};
+
+function log(msg,cls=''){
+  const e=document.createElement('div');e.className=cls;e.textContent=`[${String(state.tick).padStart(5,'0')}] ${msg}`;$('#eventLog').prepend(e);
+  while($('#eventLog').children.length>120)$('#eventLog').lastChild.remove();
+}
+function toast(msg){
+  $('#toast').textContent=msg;$('#toast').classList.add('show');clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),1300);
+}
+function resize(c){
+  const r=c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2),w=Math.max(1,Math.round(r.width*d)),h=Math.max(1,Math.round(r.height*d));
+  if(c.width!==w||c.height!==h){c.width=w;c.height=h;}
+  return {r,dpr:d,w,h};
+}
+function fit2D(c){
+  const m=resize(c),tile=Math.max(4,Math.min((m.w-46*m.dpr)/C.MAP_WIDTH,(m.h-46*m.dpr)/C.MAP_HEIGHT)*visual.zoom2d),ox=(m.w-tile*C.MAP_WIDTH)/2+visual.pan2dX*m.dpr,oy=(m.h-tile*C.MAP_HEIGHT)/2+visual.pan2dY*m.dpr;
+  return {...m,tile,ox,oy};
+}
+function cameraBasis(c){
+  const m=resize(c),cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch),cy=Math.cos(camera.yaw),sy=Math.sin(camera.yaw),pos=V(camera.target.x+camera.distance*cp*cy,camera.target.y+camera.distance*cp*sy,camera.target.z+camera.distance*sp),fwd=norm(sub(camera.target,pos)),right=norm(cross(fwd,V(0,0,1))),up=norm(cross(right,fwd)),f=Math.min(m.w,m.h)*.5/Math.tan(camera.fov/2);
+  return {...m,pos,fwd,right,up,f,cx:m.w*.5,cy:m.h*.54};
+}
+function project(p,b){
+  const q=sub(p,b.pos),z=dot(q,b.fwd);if(z<=.05)return null;
+  return {x:b.cx+dot(q,b.right)*b.f/z,y:b.cy-dot(q,b.up)*b.f/z,z,scale:b.f/z};
+}
+function quad(x,y,z,b){return [project(V(x,y,z),b),project(V(x+1,y,z),b),project(V(x+1,y+1,z),b),project(V(x,y+1,z),b)];}
+function poly(ctx,pts,fill,stroke,width=1){
+  if(!pts.every(Boolean))return;ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);
+  ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke();}
+}
+function refreshReachable(){reachable=controllable()?C.reachableTiles(state,selectedId):[];}
+
+// Rota em exibição: prioriza movimento ativo se a unidade estiver se deslocando
+function displayPlan(){
+  if(pendingPlan) return pendingPlan;
+  const active=C.movementForUnit(state,selectedId);
+  if(active){
+    return {
+      ok:true,
+      active:true,
+      path:active.path,
+      nextIndex:active.nextIndex,
+      cost:active.confirmedCost,
+      target:active.target,
+      spdAfter:selected().spd,
+      reason:`Comando #${active.seq} em execução bloco a bloco (${active.nextIndex}/${active.path.length})`
+    };
+  }
+  return hoverPlan&&hoverPlan.path?.length?hoverPlan:null;
+}
+
+function reactionReady(){
+  const u=selected();
+  return reactionMode?C.canUseReactionMovement(state,u):{ok:true,reason:'movimento normal'};
+}
+
+function setTerrainStyle(v){
+  if(!['A','B','C'].includes(v))return false;
+  terrainStyle=v;
+  $$('.terrainStyleBtn').forEach(b=>b.classList.toggle('active',b.dataset.terrainStyle===v));
+  const d={
+    A:'<b>A (Padrão aprovado pelo autor):</b> Campo QA recebe tint + badge de custo persistente no bloco.',
+    B:'<b>B (Não aprovada):</b> Campo QA recebe tint discreto; números de custo aparecem ao longo dos passos do caminho (incremental + acumulado). Mantida para comparação histórica.',
+    C:'<b>C (Não aprovada):</b> Campo QA usa leitura sutil; custos ficam concentrados no painel e no tooltip contextual. Mantida para comparação histórica.'
+  };
+  $('#terrainStyleDescription').innerHTML=d[v];
+  log(`visual de terreno ${v} ativado`,'camera');
+  return true;
+}
+
+function refreshPlans(){
+  refreshReachable();
+  if(pendingTarget) pendingPlan=C.planMovement(state,selectedId,pendingTarget);
+  if(hover) hoverPlan=C.planMovement(state,selectedId,hover);
+  updateUI();
+}
+
+function setQaCost(v){
+  const n=C.setQaCostFieldEntryCost(state,v);
+  $('#qaCost').value=n;
+  refreshPlans();
+  log(`fixture QA: custo de entrada no Campo A = ${n} SPD`,'command');
+  return n;
+}
+
+function setReactionWindow(open){
+  C.setQaReactionWindow(state,open);
+  $('#reactionWindow').checked=!!open;
+  refreshPlans();
+  log(`janela de Reação QA ${open?'aberta':'fechada'}`,'command');
+  return !!open;
+}
+
+function updateCameraControls(){
+  const wrap=a=>{let d=rad(a);while(d>180)d-=360;while(d<-180)d+=360;return Math.round(d);};
+  $('#cameraYaw').value=wrap(camera.yaw);
+  $('#cameraPitch').value=Math.round(rad(camera.pitch));
+  $('#cameraDistance').value=Math.round(camera.distance);
+  $('#cameraReadout').innerHTML=`alvo <b>${camera.target.x.toFixed(1)}, ${camera.target.y.toFixed(1)}</b> · yaw <b>${wrap(camera.yaw)}°</b> · elev. <b>${Math.round(rad(camera.pitch))}°</b> · dist. <b>${camera.distance.toFixed(1)}</b>`;
+}
+
+function updateContextTooltip(plan,targetPos,activeMove=null){
+  const tt=$('#contextTooltip');
+  if(!targetPos||!C.inBounds(targetPos)||(!plan&&!activeMove)){
+    tt.classList.remove('show');
+    return;
+  }
+  const u=selected(),rr=reactionReady();
+  const leg=activeMove?{category:'LEGAL',label:'EM MOVIMENTO',icon:'▶',badgeClass:'legal',reason:activeMove.reason,canConfirm:false}:C.classifyLegality(plan,rr,u);
+  
+  $('#ttBadge').className=`legalityBadge ${leg.badgeClass}`;
+  $('#ttBadge').textContent=`${leg.icon} ${leg.label}`;
+  $('#ttCoord').textContent=`${targetPos.x}, ${targetPos.y}`;
+  $('#ttReason').textContent=leg.reason;
+  
+  const costVal=activeMove?activeMove.cost:plan?.cost!=null?`${plan.cost} SPD`:'—';
+  const spdBefore=u.spd;
+  const spdAfter=activeMove?activeMove.spdAfter:plan?.spdAfter!=null?plan.spdAfter:'—';
+  $('#ttCost').textContent=costVal;
+  $('#ttSpd').textContent=`${spdBefore} → ${spdAfter}`;
+  $('#ttSpd').className=typeof spdAfter==='number'&&spdAfter<0?'negativeSpd':'';
+  
+  const ter=C.terrainAt(state,targetPos);
+  const isQaField=C.isQaCostFieldTile(state,targetPos);
+  const terName=isQaField?`Campo QA (custo ×${state.qa.costFieldEntryCost})`:ter?.kind==='impassable'?'Impassável':ter?.kind==='water'?'Água':ter?.kind==='brush'?'Arbustos':'Planície';
+  $('#ttTerrain').textContent=`Terreno: ${terName}${isQaField?' · fixture QA':''}`;
+  
+  const baseReach=C.mobilityBaseReach(u);
+  $('#ttMobility').textContent=`Custo-base: até ${baseReach} blocos com SPD atual`;
+  
+  const noteEl=$('#ttNote');
+  if(leg.negativeConsequence||(typeof spdAfter==='number'&&spdAfter<0)){
+    noteEl.style.display='block';
+    noteEl.textContent='Novo movimento bloqueado até SPD ≥ 1.';
+  } else if(ter?.kind==='impassable'&&C.hasGlider(u)){
+    noteEl.style.display='block';
+    noteEl.textContent='GLIDER: atravessa terreno impassável, mas não pode terminar nele.';
+  } else {
+    noteEl.style.display='none';
+  }
+  
+  const reactEl=$('#ttReaction');
+  if(reactionMode){
+    reactEl.style.display='block';
+    reactEl.textContent=`Modo Reação: 1 Reação + ${plan?.cost||0} SPD (Reações P1: ${state.qa.reactionsByPlayer.p1} → ${Math.max(0,state.qa.reactionsByPlayer.p1-1)})`;
+  } else {
+    reactEl.style.display='none';
+  }
+  
+  // Posicionamento do tooltip ancorado no cursor / stage
+  const stage=$('#stage').getBoundingClientRect();
+  let x=lastClientPointer.x-stage.left+16,y=lastClientPointer.y-stage.top+16;
+  if(x+270>stage.width) x=lastClientPointer.x-stage.left-276;
+  if(y+160>stage.height) y=lastClientPointer.y-stage.top-166;
+  tt.style.left=`${Math.max(8,x)}px`;
+  tt.style.top=`${Math.max(8,y)}px`;
+  tt.classList.add('show');
+}
+
+function updateUI(force=false){
+  const u=selected(),active=C.movementForUnit(state,u.id),rec=C.recoveryStatus(state,u.id),rr=reactionReady();
+  $('#selectedName').textContent=u.id;
+  $('#controlState').textContent=u.playerId===LOCAL_PLAYER?'P1 · controlável':'P2 · inspeção';
+  $('#controlState').className=u.playerId===LOCAL_PLAYER?'good':'warn';
+  $('#selectedPos').textContent=`${u.x},${u.y}`;
+  $('#selectedSpd').textContent=`${u.spd} / ${u.spdMax}`;
+  $('#selectedSpd').className=u.spd<0?'negativeSpd':'';
+  $('#selectedKeyword').textContent=(u.keywords||[]).join(', ')||'—';
+  $('#hoverPos').textContent=hover&&C.inBounds(hover)?`${hover.x},${hover.y}`:'—';
+  $('#reachableCount').textContent=reachable.length;
+  $('#tickValue').textContent=state.tick;
+  $('#queueValue').textContent=`${commandQueue.length} / ${state.movements?.length||0} ativos`;
+  $('#reactionCount').textContent=state.qa.reactionsByPlayer.p1;
+  $('#moveModeLabel').textContent=reactionMode?'REAÇÃO QA':'normal';
+  
+  // Resumo de mobilidade
+  const baseReach=C.mobilityBaseReach(u);
+  $('#mobSummary').textContent=`${u.spd} / ${u.spdMax} SPD • até ${baseReach} blocos em custo-base`;
+  
+  $('#recoveryStatus').textContent=!rec?.started?'não iniciado':u.spd>=u.spdMax?'ativo · no máximo':`ativo · ${rec.idleTicks} ticks ocioso`;
+  $('#recoveryCountdown').textContent=!rec?.started||u.spd>=u.spdMax?'—':`${(rec.ticksRemaining/C.SIMULATION_HZ).toFixed(2)} s`;
+  
+  const errs=C.validateState(state);
+  $('#stateValidity').textContent=errs.length?`${errs.length} erro(s)`:'válido';
+  $('#stateValidity').className=errs.length?'bad':'good';
+  const hash=C.hashState(state);
+  $('#hashValue').textContent=hash;
+  $('#hashTop').textContent=hash;
+  
+  const bar=$('#moveActionBar'),barConfirm=$('#confirmMoveStage'),planBox=$('#planBox');
+  const p=pendingPlan;
+  const leg=p?C.classifyLegality(p,rr,u):null;
+  const canConfirm=!!leg?.canConfirm&&!paused&&!autoPaused;
+  
+  if(pendingTarget&&p){
+    $('#lockedTarget').textContent=`${pendingTarget.x},${pendingTarget.y}`;
+    $('#lockedCost').textContent=p.cost!=null?`${p.cost} SPD`:'—';
+    $('#spdBeforeAfter').textContent=`${u.spd} → ${p.spdAfter!=null?p.spdAfter:'—'}`;
+    $('#spdBeforeAfter').className=p.spdAfter<0?'negativeSpd':'';
+    $('#pathLength').textContent=p.path?`${p.path.length} bloco(s)`:'—';
+    
+    planBox.className=`planbox legality-${leg.badgeClass}`;
+    $('#planStatus').innerHTML=`<span class="legalityBadge ${leg.badgeClass}">${leg.icon} ${leg.label}</span>`;
+    $('#planReason').textContent=leg.reason;
+    $('#confirmMove').disabled=!canConfirm;
+    
+    bar.className=`moveActionBar show legality-${leg.badgeClass}`;
+    $('#moveActionTitle').innerHTML=`<span class="legalityBadge ${leg.badgeClass}">${leg.icon} ${leg.label}</span> Mover ${u.id} → ${pendingTarget.x},${pendingTarget.y}${reactionMode?' · REAÇÃO':''}`;
+    $('#moveActionDetail').textContent=`Custo: ${p.cost} SPD · SPD: ${u.spd} → ${p.spdAfter}${reactionMode?' · 1 Reação consumida':''} · ${leg.reason}`;
+    barConfirm.disabled=!canConfirm;
+    
+    updateContextTooltip(p,pendingTarget);
+  } else {
+    $('#lockedTarget').textContent='—';
+    $('#lockedCost').textContent='—';
+    $('#spdBeforeAfter').textContent='—';
+    $('#spdBeforeAfter').className='';
+    $('#pathLength').textContent='—';
+    bar.className='moveActionBar';
+    barConfirm.disabled=true;
+    planBox.className='planbox';
+    
+    if(active){
+      $('#planStatus').innerHTML='<span class="legalityBadge legal">▶ MOVENDO</span>';
+      $('#planReason').textContent=`Comando #${active.seq} em execução bloco a bloco (${active.nextIndex}/${active.path.length}) · ${active.spent} SPD gasto.`;
+      updateContextTooltip(null,active.target,displayPlan());
+    } else if(controllable()&&hoverPlan&&hover){
+      const hleg=C.classifyLegality(hoverPlan,rr,u);
+      planBox.className=`planbox legality-${hleg.badgeClass}`;
+      $('#planStatus').innerHTML=`<span class="legalityBadge ${hleg.badgeClass}">${hleg.icon} ${hleg.label}</span> <span style="font-size:10px;font-weight:600">CLIQUE PARA TRAVAR</span>`;
+      $('#planReason').textContent=`Custo ${hoverPlan.cost!=null?hoverPlan.cost:'—'} SPD · SPD ${u.spd} → ${hoverPlan.spdAfter!=null?hoverPlan.spdAfter:'—'} · ${hleg.reason}`;
+      updateContextTooltip(hoverPlan,hover);
+    } else {
+      $('#planStatus').textContent=controllable()?'SELECIONE UM DESTINO':'UNIDADE ADVERSÁRIA · SOMENTE INSPEÇÃO';
+      $('#planStatus').className=`planstatus ${controllable()?'':'warn'}`;
+      $('#planReason').textContent=controllable()?'Passe o mouse para prévia; clique para travar, duplo clique para mover.':'Selecione um monstro de P1 para planejar movimento.';
+      updateContextTooltip(null,null);
+    }
+    $('#confirmMove').disabled=true;
+  }
+  
+  if(paused||autoPaused){
+    const why=paused?'PAUSADO MANUALMENTE':'PAUSADO: JANELA SEM FOCO';
+    $('#stateValidity').textContent=why;
+    $('#stateValidity').className='warn';
+  }
+  if(force) updateCameraControls();
+}
+
+function terrainColor(kind,alt){
+  if(kind==='impassable')return alt?'#3b2a2d':'#4a2f34';
+  if(kind==='water')return alt?'#203b51':'#24465f';
+  if(kind==='brush')return alt?'#29473b':'#2e5143';
+  return alt?'#203342':'#263b4b';
+}
+
+function motionPosition(u){
+  if(reducedMotion) return {x:u.x,y:u.y};
+  const m=visualMotions.get(u.id);
+  if(m){
+    const t=clamp((performance.now()-m.start)/m.duration,0,1),e=t*t*(3-2*t);
+    if(t>=1){visualMotions.delete(u.id);return {x:m.to.x,y:m.to.y};}
+    return {x:m.from.x+(m.to.x-m.from.x)*e,y:m.from.y+(m.to.y-m.from.y)*e};
+  }
+  const active=C.movementForUnit(state,u.id);
+  return active?{x:active.lastTraversed.x,y:active.lastTraversed.y}:{x:u.x,y:u.y};
+}
+
+function recoveryBadgeForUnit(u,st=state){
+  const rec=C.recoveryStatus(st,u.id);
+  if(!rec?.started||u.spd>=u.spdMax)return null;
+  const seconds=Math.max(0,rec.ticksRemaining/C.SIMULATION_HZ);
+  const progress=clamp((C.SPD_RECOVERY_TICKS-rec.ticksRemaining)/C.SPD_RECOVERY_TICKS,0,1);
+  return {
+    ticksRemaining:rec.ticksRemaining,
+    secondsRemaining:seconds,
+    displaySeconds:Math.max(1,Math.ceil(seconds)),
+    progress,
+    moving:C.isUnitMoving(state,u.id)
+  };
+}
+
+// Desenha badge compacto de SPD em screen space
+function drawSpdScreenBadge(ctx,x,y,scale,u){
+  const isNeg=u.spd<0;
+  const isMoving=C.isUnitMoving(state,u.id);
+  const badgeH=clamp(scale*.40,13,20);
+  const text=`SPD ${u.spd}`;
+  ctx.save();
+  ctx.font=`800 ${badgeH*.75}px sans-serif`;
+  const textW=ctx.measureText(text).width;
+  const badgeW=textW+14;
+  const r=badgeH*.45;
+  
+  ctx.fillStyle=isNeg?'#331010ee':'#081219ee';
+  ctx.strokeStyle=isNeg?'#ff8585':isMoving?'#e6c468':'#529ee0';
+  ctx.lineWidth=isNeg?1.8:1.2;
+  ctx.beginPath();
+  ctx.roundRect(x-badgeW/2,y-badgeH/2,badgeW,badgeH,r);
+  ctx.fill();
+  ctx.stroke();
+  
+  if(isNeg){
+    ctx.fillStyle='#ff9b9b';
+    ctx.textAlign='left';
+    ctx.textBaseline='middle';
+    ctx.fillText('⚠ '+text,x-badgeW/2+4,y);
+  } else {
+    ctx.fillStyle='#eaf4fc';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(text,x,y);
+  }
+  ctx.restore();
+}
+
+// Desenha anel de progresso circular e badge de recuperação
+function drawRecoveryRingAndBadge(ctx,x,y,scale,data,u){
+  if(!data)return;
+  const h=clamp(scale*.46,13,22),w=h*2.4,r=h*.5,ringR=h*.38;
+  const now=performance.now();
+  const resetPulse=timerResetPulses.get(u.id);
+  const isResetting=resetPulse&&(now-resetPulse.time<600);
+  
+  ctx.save();
+  // Fundo do pill
+  ctx.fillStyle='#071019e8';
+  ctx.strokeStyle=isResetting?'#ffd083':data.moving?'#8ea2b4':'#e6c468';
+  ctx.lineWidth=isResetting?1.8:1.2;
+  ctx.beginPath();
+  ctx.roundRect(x-w/2,y-h/2,w,h,r);
+  ctx.fill();
+  ctx.stroke();
+  
+  const ix=x-w*.27,iy=y;
+  // Anel de fundo
+  ctx.strokeStyle='#213444';
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.arc(ix,iy,ringR,0,Math.PI*2);
+  ctx.stroke();
+  
+  // Arco de progresso proporcional aos ticks
+  if(!reducedMotion||data.progress>0){
+    ctx.strokeStyle=isResetting?'#ffd083':data.moving?'#8ea2b4':'#f0d57c';
+    ctx.lineWidth=2.2;
+    ctx.beginPath();
+    ctx.arc(ix,iy,ringR,-Math.PI/2,-Math.PI/2+data.progress*Math.PI*2);
+    ctx.stroke();
+  }
+  
+  // Ícone relógio central
+  ctx.strokeStyle=data.moving?'#aab9c5':'#ffd083';
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(ix,iy);ctx.lineTo(ix,iy-ringR*.5);
+  ctx.moveTo(ix,iy);ctx.lineTo(ix+ringR*.4,iy);
+  ctx.stroke();
+  
+  // Segundos restantes
+  ctx.fillStyle=isResetting?'#ffd083':data.moving?'#aab9c5':'#fff1b0';
+  ctx.font=`800 ${Math.max(8,h*.52)}px ui-monospace,monospace`;
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText(`${data.displaySeconds}s`,x+w*.18,y+.3);
+  ctx.restore();
+}
+
+function triggerSpdPopup(e,now=performance.now()){
+  if(!e||e.type!=='SPD_RECOVERY_PACKET'||e.gained<=0)return null;
+  const popup={unitId:e.unitId,text:`+${e.gained}SPD`,start:now,duration:900};
+  spdPopups.push(popup);
+  while(spdPopups.length>20) spdPopups.shift();
+  return popup;
+}
+function pruneSpdPopups(now=performance.now()){
+  spdPopups=spdPopups.filter(p=>now-p.start<p.duration);
+}
+function drawSpdPopup(ctx,x,y,scale,p,now){
+  const t=clamp((now-p.start)/p.duration,0,1);
+  if(t>=1)return;
+  const rise=reducedMotion?0:t*clamp(scale*.95,18,34);
+  const alpha=1-Math.max(0,(t-.42)/.58);
+  ctx.save();
+  ctx.globalAlpha=alpha;
+  ctx.font=`900 ${clamp(scale*.44,12,20)}px sans-serif`;
+  ctx.textAlign='center';
+  ctx.textBaseline='bottom';
+  ctx.lineWidth=4;
+  ctx.strokeStyle='#071019dd';
+  ctx.strokeText(p.text,x,y-rise);
+  ctx.fillStyle='#8df0b7';
+  ctx.fillText(p.text,x,y-rise);
+  ctx.restore();
+}
+
+function handleRecoveryEvent(e){
+  if(e.gained>0){
+    triggerSpdPopup(e);
+    SoundSystem.play('SPD_RECOVERY',e);
+  }
+  log(`${e.unitId} recupera +${e.gained} SPD (${e.before} → ${e.after})${e.excessLost?` · ${e.excessLost} excedente perdido`:''}`,'pass');
+}
+
+function isReach(x,y){return reachable.find(t=>t.x===x&&t.y===y);}
+function isAllyTransitCandidate(u){
+  if(u.id===selectedId||u.playerId!==selected().playerId||!controllable())return false;
+  const p=C.shortestPath(state,selectedId,{x:u.x,y:u.y},selected().spd);
+  return !!(p&&p.length&&(p[p.length-1].cumulativeCost||p.length)<=selected().spd);
+}
+
+function drawReach2D(ctx,m){
+  if(!controllable())return;
+  for(const r of reachable){
+    const x=m.ox+r.x*m.tile,y=m.oy+r.y*m.tile;
+    if(overlayStyle==='A'){
+      ctx.fillStyle='#4d9eea28';
+      ctx.fillRect(x+1,y+1,m.tile-2,m.tile-2);
+      ctx.strokeStyle='#72baff44';
+      ctx.strokeRect(x+2,y+2,m.tile-4,m.tile-4);
+    } else if(overlayStyle==='B'){
+      const a=clamp(.11+(r.cost/Math.max(1,selected().spd))*.18,.11,.29);
+      ctx.fillStyle=`rgba(77,158,234,${a})`;
+      ctx.fillRect(x+2,y+2,m.tile-4,m.tile-4);
+      ctx.fillStyle='#cceaff';
+      ctx.font=`700 ${Math.max(7,m.tile*.25)}px sans-serif`;
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      ctx.fillText(r.cost,x+m.tile*.5,y+m.tile*.5);
+    } else {
+      ctx.fillStyle='#77c9ff';
+      ctx.beginPath();
+      ctx.arc(x+m.tile*.5,y+m.tile*.5,Math.max(1.8,m.tile*.07),0,Math.PI*2);
+      ctx.fill();
+    }
+  }
+  for(const u of state.units){
+    if(isAllyTransitCandidate(u)){
+      const p=motionPosition(u),cx=m.ox+(p.x+.5)*m.tile,cy=m.oy+(p.y+.5)*m.tile;
+      ctx.strokeStyle='#66c4ffbb';
+      ctx.lineWidth=2;
+      ctx.setLineDash([3,3]);
+      ctx.beginPath();
+      ctx.arc(cx,cy,m.tile*.38,0,Math.PI*2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+}
+
+// Desenha a rota de movimento com persistência durante a execução
+function drawPlan2D(ctx,m){
+  const p=displayPlan();
+  if(!p||!p.path?.length)return;
+  const u=selected(),origin={x:u.x,y:u.y};
+  const isActive=!!p.active;
+  const strokeColor=isActive?'#f2d77f':p.ok?'#f0cc62':'#db6868';
+  
+  ctx.save();
+  ctx.strokeStyle=strokeColor;
+  ctx.lineWidth=Math.max(2,m.tile*.12);
+  ctx.setLineDash(isActive?[]:overlayStyle==='C'?[2,4]:[m.tile*.25,m.tile*.13]);
+  ctx.beginPath();
+  ctx.moveTo(m.ox+(origin.x+.5)*m.tile,m.oy+(origin.y+.5)*m.tile);
+  for(let i=0;i<p.path.length;i++){
+    const q=p.path[i];
+    ctx.lineTo(m.ox+(q.x+.5)*m.tile,m.oy+(q.y+.5)*m.tile);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Destino marcado
+  const tgt=p.target||pendingTarget;
+  if(tgt){
+    const x=m.ox+tgt.x*m.tile,y=m.oy+tgt.y*m.tile;
+    ctx.strokeStyle=isActive?'#e6c468':p.ok?(p.negativeEntry?'#ffd083':'#78dca7'):'#ff8585';
+    ctx.lineWidth=3;
+    ctx.strokeRect(x+2,y+2,m.tile-4,m.tile-4);
+    if(isActive){
+      ctx.fillStyle='#e6c468';
+      ctx.font=`800 ${Math.max(7,m.tile*.20)}px sans-serif`;
+      ctx.textAlign='center';
+      ctx.fillText(`${p.nextIndex}/${p.path.length}`,x+m.tile*.5,y+m.tile*.82);
+    }
+  }
+  ctx.restore();
+}
+
+function drawTerrainQa2D(ctx,m){
+  if(!showFields)return;
+  const cost=state.qa.costFieldEntryCost;
+  for(let y=0;y<C.MAP_HEIGHT;y++) for(let x=0;x<C.MAP_WIDTH;x++){
+    const p={x,y};if(!C.isQaCostFieldTile(state,p))continue;
+    const px=m.ox+x*m.tile,py=m.oy+y*m.tile;
+    if(terrainStyle==='C'){
+      ctx.strokeStyle='#b68cf255';ctx.lineWidth=1;ctx.strokeRect(px+2,py+2,m.tile-4,m.tile-4);
+    } else {
+      ctx.fillStyle=terrainStyle==='A'?'#9a72d929':'#9a72d91b';ctx.fillRect(px+1,py+1,m.tile-2,m.tile-2);
+    }
+    if(terrainStyle==='A'&&m.tile>8){
+      ctx.save();
+      const txt=`×${cost}`;
+      ctx.font=`800 ${Math.max(7,m.tile*.22)}px sans-serif`;
+      const tw=ctx.measureText(txt).width;
+      ctx.fillStyle='#2a1a3dee';ctx.strokeStyle='#b68cf2';ctx.lineWidth=1;
+      ctx.beginPath();ctx.roundRect(px+m.tile*.5-tw/2-3,py+m.tile*.5-7,tw+6,14,3);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#f0e6ff';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(txt,px+m.tile*.5,py+m.tile*.5);
+      ctx.restore();
+    }
+  }
+  for(const t of state.terrain) if(t.kind==='impassable'){
+    const px=m.ox+t.x*m.tile,py=m.oy+t.y*m.tile;
+    ctx.strokeStyle='#ff9a9a99';ctx.lineWidth=1.5;ctx.beginPath();
+    ctx.moveTo(px+3,py+3);ctx.lineTo(px+m.tile-3,py+m.tile-3);
+    ctx.moveTo(px+m.tile-3,py+3);ctx.lineTo(px+3,py+m.tile-3);
+    ctx.stroke();
+  }
+}
+
+function drawTerrainQa3D(ctx,b){
+  if(!showFields)return;
+  const cost=state.qa.costFieldEntryCost;
+  for(let y=0;y<C.MAP_HEIGHT;y++) for(let x=0;x<C.MAP_WIDTH;x++){
+    const p={x,y};if(!C.isQaCostFieldTile(state,p))continue;
+    const q=quad(x,y,.012,b);
+    poly(ctx,q,terrainStyle==='C'?null:(terrainStyle==='A'?'#9a72d929':'#9a72d91b'),'#b68cf255');
+    if(terrainStyle==='A'){
+      const z=project(V(x+.5,y+.5,.035),b);
+      if(z&&z.scale>4){
+        const txt=`×${cost}`;
+        ctx.save();
+        ctx.font='800 8.5px sans-serif';
+        const tw=ctx.measureText(txt).width;
+        ctx.fillStyle='#2a1a3dee';ctx.strokeStyle='#b68cf2';ctx.lineWidth=1;
+        ctx.beginPath();ctx.roundRect(z.x-tw/2-3,z.y-6.5,tw+6,13,3);ctx.fill();ctx.stroke();
+        ctx.fillStyle='#f0e6ff';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(txt,z.x,z.y);
+        ctx.restore();
+      }
+    }
+  }
+}
+
+function drawPathCosts2D(ctx,m){
+  if(terrainStyle!=='B')return;
+  const p=displayPlan();if(!p?.path?.length)return;
+  for(let i=0;i<p.path.length;i++){
+    const q=p.path[i];
+    const x=m.ox+(q.x+.5)*m.tile,y=m.oy+(q.y+.5)*m.tile;
+    const isSpecial=q.stepCost>1;
+    const txt=isSpecial?`+${q.stepCost} (${q.cumulativeCost})`:`${q.cumulativeCost}`;
+    ctx.save();
+    ctx.font=`800 ${Math.max(8,m.tile*.22)}px sans-serif`;
+    const tw=ctx.measureText(txt).width;
+    ctx.fillStyle=isSpecial?'#38204bee':'#0c1822ee';
+    ctx.strokeStyle=isSpecial?'#c998f5':'#5a7b98';
+    ctx.lineWidth=isSpecial?1.5:1;
+    ctx.beginPath();ctx.roundRect(x-tw/2-3,y-m.tile*.24-7,tw+6,14,3);ctx.fill();ctx.stroke();
+    ctx.fillStyle=isSpecial?'#ffd083':'#eaf4fc';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(txt,x,y-m.tile*.24);
+    ctx.restore();
+  }
+}
+function drawPathCosts3D(ctx,b){
+  if(terrainStyle!=='B')return;
+  const p=displayPlan();if(!p?.path?.length)return;
+  for(let i=0;i<p.path.length;i++){
+    const q=p.path[i];
+    const z=project(V(q.x+.5,q.y+.5,.10),b);
+    if(z&&z.scale>4){
+      const isSpecial=q.stepCost>1;
+      const txt=isSpecial?`+${q.stepCost} (${q.cumulativeCost})`:`${q.cumulativeCost}`;
+      ctx.save();
+      ctx.font='800 8.5px sans-serif';
+      const tw=ctx.measureText(txt).width;
+      ctx.fillStyle=isSpecial?'#38204bee':'#0c1822ee';
+      ctx.strokeStyle=isSpecial?'#c998f5':'#5a7b98';
+      ctx.lineWidth=isSpecial?1.5:1;
+      ctx.beginPath();ctx.roundRect(z.x-tw/2-3,z.y-14,tw+6,13,3);ctx.fill();ctx.stroke();
+      ctx.fillStyle=isSpecial?'#ffd083':'#eaf4fc';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(txt,z.x,z.y-7.5);
+      ctx.restore();
+    }
+  }
+}
+
+function draw2D(c){
+  const ctx=c.getContext('2d'),m=fit2D(c);ctx.clearRect(0,0,m.w,m.h);
+  const tm=new Map(state.terrain.map(t=>[C.key(t),t.kind]));
+  for(let y=0;y<C.MAP_HEIGHT;y++) for(let x=0;x<C.MAP_WIDTH;x++){
+    const kind=tm.get(`${x},${y}`)||'plain',px=m.ox+x*m.tile,py=m.oy+y*m.tile;
+    ctx.fillStyle=terrainColor(kind,(x+y)%2);ctx.fillRect(px,py,m.tile,m.tile);
+    ctx.strokeStyle='#72879b2e';ctx.strokeRect(px,py,m.tile,m.tile);
+    if(showLabels&&m.tile>19){ctx.fillStyle='#b7c7d155';ctx.font=`${Math.max(7,m.tile*.19)}px monospace`;ctx.fillText(`${x},${y}`,px+3,py+9);}
+  }
+  drawTerrainQa2D(ctx,m);
+  drawReach2D(ctx,m);
+  if(showFields) for(const f of state.fields){
+    ctx.fillStyle=f.owner==='p1'?'#4d9eea1c':'#d95c6b1c';ctx.beginPath();
+    ctx.arc(m.ox+(f.cx+.5)*m.tile,m.oy+(f.cy+.5)*m.tile,f.radius*m.tile,0,Math.PI*2);ctx.fill();
+  }
+  for(const o of state.obstacles){ctx.fillStyle='#71818b';ctx.fillRect(m.ox+(o.x+.18)*m.tile,m.oy+(o.y+.18)*m.tile,m.tile*.64,m.tile*.64);}
+  for(const b of state.bases){ctx.fillStyle=b.playerId==='p1'?'#c9a34e':'#af5362';ctx.fillRect(m.ox+b.x*m.tile,m.oy+b.y*m.tile,m.tile,m.tile);}
+  
+  if(showFog){
+    ctx.fillStyle='#02060b87';
+    ctx.fillRect(m.ox,m.oy,m.tile*1.8,m.tile*C.MAP_HEIGHT);
+    ctx.fillRect(m.ox+m.tile*29.2,m.oy,m.tile*1.8,m.tile*C.MAP_HEIGHT);
+  }
+  
+  drawPlan2D(ctx,m);
+  drawPathCosts2D(ctx,m);
+  
+  // Unidades com badges screen-space
+  for(const u of state.units){
+    // Se o modo QA de informação reduzida estiver ativo, oculta inimigos fora de visão
+    if(reducedInfoMode&&u.playerId!=='p1'&&!C.isTileVisibleForP1(state,u)) continue;
+    
+    const p=motionPosition(u),cx=m.ox+(p.x+.5)*m.tile,cy=m.oy+(p.y+.5)*m.tile,r=m.tile*.29;
+    ctx.fillStyle=u.playerId==='p1'?'#4d9eea':'#d95c6b';
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=u.id===selectedId?'#f5d36c':'#f4f8fb';
+    ctx.lineWidth=u.id===selectedId?3:1.3;
+    ctx.stroke();
+    ctx.fillStyle='#fff';
+    ctx.font=`800 ${Math.max(8,r*.7)}px sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(u.id.slice(-1),cx,cy);
+    
+    // Hierarquia de badges em screen-space
+    drawSpdScreenBadge(ctx,cx,cy+r+m.tile*.22,m.tile,u);
+    drawRecoveryRingAndBadge(ctx,cx,cy-r-m.tile*.24,m.tile,recoveryBadgeForUnit(u),u);
+    
+    if(C.hasGlider(u)){
+      ctx.fillStyle='#2b463a';ctx.strokeStyle='#7be4b5';ctx.lineWidth=1;
+      ctx.beginPath();ctx.roundRect(cx-m.tile*.3,cy+r+m.tile*.42,m.tile*.6,m.tile*.18,2);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#8ff2c7';ctx.font=`800 ${Math.max(6,m.tile*.13)}px sans-serif`;ctx.fillText('GLIDER',cx,cy+r+m.tile*.51);
+    }
+  }
+  
+  const popupNow=performance.now();
+  for(const p of spdPopups){
+    const u=C.getUnit(state,p.unitId);if(!u)continue;
+    const q=motionPosition(u),cx=m.ox+(q.x+.5)*m.tile,cy=m.oy+(q.y+.5)*m.tile;
+    drawSpdPopup(ctx,cx,cy-m.tile*.60,m.tile,p,popupNow);
+  }
+  if(hover&&C.inBounds(hover)){
+    ctx.strokeStyle='#e6c468aa';ctx.lineWidth=1.5;
+    ctx.strokeRect(m.ox+hover.x*m.tile+1,m.oy+hover.y*m.tile+1,m.tile-2,m.tile-2);
+  }
+}
+
+function drawReach3D(ctx,b){
+  if(!controllable())return;
+  for(const r of reachable){
+    const q=quad(r.x,r.y,.025,b);
+    if(overlayStyle==='A') poly(ctx,q,'#4d9eea29','#72baff42');
+    else if(overlayStyle==='B'){
+      poly(ctx,q,`rgba(77,158,234,${clamp(.10+r.cost/Math.max(1,selected().spd)*.18,.1,.28)})`,'#72baff50');
+      const p=project(V(r.x+.5,r.y+.5,.04),b);
+      if(p&&p.scale>7){ctx.fillStyle='#d5efff';ctx.font='700 9px sans-serif';ctx.textAlign='center';ctx.fillText(r.cost,p.x,p.y);}
+    } else {
+      const p=project(V(r.x+.5,r.y+.5,.04),b);
+      if(p){ctx.fillStyle='#77c9ff';ctx.beginPath();ctx.arc(p.x,p.y,clamp(p.scale*.055,1.4,4),0,Math.PI*2);ctx.fill();}
+    }
+  }
+}
+
+function drawPlan3D(ctx,b){
+  const p=displayPlan();if(!p||!p.path?.length)return;
+  const u=selected(),origin={x:u.x,y:u.y};
+  let a=project(V(origin.x+.5,origin.y+.5,.07),b);if(!a)return;
+  const isActive=!!p.active;
+  
+  ctx.save();
+  ctx.strokeStyle=isActive?'#f2d77f':p.ok?'#f0cc62':'#db6868';
+  ctx.lineWidth=3;
+  ctx.setLineDash(isActive?[]:overlayStyle==='C'?[2,4]:[7,4]);
+  ctx.beginPath();ctx.moveTo(a.x,a.y);
+  for(const q of p.path){
+    const z=project(V(q.x+.5,q.y+.5,.07),b);
+    if(z) ctx.lineTo(z.x,z.y);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  const tgt=p.target||pendingTarget;
+  if(tgt){
+    poly(ctx,quad(tgt.x,tgt.y,.035,b),isActive?'#e6c46830':p.ok?'#78dca72a':'#ff85852b',isActive?'#e6c468':p.ok?'#78dca7':'#ff8585',2);
+  }
+  ctx.restore();
+}
+
+function draw3D(c){
+  const ctx=c.getContext('2d'),b=cameraBasis(c);ctx.clearRect(0,0,b.w,b.h);
+  const tiles=[];
+  for(let y=0;y<C.MAP_HEIGHT;y++) for(let x=0;x<C.MAP_WIDTH;x++){
+    const p=project(V(x+.5,y+.5,0),b);if(p) tiles.push({x,y,d:p.z});
+  }
+  tiles.sort((a,z)=>z.d-a.d);
+  const tm=new Map(state.terrain.map(t=>[C.key(t),t.kind]));
+  for(const t of tiles) poly(ctx,quad(t.x,t.y,0,b),terrainColor(tm.get(`${t.x},${t.y}`)||'plain',(t.x+t.y)%2),'#75889a27');
+  
+  drawTerrainQa3D(ctx,b);
+  drawReach3D(ctx,b);
+  if(showFields) for(const f of state.fields){
+    const p=project(V(f.cx+.5,f.cy+.5,.03),b);
+    if(p){ctx.fillStyle=f.owner==='p1'?'#4d9eea20':'#d95c6b20';ctx.beginPath();ctx.arc(p.x,p.y,Math.max(4,p.scale*f.radius),0,Math.PI*2);ctx.fill();}
+  }
+  drawPlan3D(ctx,b);
+  drawPathCosts3D(ctx,b);
+  
+  const objs=[];
+  for(const o of state.obstacles){const p=project(V(o.x+.5,o.y+.5,.45),b);if(p)objs.push({type:'o',v:o,d:p.z,p});}
+  for(const ba of state.bases){const p=project(V(ba.x+.5,ba.y+.5,.45),b);if(p)objs.push({type:'b',v:ba,d:p.z,p});}
+  for(const u of state.units){
+    if(reducedInfoMode&&u.playerId!=='p1'&&!C.isTileVisibleForP1(state,u)) continue;
+    const q=motionPosition(u),p=project(V(q.x+.5,q.y+.5,.78),b);
+    if(p) objs.push({type:'u',v:u,q,d:p.z,p});
+  }
+  objs.sort((a,z)=>z.d-a.d);
+  
+  for(const o of objs){
+    if(o.type!=='u'){
+      ctx.fillStyle=o.type==='b'?(o.v.playerId==='p1'?'#c9a34e':'#af5362'):'#75858e';
+      const s=clamp(o.p.scale*.28,5,15);ctx.fillRect(o.p.x-s/2,o.p.y-s/2,s,s);continue;
+    }
+    const foot=project(V(o.q.x+.5,o.q.y+.5,0),b),r=clamp(o.p.scale*.22,5,20);
+    ctx.strokeStyle='#000a';ctx.lineWidth=Math.max(2,r*.5);ctx.beginPath();ctx.moveTo(foot.x,foot.y);ctx.lineTo(o.p.x,o.p.y);ctx.stroke();
+    ctx.fillStyle=o.v.playerId==='p1'?'#4d9eea':'#d95c6b';
+    ctx.beginPath();ctx.arc(o.p.x,o.p.y,r,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=o.v.id===selectedId?'#f5d36c':'#fff';
+    ctx.lineWidth=o.v.id===selectedId?3:1.2;
+    ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font='800 10px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(o.v.id.slice(-1),o.p.x,o.p.y);
+    
+    // Badges projetados em 3D
+    const badgeScale=clamp(o.p.scale*.9,24,42);
+    drawSpdScreenBadge(ctx,o.p.x,o.p.y+r+10,badgeScale,o.v);
+    drawRecoveryRingAndBadge(ctx,o.p.x,o.p.y-r-12,badgeScale,recoveryBadgeForUnit(o.v),o.v);
+    
+    if(C.hasGlider(o.v)){
+      ctx.fillStyle='#2b463a';ctx.strokeStyle='#7be4b5';ctx.lineWidth=1;
+      ctx.beginPath();ctx.roundRect(o.p.x-16,o.p.y+r+20,32,11,2);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#8ff2c7';ctx.font='800 7px sans-serif';ctx.fillText('GLIDER',o.p.x,o.p.y+r+25.5);
+    }
+  }
+  
+  const popupNow=performance.now();
+  for(const p of spdPopups){
+    const u=C.getUnit(state,p.unitId);if(!u)continue;
+    const q=motionPosition(u),z=project(V(q.x+.5,q.y+.5,.92),b);
+    if(z) drawSpdPopup(ctx,z.x,z.y-10,clamp(z.scale*.9,24,42),p,popupNow);
+  }
+  if(showFog){
+    const L=[project(V(0,0,.02),b),project(V(1.8,0,.02),b),project(V(1.8,C.MAP_HEIGHT,.02),b),project(V(0,C.MAP_HEIGHT,.02),b)],
+          R=[project(V(29.2,0,.02),b),project(V(C.MAP_WIDTH,0,.02),b),project(V(C.MAP_WIDTH,C.MAP_HEIGHT,.02),b),project(V(29.2,C.MAP_HEIGHT,.02),b)];
+    poly(ctx,L,'#02060b74',null);poly(ctx,R,'#02060b74',null);
+  }
+}
+
+function grid2D(c,e){
+  const m=fit2D(c),r=c.getBoundingClientRect(),px=(e.clientX-r.left)*m.dpr,py=(e.clientY-r.top)*m.dpr;
+  return {x:Math.floor((px-m.ox)/m.tile),y:Math.floor((py-m.oy)/m.tile)};
+}
+function rayToPlane(c,cx,cy){
+  const b=cameraBasis(c),r=c.getBoundingClientRect(),px=(cx-r.left)*b.dpr,py=(cy-r.top)*b.dpr,nx=(px-b.cx)/b.f,ny=-(py-b.cy)/b.f,dir=norm(add(b.fwd,add(mul(b.right,nx),mul(b.up,ny))));
+  if(Math.abs(dir.z)<1e-7)return null;const t=-b.pos.z/dir.z;if(t<=0)return null;
+  return add(b.pos,mul(dir,t));
+}
+function grid3D(c,e){
+  const h=rayToPlane(c,e.clientX,e.clientY);return h?{x:Math.floor(h.x),y:Math.floor(h.y)}:null;
+}
+function planForGrid(g){
+  if(!g||!C.inBounds(g)||!controllable())return null;
+  return C.planMovement(state,selectedId,g);
+}
+function setHover(g,clientX=null,clientY=null){
+  if(clientX!=null&&clientY!=null){lastClientPointer.x=clientX;lastClientPointer.y=clientY;}
+  hover=g&&C.inBounds(g)?g:null;
+  hoverPlan=hover?planForGrid(hover):null;
+  updateUI();
+}
+
+function lockDestination(g){
+  if(!g||!C.inBounds(g)){toast('clique fora do mapa');return null;}
+  if(!controllable()){toast('unidade adversária: somente inspeção');return null;}
+  pendingTarget={x:g.x,y:g.y};
+  pendingPlan=C.planMovement(state,selectedId,pendingTarget);
+  hover=g;hoverPlan=null;
+  
+  const rr=reactionReady();
+  const leg=C.classifyLegality(pendingPlan,rr,selected());
+  log(`destino ${g.x},${g.y}: ${leg.label} · ${pendingPlan.ok?`${pendingPlan.cost} SPD`:leg.reason}`,leg.canConfirm?(leg.negativeConsequence?'command':'pass'):'error');
+  if(!pendingPlan.ok) toast(pendingPlan.reason);
+  
+  SoundSystem.play(leg.canConfirm?(leg.negativeConsequence?'LOCK_DESTINATION_CONSEQUENCE':'LOCK_DESTINATION_LEGAL'):'LOCK_DESTINATION_ILLEGAL',{target:g,plan:pendingPlan});
+  updateUI();
+  return pendingPlan;
+}
+
+function chooseGrid(g){
+  if(!g||!C.inBounds(g)){
+    cancelPlan();
+    return;
+  }
+  
+  // Requisito 8: Segundo clique no mesmo destino travado cancela a prévia
+  if(pendingTarget&&pendingTarget.x===g.x&&pendingTarget.y===g.y){
+    cancelPlan();
+    log(`segundo clique em ${g.x},${g.y}: prévia cancelada sem custo`,'command');
+    return;
+  }
+  
+  const hit=C.unitAt(state,g,null);
+  if(hit){
+    const previous=selected();
+    if(hit.id!==previous.id&&hit.playerId===previous.playerId&&previous.playerId===LOCAL_PLAYER)
+      toast(`${hit.id}: aliado atravessável; selecionado para novo planejamento`);
+    else if(hit.playerId!==LOCAL_PLAYER)
+      toast(`${hit.id}: inimigo bloqueia passagem; selecionado apenas para inspeção`);
+    selectedId=hit.id;
+    pendingPlan=null;
+    pendingTarget=null;
+    hover=g;
+    hoverPlan=null;
+    refreshReachable();
+    log(`selecionado ${hit.id} em ${hit.x},${hit.y}`);
+    updateUI();
+    return;
+  }
+  lockDestination(g);
+}
+
+function cancelPlan(){
+  if(!pendingTarget&&!hoverPlan){toast('nenhuma prévia travada');return;}
+  pendingTarget=null;
+  pendingPlan=null;
+  hoverPlan=null;
+  log('prévia cancelada sem custo');
+  SoundSystem.play('CANCEL_PREVIEW',{unitId:selectedId});
+  updateUI();
+}
+
+function confirmPlan(){
+  if(paused||autoPaused){toast(paused?'lógica pausada: retome antes de confirmar':'janela sem foco: lógica pausada automaticamente');return false;}
+  if(!pendingTarget){toast('nenhum destino travado para confirmar');return false;}
+  if(!pendingPlan?.ok){toast(pendingPlan?.reason||'destino inválido');return false;}
+  if(reactionMode){
+    const rr=C.canUseReactionMovement(state,selected());
+    if(!rr.ok){toast(rr.reason);SoundSystem.play('REACTION_BLOCKED',{reason:rr.reason});return false;}
+  }
+  const cmd={type:'MOVE',mode:reactionMode?'REACTION':'NORMAL',seq:nextSeq++,unitId:selectedId,target:{...pendingTarget},issuedAtTick:state.tick};
+  commandQueue.push(cmd);
+  log(`comando #${cmd.seq} enfileirado${cmd.mode==='REACTION'?' como Reação':''}: ${cmd.unitId} → ${cmd.target.x},${cmd.target.y}`,'command');
+  toast(`movimento #${cmd.seq} confirmado`);
+  SoundSystem.play('CONFIRM_MOVE',cmd);
+  
+  // Limpa o planejamento travado mas a rota agora é desenhada via active movement!
+  pendingPlan=null;
+  pendingTarget=null;
+  hoverPlan=null;
+  updateUI();
+  return true;
+}
+
+function processCommands(){
+  commandQueue.sort((a,b)=>a.seq-b.seq);
+  while(commandQueue.length){
+    const cmd=commandQueue.shift(),result=C.beginMovementCommand(state,cmd);
+    if(result.ok){
+      selectedId=cmd.unitId;
+      refreshReachable();
+      for(const ev of result.events||[])
+        if(ev.type==='REACTION_SPENT') log(`#${cmd.seq} consome 1 Reação QA · restam ${ev.remaining}`,'command');
+      log(`#${cmd.seq} aceito${cmd.mode==='REACTION'?' como Reação':''} · custo previsto ${result.plan.cost} SPD · bloco a bloco`,'pass');
+    } else {
+      log(`#${cmd.seq} rejeitado na revalidação: ${result.reason}`,'error');
+      toast(result.reason);
+      SoundSystem.play('MOVE_REJECTED',{cmd,reason:result.reason});
+    }
+  }
+}
+
+function applyMovementVisualEvent(e){
+  if(e.type==='ENTER_TILE'||e.type==='PASS_ALLY'){
+    visualMotions.set(e.unitId,{from:{...e.from},to:{...e.to},start:performance.now(),duration:C.STEP_MS});
+    // Reinício do timer no movimento
+    timerResetPulses.set(e.unitId,{time:performance.now(),tick:state.tick});
+    if(e.type==='PASS_ALLY') log(`↳ #${e.seq} atravessa aliado ${e.allyId} em ${e.x},${e.y} · custo ${e.cost} · SPD ${e.spdAfter}`,'camera');
+    else log(`↳ #${e.seq} entra ${e.x},${e.y} · custo ${e.cost} · SPD ${e.spdAfter}`,e.completed?'pass':'command');
+    if(e.completed) log(`#${e.seq} movimento concluído em ${e.x},${e.y}`,'pass');
+  } else if(e.type==='MOVE_STOPPED'){
+    visualMotions.delete(e.unitId);
+    log(`#${e.seq} movimento interrompido em ${e.position?`${e.position.x},${e.position.y}`:'—'}: ${e.reason}`,'error');
+    toast(`movimento interrompido: ${e.reason}`);
+    SoundSystem.play('MOVE_INTERRUPTED',e);
+  }
+}
+
+function logicStep(){
+  if(paused||autoPaused)return;
+  state.tick+=1;
+  processCommands();
+  const events=C.stepMovements(state);
+  for(const e of events) applyMovementVisualEvent(e);
+  for(const e of C.stepRecovery(state)) handleRecoveryEvent(e);
+  refreshReachable();
+  updateUI();
+}
+
+function setView(v){
+  view=v;
+  if(v!=='qa'&&overlayStyle!=='A') setOverlayStyle('A',true);
+  $$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  $('#view2d').classList.toggle('active',v==='2d');
+  $('#view3d').classList.toggle('active',v==='3d');
+  $('#viewQA').classList.toggle('active',v==='qa');
+  $$('.stylebtn').forEach(b=>{
+    b.disabled=v!=='qa'&&b.dataset.style!=='A';
+    b.title=v!=='qa'&&b.dataset.style!=='A'?'B/C são evidência histórica; use QA para comparar.':'';
+  });
+  log(`orientação ${v} ativada`,'camera');
+}
+
+function setOverlayStyle(s,forced=false){
+  if(view!=='qa'&&s!=='A'&&!forced){
+    toast('A · área cheia é a apresentação aprovada. B/C ficam disponíveis apenas no modo QA.','warn');
+    return false;
+  }
+  overlayStyle=s;
+  $$('.stylebtn').forEach(b=>b.classList.toggle('active',b.dataset.style===s));
+  log(`visualização de movimento ${s} ativada${forced?' (forçada pela orientação aprovada)':''}`,'camera');
+  return true;
+}
+
+function center2D(u){
+  const c=view==='qa'?canvases.q2:canvases.d2,m=fit2D(c),desiredX=m.w/(2*m.dpr),desiredY=m.h/(2*m.dpr),curX=(m.ox+(u.x+.5)*m.tile)/m.dpr,curY=(m.oy+(u.y+.5)*m.tile)/m.dpr;
+  visual.pan2dX+=desiredX-curX;visual.pan2dY+=desiredY-curY;
+}
+function focusSelected(){
+  const u=selected();cameraTween=null;camera.target={x:u.x+.5,y:u.y+.5,z:0};center2D(u);updateCameraControls();log(`câmeras focadas em ${u.id}`,'camera');
+}
+function desiredBehind(u){
+  return {target:{x:u.x+.5,y:u.y+.5,z:0},yaw:u.playerId==='p1'?Math.PI:0,pitch:deg(38),distance:14};
+}
+function applyPose(p){
+  camera.target={...p.target};camera.yaw=p.yaw;camera.pitch=p.pitch;camera.distance=p.distance;updateCameraControls();
+}
+function focusBehind(u,animate=true){
+  const goal=desiredBehind(u);
+  if(!animate||reducedMotion){cameraTween=null;applyPose(goal);}
+  else cameraTween={start:performance.now(),duration:560,from:{target:{...camera.target},yaw:camera.yaw,pitch:camera.pitch,distance:camera.distance},to:goal};
+  log(`foco traseiro visual em ${u.id}`,'camera');
+}
+function updateTween(now=performance.now()){
+  if(!cameraTween)return;
+  const t=clamp((now-cameraTween.start)/cameraTween.duration,0,1),e=t*t*(3-2*t),a=cameraTween.from,b=cameraTween.to;
+  camera.target={x:a.target.x+(b.target.x-a.target.x)*e,y:a.target.y+(b.target.y-a.target.y)*e,z:0};
+  let dy=b.yaw-a.yaw;while(dy>Math.PI)dy-=Math.PI*2;while(dy<-Math.PI)dy+=Math.PI*2;
+  camera.yaw=a.yaw+dy*e;camera.pitch=a.pitch+(b.pitch-a.pitch)*e;camera.distance=a.distance+(b.distance-a.distance)*e;
+  updateCameraControls();if(t>=1)cameraTween=null;
+}
+
+function doubleClickGrid(g,mode='2d',animate=true){
+  if(!g||!C.inBounds(g)){toast('duplo clique fora do mapa');return {ok:false,action:'outside'};}
+  const hit=C.unitAt(state,g,null);
+  if(hit){
+    selectedId=hit.id;pendingPlan=null;pendingTarget=null;hover=g;hoverPlan=null;refreshReachable();
+    if(mode==='2d')center2D(hit);focusBehind(hit,animate);updateUI();
+    return {ok:true,action:'focus-unit',unitId:hit.id};
+  }
+  if(!controllable()){toast('unidade adversária: somente inspeção');return {ok:false,action:'inspect-only'};}
+  const plan=lockDestination(g);
+  if(!plan?.ok) return {ok:false,action:'invalid-destination',reason:plan?.reason||'destino inválido'};
+  const confirmed=confirmPlan();
+  return {ok:confirmed,action:confirmed?'move-confirmed':'move-not-confirmed',reason:confirmed?null:(paused?'lógica pausada':autoPaused?'janela sem foco':'confirmação rejeitada')};
+}
+function doubleClickAtPointer(c,mode,e){
+  const g=mode==='2d'?grid2D(c,e):grid3D(c,e);return doubleClickGrid(g,mode,true);
+}
+function pan3D(dx,dy,c){
+  const b=cameraBasis(c),scale=camera.distance/Math.min(b.w,b.h)*1.7,gRight=norm(V(b.right.x,b.right.y,0)),gFwd=norm(V(b.fwd.x,b.fwd.y,0));
+  camera.target=add(camera.target,add(mul(gRight,-dx*b.dpr*scale),mul(gFwd,dy*b.dpr*scale)));
+  camera.target.x=clamp(camera.target.x,-5,C.MAP_WIDTH+5);camera.target.y=clamp(camera.target.y,-5,C.MAP_HEIGHT+5);
+  updateCameraControls();
+}
+function pointerDown(c,mode,e){
+  visual.pointer={c,mode,id:e.pointerId,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,button:e.button,shift:e.shiftKey,dragStarted:false};
+  c.setPointerCapture(e.pointerId);if(e.button===2)e.preventDefault();
+}
+function pointerMove(c,mode,e){
+  lastClientPointer.x=e.clientX;lastClientPointer.y=e.clientY;
+  const d=visual.pointer;
+  if(d&&d.id===e.pointerId){
+    const total=Math.hypot(e.clientX-d.startX,e.clientY-d.startY),dx=e.clientX-d.lastX,dy=e.clientY-d.lastY;
+    d.lastX=e.clientX;d.lastY=e.clientY;
+    if(!d.dragStarted&&total>CLICK_SLOP_PX)d.dragStarted=true;
+    if(d.dragStarted){
+      cameraTween=null;
+      if(mode==='2d'){visual.pan2dX+=dx;visual.pan2dY+=dy;}
+      else if(d.button===2||d.shift||e.shiftKey) pan3D(dx,dy,c);
+      else{
+        camera.yaw-=dx*.007;camera.pitch=clamp(camera.pitch+dy*.005,deg(20),deg(80));updateCameraControls();
+      }
+      return;
+    }
+  }
+  setHover(mode==='2d'?grid2D(c,e):grid3D(c,e),e.clientX,e.clientY);
+}
+function pointerUp(c,mode,e){
+  const d=visual.pointer;if(!d||d.id!==e.pointerId)return;visual.pointer=null;
+  try{c.releasePointerCapture(e.pointerId);}catch{}
+  if(!d.dragStarted&&d.button===0) chooseGrid(mode==='2d'?grid2D(c,e):grid3D(c,e));
+}
+function attach(c,mode){
+  c.addEventListener('pointerdown',e=>pointerDown(c,mode,e));
+  c.addEventListener('pointermove',e=>pointerMove(c,mode,e));
+  c.addEventListener('pointerup',e=>pointerUp(c,mode,e));
+  c.addEventListener('pointercancel',()=>visual.pointer=null);
+  c.addEventListener('pointerleave',()=>{if(!visual.pointer){setHover(null);updateContextTooltip(null,null);}});
+  c.addEventListener('contextmenu',e=>e.preventDefault());
+  c.addEventListener('dblclick',e=>{e.preventDefault();doubleClickAtPointer(c,mode,e);});
+  c.addEventListener('wheel',e=>{
+    e.preventDefault();cameraTween=null;
+    if(mode==='2d') visual.zoom2d=clamp(visual.zoom2d*(e.deltaY>0?.90:1.11),.45,3.5);
+    else{camera.distance=clamp(camera.distance*(e.deltaY>0?1.08:.92),12,75);updateCameraControls();}
+  },{passive:false});
+}
+
+function resetCamera(){
+  cameraTween=null;camera.target={x:15.5,y:8.5,z:0};camera.yaw=deg(-35);camera.pitch=deg(48);camera.distance=37;visual.zoom2d=1;visual.pan2dX=visual.pan2dY=0;
+  updateCameraControls();log('câmeras resetadas','camera');
+}
+function resetScenario(){
+  state=C.createScenario();selectedId='P1-A';hover=null;hoverPlan=null;pendingPlan=null;pendingTarget=null;commandQueue=[];nextSeq=1;visualMotions.clear();spdPopups=[];timerResetPulses.clear();
+  refreshReachable();reactionMode=false;$('#reactionMode').checked=false;$('#reactionWindow').checked=false;$('#qaCost').value=1;
+  log('cenário VIS-004 resetado');updateUI(true);
+}
+function setupNegativeStress(){
+  if(state.movements?.length||commandQueue.length){toast('aguarde movimentos em curso antes do stress QA');return false;}
+  const u=C.getUnit(state,'P1-D');selectedId=u.id;pendingPlan=null;pendingTarget=null;hover=null;hoverPlan=null;
+  const n=C.setQaCostFieldEntryCost(state,u.spd+1);$('#qaCost').value=n;
+  reactionMode=false;$('#reactionMode').checked=false;refreshReachable();center2D(u);updateUI();
+  log(`stress QA preparado: ${u.id} em ${u.x},${u.y}, SPD ${u.spd}; entrada 12,8 custa ${n} e pode levar SPD a negativo`,'command');
+  toast('P1-D pronto: mova para 12,8');return true;
+}
+function registerQaAction(){
+  const r=C.registerUnitAction(state,selectedId);
+  if(!r.ok){toast(r.reason);return false;}
+  timerResetPulses.set(selectedId,{time:performance.now(),tick:state.tick});
+  log(`Ação QA registrada em ${selectedId}: timer de SPD reiniciado sem implementar custo de Ação`,'command');
+  SoundSystem.play('TIMER_RESET',{unitId:selectedId});
+  updateUI();return true;
+}
+function stepLogicForTest(n=1){
+  const count=Math.max(0,Math.trunc(n));
+  for(let i=0;i<count;i++){
+    state.tick+=1;processCommands();
+    for(const e of C.stepMovements(state)) applyMovementVisualEvent(e);
+    for(const e of C.stepRecovery(state)) handleRecoveryEvent(e);
+  }
+  refreshReachable();updateUI();return C.clone(state);
+}
+
+function keyboardCamera(e){
+  if(view==='2d')return false;
+  const el=document.activeElement;if(el&&['INPUT','TEXTAREA','SELECT'].includes(el.tagName))return false;
+  const pan=.65*Math.max(.55,camera.distance/37),yaw=deg(4),pitch=deg(3),fg=norm(V(-Math.cos(camera.yaw),-Math.sin(camera.yaw),0)),rg=norm(V(-fg.y,fg.x,0));
+  let used=true;cameraTween=null;
+  switch(e.key.toLowerCase()){
+    case'w':camera.target=add(camera.target,mul(fg,pan));break;
+    case's':camera.target=add(camera.target,mul(fg,-pan));break;
+    case'a':camera.target=add(camera.target,mul(rg,-pan));break;
+    case'd':camera.target=add(camera.target,mul(rg,pan));break;
+    case'q':camera.yaw-=yaw;break;
+    case'e':camera.yaw+=yaw;break;
+    case'arrowup':camera.pitch=clamp(camera.pitch+pitch,deg(20),deg(80));break;
+    case'arrowdown':camera.pitch=clamp(camera.pitch-pitch,deg(20),deg(80));break;
+    case'f':focusSelected();break;
+    case'home':resetCamera();break;
+    default:used=false;
+  }
+  if(used){updateCameraControls();e.preventDefault();}
+  return used;
+}
+
+function toggleLegend(){
+  const content=$('#legendContent'),arrow=$('#legendArrow');
+  content.classList.toggle('collapsed');
+  arrow.textContent=content.classList.contains('collapsed')?'▸':'▾';
+}
+
+function render(now){
+  updateTween(now);pruneSpdPopups(now);
+  if(view==='2d') draw2D(canvases.d2);
+  else if(view==='3d') draw3D(canvases.d3);
+  else{draw2D(canvases.q2);draw3D(canvases.q3);}
+  requestAnimationFrame(render);
+}
+
+function runTests(){
+  const results=[],test=(n,fn)=>{try{fn();results.push({name:n,ok:true});}catch(e){results.push({name:n,ok:false,error:e.message});}},assert=(c,m='assertion')=>{if(!c)throw Error(m);};
+  
+  // Testes 1 a 33: suíte completa preexistente do VIS-004
+  test('mapa 31×17 · 20 Hz/50 ms · recuperação 160 ticks',()=>assert(C.MAP_WIDTH===31&&C.MAP_HEIGHT===17&&C.SIMULATION_HZ===20&&C.STEP_MS===50&&C.SPD_RECOVERY_TICKS===160));
+  test('cenário 5×5 válido e custo QA padrão neutro',()=>{const s=C.createScenario();assert(s.units.filter(u=>u.playerId==='p1').length===5&&s.units.filter(u=>u.playerId==='p2').length===5&&s.qa.costFieldEntryCost===1&&C.validateState(s).length===0);});
+  test('custo-base continua 1 SPD por bloco fora de modificadores',()=>{const p=C.planMovement(C.createScenario(),'P1-A',{x:4,y:9});assert(p.ok&&p.cost===2&&p.path.every(x=>x.stepCost===1));});
+  test('aliado atravessável, não destino final',()=>{const s=C.createScenario();assert(!C.planMovement(s,'P1-A',{x:5,y:8}).ok);const p=C.planMovement(s,'P1-A',{x:6,y:8});assert(p.ok&&p.path.some(q=>q.x===5&&q.y===8));});
+  test('inimigo bloqueia passagem e destino',()=>{const s=C.createScenario(),e=C.getUnit(s,'P2-A');e.x=4;e.y=8;assert(!C.planMovement(s,'P1-A',{x:4,y:8}).ok);});
+  test('LEAPER 2 preserva diagonal a 1 SPD',()=>{const s=C.createScenario();const p=C.planMovement(s,'P1-E',{x:11,y:13});assert(p.ok&&p.cost===1&&p.path[0].diagonal);});
+  test('terreno impassável bloqueia unidade normal',()=>{const s=C.createScenario(),u=C.getUnit(s,'P1-A');u.x=6;u.y=12;assert(!C.planMovement(s,u.id,{x:7,y:12}).ok);});
+  test('GLIDER atravessa impassável mas não termina nele',()=>{const s=C.createScenario();assert(!C.planMovement(s,'P1-C',{x:7,y:12}).ok);const p=C.planMovement(s,'P1-C',{x:8,y:12});assert(p.ok&&p.path.some(q=>q.x===7&&q.y===12));});
+  test('fixture QA pondera custo sem declarar regra canônica',()=>{const s=C.createScenario();C.setQaCostFieldEntryCost(s,5);const p=C.planMovement(s,'P1-D',{x:12,y:8});assert(p.ok&&p.cost===5&&p.spdAfter===-1&&p.negativeEntry);});
+  test('entrada final cara pode levar SPD a negativo',()=>{const s=C.createScenario(),u=C.getUnit(s,'P1-D');C.setQaCostFieldEntryCost(s,5);assert(C.beginMovementCommand(s,{type:'MOVE',unitId:u.id,target:{x:12,y:8},seq:1}).ok);C.stepMovements(s);assert(u.x===12&&u.y===8&&u.spd===-1);});
+  test('SPD negativo bloqueia início de novo movimento',()=>{const s=C.createScenario(),u=C.getUnit(s,'P1-D');u.spd=-1;assert(!C.planMovement(s,u.id,{x:10,y:8}).ok);});
+  test('GLIDER ignora custo especial do Campo QA',()=>{const s=C.createScenario(),u=C.getUnit(s,'P1-C');u.x=11;u.y=9;C.getUnit(s,'P1-D').x=10;C.getUnit(s,'P1-D').y=7;C.setQaCostFieldEntryCost(s,9);const p=C.planMovement(s,u.id,{x:12,y:9});assert(p.ok&&p.cost===1&&p.path[0].stepCost===1);});
+  test('path ponderado é determinístico e desempate continua explícito',()=>{const a=C.createScenario(),b=C.createScenario();C.setQaCostFieldEntryCost(a,4);C.setQaCostFieldEntryCost(b,4);assert(JSON.stringify(C.planMovement(a,'P1-A',{x:10,y:8}))===JSON.stringify(C.planMovement(b,'P1-A',{x:10,y:8}))&&C.PROTOTYPE_TIE_BREAK==='N,E,S,W,NE,SE,SW,NW');});
+  test('confirmar não teleporta ao destino',()=>{const s=C.createScenario(),u=C.getUnit(s,'P1-A'),x=u.x,r=C.beginMovementCommand(s,{type:'MOVE',unitId:u.id,target:{x:4,y:8},seq:1});assert(r.ok&&u.x===x&&C.isUnitMoving(s,u.id));});
+  test('execução cobra custo bloco a bloco',()=>{const s=C.createScenario(),u=C.getUnit(s,'P1-A');C.beginMovementCommand(s,{type:'MOVE',unitId:u.id,target:{x:4,y:9},seq:1});C.stepMovements(s);assert(u.spd===6);C.stepMovements(s);assert(u.spd===5&&!C.isUnitMoving(s,u.id));});
+  test('recuperação não começa antes do primeiro gasto de SPD',()=>{const s=C.createScenario(),r=C.recoveryStatus(s,'P1-A');s.tick=500;assert(!r.started&&C.stepRecovery(s).length===0);});
+  test('primeiro gasto de SPD inicia recuperação',()=>{const s=C.createScenario();C.beginMovementCommand(s,{type:'MOVE',unitId:'P1-A',target:{x:4,y:8},seq:1});C.stepMovements(s);assert(C.recoveryStatus(s,'P1-A').started);});
+  test('+2 SPD ocorre somente após 160 ticks de ociosidade',()=>{const s=C.createScenario(),u=C.getUnit(s,'P1-A');u.spd=5;C.beginMovementCommand(s,{type:'MOVE',unitId:u.id,target:{x:4,y:8},seq:1});C.stepMovements(s);assert(u.spd===4);s.tick=159;assert(C.stepRecovery(s).length===0&&u.spd===4);s.tick=160;const e=C.stepRecovery(s)[0];assert(e.gained===2&&u.spd===6);});
+  test('recuperação respeita SPD máximo e perde excedente',()=>{const s=C.createScenario(),u=C.getUnit(s,'P1-A'),r=C.recoveryRecord(s,u);u.spd=6;r.started=true;r.lastActivityTick=0;s.tick=160;const e=C.stepRecovery(s)[0];assert(u.spd===7&&e.gained===1&&e.excessLost===1);});
+  test('Ação QA reinicia timer sem fingir implementar custo de Ação',()=>{const s=C.createScenario(),u=C.getUnit(s,'P1-A'),r=C.recoveryRecord(s,u);r.started=true;r.lastActivityTick=0;s.tick=90;C.registerUnitAction(s,u.id);assert(r.lastActivityTick===90&&C.recoveryStatus(s,u.id).idleTicks===0);});
+  test('movimento como Reação rejeitado fora da janela QA',()=>{const s=C.createScenario(),r=C.beginMovementCommand(s,{type:'MOVE',mode:'REACTION',unitId:'P1-A',target:{x:4,y:8},seq:1});assert(!r.ok&&/fechada/.test(r.reason));});
+  test('movimento como Reação consome 1 Reação + SPD',()=>{const s=C.createScenario(),u=C.getUnit(s,'P1-A'),before=s.qa.reactionsByPlayer.p1;C.setQaReactionWindow(s,true);const r=C.beginMovementCommand(s,{type:'MOVE',mode:'REACTION',unitId:u.id,target:{x:4,y:8},seq:1});assert(r.ok&&s.qa.reactionsByPlayer.p1===before-1);C.stepMovements(s);assert(u.spd===6);});
+  test('movimento normal não consome Reação',()=>{const s=C.createScenario(),before=s.qa.reactionsByPlayer.p1;C.beginMovementCommand(s,{type:'MOVE',mode:'NORMAL',unitId:'P1-A',target:{x:4,y:8},seq:1});assert(s.qa.reactionsByPlayer.p1===before);});
+  test('movimento ativo e fixture lógica participam do hash',()=>{const s=C.createScenario(),h=C.hashState(s);C.setQaCostFieldEntryCost(s,3);assert(C.hashState(s)!==h);const h2=C.hashState(s);C.beginMovementCommand(s,{type:'MOVE',unitId:'P1-A',target:{x:4,y:8},seq:1});assert(C.hashState(s)!==h2);});
+  test('câmera continua fora do hash',()=>{const h=C.hashState(state),y=camera.yaw;camera.yaw+=.17;assert(C.hashState(state)===h);camera.yaw=y;});
+  test('A/B/C de terreno são apresentação e ficam fora do hash',()=>{const h=C.hashState(state),t=terrainStyle;terrainStyle=t==='A'?'B':'A';assert(C.hashState(state)===h);terrainStyle=t;});
+  test('2D/3D/QA compartilham o mesmo estado',()=>{const ref=state,old=view;setView('2d');assert(state===ref);setView('3d');assert(state===ref);setView('qa');assert(state===ref);setView(old);});
+  test('duplo clique em destino legal continua reutilizando confirmação',()=>{const os=state,oi=selectedId,oq=commandQueue,ns=nextSeq,op=paused,oa=autoPaused;state=C.createScenario();selectedId='P1-A';commandQueue=[];nextSeq=1;paused=false;autoPaused=false;reactionMode=false;refreshReachable();const r=doubleClickGrid({x:4,y:8},'2d',false);assert(r.ok&&r.action==='move-confirmed'&&commandQueue.length===1);state=os;selectedId=oi;commandQueue=oq;nextSeq=ns;paused=op;autoPaused=oa;refreshReachable();updateUI();});
+  test('duplo clique em monstro continua foco e não movimento',()=>{const os=state,oi=selectedId,oq=commandQueue,ns=nextSeq,op=paused,oa=autoPaused,cam={target:{...camera.target},yaw:camera.yaw,pitch:camera.pitch,distance:camera.distance};state=C.createScenario();selectedId='P1-A';commandQueue=[];nextSeq=1;paused=false;autoPaused=false;refreshReachable();const u=C.getUnit(state,'P1-B'),r=doubleClickGrid({x:u.x,y:u.y},'3d',false);assert(r.action==='focus-unit'&&commandQueue.length===0);state=os;selectedId=oi;commandQueue=oq;nextSeq=ns;paused=op;autoPaused=oa;applyPose(cam);refreshReachable();updateUI();});
+  test('ícone de recuperação mostra contagem regressiva inteira',()=>{const os=state;state=C.createScenario();const u=C.getUnit(state,'P1-A');u.spd=5;const r=C.recoveryRecord(state,u);r.started=true;r.lastActivityTick=0;state.tick=1;assert(recoveryBadgeForUnit(u).displaySeconds===8);state.tick=21;assert(recoveryBadgeForUnit(u).displaySeconds===7);state=os;});
+  test('ícone de recuperação some no SPD máximo',()=>{const os=state;state=C.createScenario();const u=C.getUnit(state,'P1-A'),r=C.recoveryRecord(state,u);r.started=true;r.lastActivityTick=0;u.spd=u.spdMax;assert(recoveryBadgeForUnit(u)===null);state=os;});
+  test('pacote de recuperação cria pop-up +2SPD apenas quando há ganho',()=>{const old=spdPopups;spdPopups=[];const p=triggerSpdPopup({type:'SPD_RECOVERY_PACKET',unitId:'P1-A',gained:2},1000);assert(p?.text==='+2SPD'&&spdPopups.length===1);assert(triggerSpdPopup({type:'SPD_RECOVERY_PACKET',unitId:'P1-A',gained:0},1000)===null&&spdPopups.length===1);spdPopups=old;});
+  test('stress QA configura caso reproduzível de SPD negativo',()=>{const os=state,oi=selectedId;state=C.createScenario();setupNegativeStress();const u=C.getUnit(state,'P1-D'),p=C.planMovement(state,u.id,{x:12,y:8});assert(selectedId==='P1-D'&&p.ok&&p.spdAfter<0);state=os;selectedId=oi;refreshReachable();updateUI();});
+
+  // Novos testes adicionados para o pacote de qualidade de uso (QoL)
+  test('classificação de legalidade distingue LEGAL, CONSEQUÊNCIA e ILEGAL',()=>{
+    const s=C.createScenario(),u=C.getUnit(s,'P1-A');
+    const legal=C.classifyLegality(C.planMovement(s,u.id,{x:4,y:8}),{ok:true},u);
+    assert(legal.category==='LEGAL'&&legal.canConfirm);
+    
+    C.setQaCostFieldEntryCost(s,u.spd+1);
+    const d=C.getUnit(s,'P1-D');
+    const con=C.classifyLegality(C.planMovement(s,d.id,{x:12,y:8}),{ok:true},d);
+    assert(con.category==='LEGAL_WITH_CONSEQUENCE'&&con.canConfirm&&con.negativeConsequence);
+    
+    const ill=C.classifyLegality(C.planMovement(s,u.id,{x:0,y:8}),{ok:true},u); // base
+    assert(ill.category==='ILLEGAL'&&!ill.canConfirm);
+  });
+
+  test('segundo clique no mesmo destino travado cancela prévia sem custo',()=>{
+    const os=state,oi=selectedId;
+    state=C.createScenario();selectedId='P1-A';pendingTarget=null;pendingPlan=null;
+    chooseGrid({x:4,y:8});
+    assert(pendingTarget&&pendingTarget.x===4&&pendingTarget.y===8);
+    chooseGrid({x:4,y:8});
+    assert(pendingTarget===null&&pendingPlan===null);
+    state=os;selectedId=oi;updateUI();
+  });
+
+  test('tecla Escape cancela prévia travada',()=>{
+    const os=state,oi=selectedId;
+    state=C.createScenario();selectedId='P1-A';
+    lockDestination({x:4,y:8});
+    assert(pendingTarget!==null);
+    cancelPlan();
+    assert(pendingTarget===null&&pendingPlan===null);
+    state=os;selectedId=oi;updateUI();
+  });
+
+  test('troca de seleção para outro aliado limpa prévia travada anterior',()=>{
+    const os=state,oi=selectedId;
+    state=C.createScenario();selectedId='P1-A';
+    lockDestination({x:4,y:8});
+    assert(pendingTarget!==null);
+    chooseGrid({x:5,y:8}); // aliada P1-B
+    assert(selectedId==='P1-B'&&pendingTarget===null&&pendingPlan===null);
+    state=os;selectedId=oi;updateUI();
+  });
+
+  test('rota confirmada permanece persistente durante execução bloco a bloco',()=>{
+    const s=C.createScenario(),u=C.getUnit(s,'P1-A');
+    C.beginMovementCommand(s,{type:'MOVE',unitId:u.id,target:{x:4,y:9},seq:1});
+    const active=C.movementForUnit(s,u.id);
+    assert(active!==null&&active.path.length===2&&active.confirmedCost===2);
+    C.stepMovements(s);
+    const mid=C.movementForUnit(s,u.id);
+    assert(mid!==null&&mid.nextIndex===1&&u.x===4&&u.y===8);
+  });
+
+  test('hover casual durante movimento ativo não apaga a rota em execução',()=>{
+    const os=state,oi=selectedId,ot=pendingTarget,op=pendingPlan;
+    state=C.createScenario();selectedId='P1-A';
+    C.beginMovementCommand(state,{type:'MOVE',unitId:'P1-A',target:{x:4,y:9},seq:1});
+    pendingTarget=null;pendingPlan=null;
+    setHover({x:10,y:10});
+    const dp=displayPlan();
+    assert(dp&&dp.active&&dp.target.x===4&&dp.target.y===9);
+    state=os;selectedId=oi;pendingTarget=ot;pendingPlan=op;updateUI();
+  });
+
+  test('anel de recuperação reflete progresso exato dos ticks',()=>{
+    const s=C.createScenario(),u=C.getUnit(s,'P1-A');
+    u.spd=5;const r=C.recoveryRecord(s,u);
+    r.started=true;r.lastActivityTick=0;s.tick=80;
+    const b=recoveryBadgeForUnit(u,s);
+    assert(Math.abs(b.progress-0.5)<0.01&&b.ticksRemaining===80&&b.displaySeconds===4);
+  });
+
+  test('timer de recuperação reinicia no movimento e na Ação QA',()=>{
+    const s=C.createScenario(),u=C.getUnit(s,'P1-A');
+    u.spd=5;const r=C.recoveryRecord(s,u);
+    r.started=true;r.lastActivityTick=0;s.tick=100;
+    C.registerUnitAction(s,u.id);
+    assert(r.lastActivityTick===100);
+  });
+
+  test('modo QA de informação reduzida não altera o hash autoritativo',()=>{
+    const h1=C.hashState(state);
+    reducedInfoMode=!reducedInfoMode;
+    const h2=C.hashState(state);
+    assert(h1===h2);
+    reducedInfoMode=!reducedInfoMode;
+  });
+
+  test('modo QA de informação reduzida oculta inimigos fora da visão de P1',()=>{
+    const s=C.createScenario();
+    const p2e=C.getUnit(s,'P2-E'); // x:20, y:3
+    assert(!C.isTileVisibleForP1(s,p2e));
+    const p2a=C.getUnit(s,'P2-A'); // x:13, y:8 (perto de P1-D em 11,8 com VIS 3)
+    assert(C.isTileVisibleForP1(s,p2a));
+  });
+
+  test('contrato de som SoundSystem consome eventos sem alterar hash',()=>{
+    const h1=C.hashState(state);
+    SoundSystem.play('TEST_EVENT',{sample:1});
+    const h2=C.hashState(state);
+    assert(h1===h2&&SoundSystem.history.length>0);
+  });
+
+  test('legenda recolhível alterna visibilidade sem alterar estado ou hash',()=>{
+    const h1=C.hashState(state);
+    toggleLegend();
+    toggleLegend();
+    assert(C.hashState(state)===h1);
+  });
+
+  test('redução de movimento desativa interpolação mantendo timing lógico idêntico',()=>{
+    const s=C.createScenario();
+    reducedMotion=true;
+    const u=C.getUnit(s,'P1-A');
+    C.beginMovementCommand(s,{type:'MOVE',unitId:u.id,target:{x:4,y:8},seq:1});
+    C.stepMovements(s);
+    assert(u.x===4&&u.y===8);
+    reducedMotion=false;
+  });
+
+    test('três opções A, B e C de terreno são alternáveis e preservam o mesmo hash autoritativo',()=>{
+    const os=state,origStyle=terrainStyle;
+    const h0=C.hashState(state);
+    assert(setTerrainStyle('A')&&terrainStyle==='A'&&C.hashState(state)===h0);
+    assert(setTerrainStyle('B')&&terrainStyle==='B'&&C.hashState(state)===h0);
+    assert(setTerrainStyle('C')&&terrainStyle==='C'&&C.hashState(state)===h0);
+    setTerrainStyle(origStyle);
+  });
+
+  test('ficha de mobilidade resume alcance em custo-base',()=>{
+    const s=C.createScenario(),u=C.getUnit(s,'P1-A');
+    assert(C.mobilityBaseReach(u)===7);
+    u.spd=-2;
+    assert(C.mobilityBaseReach(u)===0);
+  });
+
+  const pass=results.filter(r=>r.ok).length,m=$('#testModal');
+  m.innerHTML=`<div class="testsummary">VIS-004 · ${pass}/${results.length} testes passaram</div>`+
+    results.map(r=>`<div class="testrow ${r.ok?'pass':'fail'}"><span>${r.ok?'✓':'✕'}</span><span>${r.name}${r.ok?'':` — ${r.error}`}</span></div>`).join('')+
+    `<div class="help">Clique para fechar.</div>`;
+  m.classList.add('show');
+  m.onclick=()=>m.classList.remove('show');
+  log(`testes embutidos ${pass}/${results.length}`,pass===results.length?'pass':'error');
+  return results;
+}
+
+// Event Listeners
+Object.values(canvases).forEach((c,i)=>attach(c,i===0||i===2?'2d':'3d'));
+$$('.nav button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+$$('.stylebtn').forEach(b=>b.addEventListener('click',()=>setOverlayStyle(b.dataset.style)));
+$$('.terrainStyleBtn').forEach(b=>b.addEventListener('click',()=>setTerrainStyle(b.dataset.terrainStyle)));
+$('#confirmMove').addEventListener('click',confirmPlan);
+$('#confirmMoveStage').addEventListener('click',confirmPlan);
+$('#cancelPlan').addEventListener('click',cancelPlan);
+$('#cancelPlanStage').addEventListener('click',cancelPlan);
+$('#focusSelected').addEventListener('click',focusSelected);
+$('#resetCamera').addEventListener('click',resetCamera);
+$('#resetScenario').addEventListener('click',resetScenario);
+$('#runTests').addEventListener('click',runTests);
+$('#qaCost').addEventListener('change',e=>setQaCost(e.target.value));
+$('#negativeStress').addEventListener('click',setupNegativeStress);
+$('#qaAction').addEventListener('click',registerQaAction);
+$('#reactionWindow').addEventListener('change',e=>setReactionWindow(e.target.checked));
+$('#reactionMode').addEventListener('change',e=>{
+  reactionMode=e.target.checked;refreshPlans();
+  log(`próximo movimento: ${reactionMode?'Reação QA':'normal'}`,'command');
+});
+$('#legendToggle').addEventListener('click',toggleLegend);
+$('#togglePause').addEventListener('click',()=>{
+  paused=!paused;$('#togglePause').textContent=paused?'retomar lógica':'pausar lógica';
+  log(paused?'lógica pausada':'lógica retomada');updateUI();
+});
+$('#showFog').addEventListener('change',e=>showFog=e.target.checked);
+$('#showFields').addEventListener('change',e=>showFields=e.target.checked);
+$('#showLabels').addEventListener('change',e=>showLabels=e.target.checked);
+$('#reducedInfoToggle').addEventListener('change',e=>{
+  reducedInfoMode=e.target.checked;
+  $('#reducedInfoBanner').classList.toggle('show',reducedInfoMode);
+  log(`modo QA informação reduzida ${reducedInfoMode?'ativado':'desativado'}; lógica intacta`,'camera');
+  updateUI();
+});
+$('#reducedMotion').checked=reducedMotion;
+$('#reducedMotion').addEventListener('change',e=>{
+  reducedMotion=e.target.checked;
+  log(`redução de animação ${reducedMotion?'ativada':'desativada'}; lógica intacta`,'camera');
+});
+$('#soundToggle').addEventListener('change',e=>{
+  SoundSystem.enabled=e.target.checked;
+  log(`contrato sonoro ${SoundSystem.enabled?'habilitado':'silenciado'}`,'camera');
+});
+$('#cameraYaw').addEventListener('input',e=>{cameraTween=null;camera.yaw=deg(Number(e.target.value));updateCameraControls();});
+$('#cameraPitch').addEventListener('input',e=>{cameraTween=null;camera.pitch=deg(Number(e.target.value));updateCameraControls();});
+$('#cameraDistance').addEventListener('input',e=>{cameraTween=null;camera.distance=Number(e.target.value);updateCameraControls();});
+
+document.addEventListener('keydown',e=>{
+  if(keyboardCamera(e))return;
+  if(e.key==='Escape'){cancelPlan();e.preventDefault();}
+  else if(e.key==='Enter'){confirmPlan();e.preventDefault();}
+  else if(e.key.toLowerCase()==='t') runTests();
+  else if(e.key.toLowerCase()==='l') toggleLegend();
+  else if(e.key==='1') setView('2d');
+  else if(e.key==='2') setView('3d');
+  else if(e.key==='3') setView('qa');
+});
+
+// API pública para QA e automação
+window.MIPrototype={
+  runTests,
+  getState:()=>C.clone(state),
+  getCamera:()=>C.clone(camera),
+  getPending:()=>C.clone(pendingPlan),
+  getReachable:()=>C.clone(reachable),
+  getSelected:()=>selectedId,
+  getRecoveryBadge:unitId=>{const u=C.getUnit(state,unitId);return u?recoveryBadgeForUnit(u):null;},
+  getSpdPopups:()=>C.clone(spdPopups),
+  getSoundHistory:()=>[...SoundSystem.history],
+  setView,setOverlayStyle,setTerrainStyle,setQaCost,setReactionWindow,
+  setReactionMode:v=>{reactionMode=!!v;$('#reactionMode').checked=reactionMode;refreshPlans();return reactionMode;},
+  setReducedInfoMode:v=>{reducedInfoMode=!!v;$('#reducedInfoToggle').checked=reducedInfoMode;$('#reducedInfoBanner').classList.toggle('show',reducedInfoMode);updateUI();return reducedInfoMode;},
+  setupNegativeStress,registerQaAction,stepLogicForTest,resetScenario,resetCamera,chooseGrid,doubleClickGrid,confirmPlan,cancelPlan,focusSelected,focusBehind,desiredBehind,rayToPlane,
+  projectTile3D:(canvasKey,x,y)=>{
+    const c=canvases[canvasKey],b=cameraBasis(c),p=project(V(x+.5,y+.5,0),b),r=c.getBoundingClientRect();
+    return p?{clientX:r.left+p.x/b.dpr,clientY:r.top+p.y/b.dpr}:null;
+  },
+  projectTile2D:(canvasKey,x,y)=>{
+    const c=canvases[canvasKey],m=fit2D(c),r=c.getBoundingClientRect();
+    return {clientX:r.left+(m.ox+(x+.5)*m.tile)/m.dpr,clientY:r.top+(m.oy+(y+.5)*m.tile)/m.dpr};
+  },
+  flags:()=>({
+    view,overlayStyle,terrainStyle,reactionMode,paused,autoPaused,showFog,showFields,showLabels,reducedInfoMode,reducedMotion,
+    queue:commandQueue.length,activeMovements:state.movements?.length||0,clickSlop:CLICK_SLOP_PX,qaCost:state.qa.costFieldEntryCost,
+    reactionWindow:state.qa.reactionWindowOpen,reactionsP1:state.qa.reactionsByPlayer.p1
+  })
+};
+
+window.addEventListener('blur',()=>{autoPaused=true;updateUI();log('janela perdeu foco · lógica pausada automaticamente','camera');});
+window.addEventListener('focus',()=>{autoPaused=false;updateUI();log('janela recuperou foco · lógica automática retomada','camera');});
+document.addEventListener('visibilitychange',()=>{
+  autoPaused=document.hidden;if(autoPaused)log('aba oculta · lógica pausada automaticamente','camera');updateUI();
+});
+
+setInterval(logicStep,C.STEP_MS);
+refreshReachable();
+updateUI(true);
+setView(view);
+setOverlayStyle('A',true);
+setTerrainStyle('A');
+log('VIS-004 carregado · herda área cheia + 2D/3D · Opção A padrão aprovado · QoL completo ativo');
+requestAnimationFrame(render);
+if(new URLSearchParams(location.search).get('autotest')==='1') setTimeout(runTests,180);
+})();
+</script>
+</body>
+</html>

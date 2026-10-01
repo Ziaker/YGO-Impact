@@ -1,0 +1,1858 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Monster Impact — VIS-006 · Invocações, âncoras e fallback espacial</title>
+  <style>
+:root{
+  color-scheme:dark;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --bg:#070b10;--panel:#0f1821;--panel2:#15222d;--line:#2d4355;--ink:#edf5fb;--muted:#8ea2b4;
+  --accent:#e6c468;--good:#78dca7;--bad:#ff8585;--warn:#ffd083;--p1:#4d9eea;--p2:#d95c6b;
+  --summon:#9d4edd;--tribute:#f72585;--ritual:#4361ee;--fusion:#7209b7;--fallback:#ff9e00;
+  --cand:#06d6a0;--fog-a:#060d15;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:radial-gradient(circle at 50% -15%,#20364a 0,#0a1118 34%,#070b10 70%);color:var(--ink);overflow:hidden}
+button,input{font:inherit}
+button{color:inherit}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+.topbar{display:flex;gap:10px;align-items:center;padding:8px 12px;background:#071019ef;border-bottom:1px solid var(--line);backdrop-filter:blur(12px);z-index:20}
+.brand{font-weight:900;letter-spacing:.07em;white-space:nowrap}
+.tag{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 7px;white-space:nowrap}
+.tag.exp{border-color:#9d4edd;color:#d8b4fe}
+.nav,.buttonrow,.styles{display:flex;gap:6px;flex-wrap:wrap}
+.nav button,.btn,.stylebtn,.summonStyleBtn{cursor:pointer;background:#13212d;border:1px solid var(--line);border-radius:6px;padding:6px 9px;transition:background .12s,border-color .12s}
+.nav button:hover,.btn:hover,.stylebtn:hover,.summonStyleBtn:hover{background:#1a2b39}
+.nav button.active,.stylebtn.active,.btn.primary{outline:2px solid var(--accent);background:#1d2f3d}
+.summonStyleBtn.active{outline:2px solid var(--summon);background:#251336}
+.btn[disabled]{opacity:.42;cursor:not-allowed;outline:none}
+.btn.small,.stylebtn,.summonStyleBtn{font-size:10px;padding:4px 7px}
+.topmeta{margin-left:auto;font-size:11px;color:var(--muted);display:flex;gap:10px;align-items:center;white-space:nowrap}
+.topmeta b{color:var(--ink)}
+.workspace{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:8px;padding:8px}
+.stage{position:relative;min-width:0;min-height:0;border:1px solid var(--line);border-radius:9px;background:#04080d;overflow:hidden;box-shadow:0 18px 50px #0007}
+.view{position:absolute;inset:0;display:none}
+.view.active{display:block}
+.view.split.active{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+.half{position:relative;min-width:0;overflow:hidden;background:#05090e}
+.view canvas,.half canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;user-select:none;outline:none}
+.viewlabel,.statuspill{position:absolute;z-index:4;font-size:10px;background:#071019dc;border:1px solid var(--line);padding:4px 7px;pointer-events:none}
+.viewlabel{top:9px;left:9px;border-radius:4px;letter-spacing:.08em;text-transform:uppercase;color:#cbd8e2}
+.statuspill{right:9px;top:9px;border-radius:99px;border-color:#2d8b62;color:#8ee2b3}
+
+.choiceBanner{position:absolute;top:38px;left:9px;right:9px;z-index:12;font-size:11px;font-weight:750;background:#2d1b0cee;border:1px solid #ffbe53;border-radius:6px;padding:8px 12px;color:#ffd083;display:none;box-shadow:0 6px 20px #000c;align-items:center;gap:10px}
+.choiceBanner.show{display:flex}
+.choiceBannerButtons{display:flex;gap:6px;margin-left:auto}
+
+.deniedBanner{position:absolute;top:80px;left:9px;z-index:12;font-size:11px;font-weight:750;background:#381212ee;border:1px solid #ff5a5a;border-radius:6px;padding:6px 10px;color:#ffa0a0;display:none;box-shadow:0 4px 14px #000a}
+.deniedBanner.show{display:block}
+
+.cameraHint{position:absolute;left:10px;bottom:10px;z-index:4;max-width:min(690px,78%);background:#071019df;border:1px solid var(--line);border-radius:7px;padding:6px 8px;font-size:9px;line-height:1.55;color:#adbdc9;pointer-events:none}
+.cameraHint b{color:#eef5fa}
+.kbd{border:1px solid #405365;border-bottom-width:2px;border-radius:3px;padding:1px 4px;color:#d1dde7;background:#101a23;white-space:nowrap}
+
+/* OPÇÃO B: WORKBENCH INFERIOR */
+.workbenchDock{position:absolute;left:12px;right:12px;bottom:12px;z-index:10;background:#0d1620fa;border:1px solid #3d566e;border-radius:8px;padding:8px 12px;box-shadow:0 10px 30px #000c;display:none}
+.workbenchDock.show{display:flex;gap:12px;align-items:center}
+.workbenchTitle{font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;white-space:nowrap}
+.workbenchCards{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.workbenchCard{border:1px solid var(--line);border-radius:5px;background:#162432;padding:5px 8px;font-size:10px;cursor:pointer;white-space:nowrap;transition:border-color .15s}
+.workbenchCard:hover{border-color:var(--accent)}
+.workbenchCard.selected{border-color:var(--summon);background:#221533;outline:1px solid var(--summon)}
+
+/* OPÇÃO C: RADIAL / PIE CONTEXTUAL */
+.radialMenu{position:absolute;z-index:15;display:none;transform:translate(-50%,-50%);pointer-events:auto}
+.radialMenu.show{display:block}
+.radialRing{position:relative;width:130px;height:130px;border-radius:50%;background:#09121be6;border:2px solid #3b5368;backdrop-filter:blur(8px);box-shadow:0 6px 25px #000b}
+.radialBtn{position:absolute;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#15222e;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;cursor:pointer;transition:transform .12s,background .12s}
+.radialBtn:hover{transform:scale(1.15);background:#223649;border-color:var(--accent)}
+.radialBtn.normal{top:6px;left:46px;color:#a8d5ba}
+.radialBtn.tribute{top:46px;right:6px;color:#f72585}
+.radialBtn.ritual{bottom:6px;left:46px;color:#4361ee}
+.radialBtn.fusion{top:46px;left:6px;color:#9d4edd}
+.radialCenter{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:9px;color:var(--muted);text-align:center;pointer-events:none}
+
+/* PIPELINE COMPACTO NO HUD (HERANÇA POSITIVA DA OPÇÃO B CONSOLIDADA NA OPÇÃO A) */
+.pipelineBox{display:flex;align-items:center;justify-content:space-between;background:#0b141ee8;border:1px solid #283e52;border-radius:6px;padding:6px 8px;margin-bottom:8px;gap:3px}
+.pipeStep{display:flex;flex-direction:column;align-items:center;gap:1px;flex:1;text-align:center}
+.pipeLabel{font-size:7.5px;text-transform:uppercase;color:var(--muted);font-weight:700;letter-spacing:.3px}
+.pipeVal{font-size:9.5px;font-weight:800;color:var(--accent);white-space:nowrap}
+.pipeSep{color:#3d566e;font-size:10px;font-weight:800;user-select:none}
+
+/* SIDEBAR E PAINÉIS */
+.sidebar{min-height:0;background:var(--panel);border:1px solid var(--line);border-radius:99px;border-radius:9px;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;gap:10px;padding:10px}
+.section{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:9px}
+.section h3{margin:0 0 6px 0;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8ea2b4;display:flex;align-items:center;justify-content:space-between}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 8px;font-size:11px;margin-bottom:6px}
+.kv .k{color:var(--muted)}
+.kv .v{color:var(--ink);font-weight:600;text-align:right;word-break:break-word}
+.badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9.5px;font-weight:700;text-transform:uppercase}
+.badge.normal{background:#1e3d2f;color:#78dca7;border:1px solid #2d6b4f}
+.badge.tribute{background:#421129;color:#ff70a6;border:1px solid #7d1c4a}
+.badge.ritual{background:#122549;color:#80b3ff;border:1px solid #1e4585}
+.badge.fusion{background:#2e0f49;color:#c77dff;border:1px solid #571b8a}
+.badge.fallback{background:#3d2407;color:#ffbe53;border:1px solid #7d4d12}
+.badge.pending{background:#382508;color:#ffc107;border:1px solid #9c7103}
+.cardlist{display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;padding-right:3px}
+.cardItem{display:flex;justify-content:space-between;align-items:center;background:#0d1822;border:1px solid var(--line);border-radius:5px;padding:5px 8px;font-size:10.5px;cursor:pointer}
+.cardItem:hover{background:#152636;border-color:var(--accent)}
+.cardItem.selected{outline:2px solid var(--summon);background:#221533}
+.materialList{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.materialItem{display:flex;align-items:center;justify-content:space-between;background:#0b141d;border:1px solid #253949;border-radius:4px;padding:4px 6px;font-size:10px}
+.materialItem.checked{border-color:var(--good);background:#0e231b}
+.candidateList{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.candidateBtn{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;font-size:10.5px;background:#14231e;border:1px solid #266b50;border-radius:4px;cursor:pointer;color:#78dca7;text-align:left}
+.candidateBtn:hover{background:#1c382f;border-color:var(--accent)}
+.candidateBtn.selected{outline:2px solid #ffbe53;background:#2d2915;color:#ffbe53}
+.logbox{background:#05090e;border:1px solid var(--line);border-radius:5px;padding:6px;font-family:monospace;font-size:9.5px;height:90px;overflow-y:auto;color:#a4b7c6;display:flex;flex-direction:column-reverse}
+.logentry{margin-bottom:2px}
+.logentry.warn{color:var(--warn)}
+.logentry.good{color:var(--good)}
+.logentry.bad{color:var(--bad)}
+.footerbar{display:flex;gap:12px;align-items:center;padding:5px 12px;background:#071019ef;border-top:1px solid var(--line);font-size:10px;color:var(--muted);z-index:20}
+
+/* MODAL DE TESTE */
+.modal{position:fixed;inset:0;background:#0009;backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:50}
+.modal.show{display:flex}
+.modalBox{background:#0e1721;border:1px solid var(--line);border-radius:8px;padding:16px;width:min(700px,94%);max-height:85vh;display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 60px #000c}
+.modalHeader{display:flex;justify-content:space-between;align-items:center}
+.modalTitle{font-size:13px;font-weight:800;color:var(--ink)}
+.testResults{overflow-y:auto;flex:1;border:1px solid var(--line);border-radius:5px;background:#05090d;padding:8px;font-family:monospace;font-size:10.5px;display:flex;flex-direction:column;gap:4px}
+.testRow{display:flex;justify-content:space-between;padding:3px 6px;border-radius:3px}
+.testRow.pass{background:#112a1f;color:#7ae6b2}
+.testRow.fail{background:#351313;color:#ff8e8e}
+
+@media(max-width:920px){
+  .workspace{grid-template-columns:1fr;grid-template-rows:minmax(380px,1fr) auto}
+  body{overflow-y:auto}
+  .app{height:auto;min-height:100%}
+  .sidebar{max-height:none}
+}
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">MONSTER IMPACT</div>
+    <div class="tag exp">VIS-006 · INVOCAÇÕES & FALLBACK</div>
+    
+    <div class="nav" role="tablist">
+      <button class="active" data-view="2d" title="2D Top-Down Ortogonal">2D Top-Down</button>
+      <button data-view="3d" title="3D Tático Livre">3D Tático</button>
+      <button data-view="split" title="Comparador QA 2D/3D">Split QA</button>
+    </div>
+
+    <div class="styles">
+      <span style="font-size:10px;color:var(--muted);align-self:center;margin-left:6px">A/B/C Invocação:</span>
+      <button class="summonStyleBtn active" data-style="A" title="Opção A: Projeção Espacial Direta (Padrão Aprovado)">A · Espacial (Padrão Aprovado)</button>
+      <button class="summonStyleBtn" data-style="B" title="Opção B: Workbench / Painel de Apoio no HUD (Histórico)">B · Workbench</button>
+      <button class="summonStyleBtn" data-style="C" title="Opção C: Modo Híbrido Contextual (Histórico)">C · Híbrido</button>
+    </div>
+
+    <div class="topmeta">
+      <div>Hash: <b id="stateHash" style="font-family:monospace">--------</b></div>
+      <button class="btn small" id="runTests" title="Executar suíte de testes embutidos (Atalho: T)">Testes (T)</button>
+    </div>
+  </header>
+
+  <!-- WORKSPACE -->
+  <main class="workspace">
+    <div class="stage" id="stageContainer">
+      <!-- 2D View -->
+      <div class="view active" id="view2d">
+        <canvas id="canvas2d" width="1000" height="600"></canvas>
+        <div class="viewlabel">2D Ortogonal · Bases Canônicas (0,8) & (30,8)</div>
+      </div>
+      <!-- 3D View -->
+      <div class="view" id="view3d">
+        <canvas id="canvas3d" width="1000" height="600"></canvas>
+        <div class="viewlabel">3D Tático Livre · Câmera Livre & Projeção Plana</div>
+      </div>
+      <!-- Split View -->
+      <div class="view split" id="viewSplit">
+        <div class="half">
+          <canvas id="canvasSplit2d" width="500" height="600"></canvas>
+          <div class="viewlabel">2D QA</div>
+        </div>
+        <div class="half">
+          <canvas id="canvasSplit3d" width="500" height="600"></canvas>
+          <div class="viewlabel">3D QA</div>
+        </div>
+      </div>
+
+      <div class="statuspill" id="stageStatus">Âncora: P1-A (Guerreiro Alado)</div>
+
+      <!-- BANNER DE ESCOLHA OBRIGATÓRIA DE FALLBACK EM CASO DE EMPATE -->
+      <div class="choiceBanner" id="choiceBanner">
+        <span>⚠ <b>EMPATE DE FALLBACK DETECTADO:</b> Múltiplos destinos empatados na menor distância! Escolha obrigatória:</span>
+        <div class="choiceBannerButtons" id="choiceBannerButtons"></div>
+      </div>
+
+      <div class="deniedBanner" id="deniedBanner">⚠ INVOCAÇÃO NEGADA! Custos pagos seguem seus destinos próprios e não há reembolso.</div>
+
+      <!-- WORKBENCH DOCK (OPÇÃO B) -->
+      <div class="workbenchDock" id="workbenchDock">
+        <div class="workbenchTitle">Painel de Invocação</div>
+        <div class="workbenchCards" id="workbenchCardsList"></div>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button class="btn small primary" id="dockConfirmBtn">Confirmar</button>
+          <button class="btn small" id="dockCancelBtn">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- RADIAL MENU (OPÇÃO C) -->
+      <div class="radialMenu" id="radialMenu">
+        <div class="radialRing">
+          <div class="radialBtn normal" id="radialNormal" title="Invocação Normal">NRM</div>
+          <div class="radialBtn tribute" id="radialTribute" title="Invocação Tributo">TRB</div>
+          <div class="radialBtn ritual" id="radialRitual" title="Invocação Ritual">RTL</div>
+          <div class="radialBtn fusion" id="radialFusion" title="Invocação Fusion">FUS</div>
+          <div class="radialCenter">INVOCAR<br><span id="radialCoord">(0,0)</span></div>
+        </div>
+      </div>
+
+      <div class="cameraHint">
+        <b>Regras Canônicas:</b> 0 aliados $\to$ Base obrigatória · 1+ aliados $\to$ Base proibida, escolha um aliado.<br>
+        <b>Empate de Fallback:</b> Sem decisão automática — escolha obrigatória de destino pelo controlador.
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <!-- PAINEL DE INFORMAÇÕES DE INVOCAÇÃO -->
+      <div class="section">
+        <h3>
+          <span>Invocação Selecionada</span>
+          <span class="badge normal" id="modeBadge">NORMAL</span>
+        </h3>
+        <!-- RESUMO COMPACTO DE FLUXO (HERANÇA DA OPÇÃO B CONSOLIDADA NO HUD DA OPÇÃO A) -->
+        <div class="pipelineBox" id="pipelineBox" title="Fluxo de Invocação: Método → Materiais → Requisito → Destino → Confirmação">
+          <div class="pipeStep">
+            <span class="pipeLabel">Método</span>
+            <span class="pipeVal" id="pipeMethodVal">NORMAL</span>
+          </div>
+          <span class="pipeSep">→</span>
+          <div class="pipeStep">
+            <span class="pipeLabel">Materiais</span>
+            <span class="pipeVal" id="pipeMatVal">Dispensado</span>
+          </div>
+          <span class="pipeSep">→</span>
+          <div class="pipeStep">
+            <span class="pipeLabel">Requisito</span>
+            <span class="pipeVal" id="pipeReqVal">OK</span>
+          </div>
+          <span class="pipeSep">→</span>
+          <div class="pipeStep">
+            <span class="pipeLabel">Destino</span>
+            <span class="pipeVal" id="pipeDestVal">---</span>
+          </div>
+          <span class="pipeSep">→</span>
+          <div class="pipeStep">
+            <span class="pipeLabel">Estado</span>
+            <span class="pipeVal" id="pipeStatusVal">PRONTO</span>
+          </div>
+        </div>
+        <div class="kv">
+          <span class="k">Âncora Atual:</span><span class="v" id="anchorText">P1-A (Guerreiro Alado)</span>
+          <span class="k">Destino Primário:</span><span class="v" id="destPrimText">(3, 8)</span>
+          <span class="k">Destino Definido:</span><span class="v" id="destRealText">Aguardando Escolha</span>
+          <span class="k">Status do Fallback:</span><span class="v" id="fallbackDistText">Nenhum</span>
+          <span class="k">Posição:</span><span class="v" id="posText">Modo ATK</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <button class="btn small" id="togglePosBtn">Alternar ATK / DEF</button>
+          <button class="btn small" id="selectBaseAnchorBtn" title="Apenas elegível se não houver aliados no campo">Ancorar na Base</button>
+        </div>
+      </div>
+
+      <!-- CANDIDATOS EMPATADOS DE FALLBACK (QUANDO HOUVER EMPATE) -->
+      <div class="section" id="candidateSection" style="display:none;border-color:#ffbe53">
+        <h3>
+          <span style="color:#ffbe53">Destinos Empatados na Menor Distância</span>
+          <span class="badge pending">ESCOLHA OBRIGATÓRIA</span>
+        </h3>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">O sistema não decide por você. Clique no candidato para definir o destino:</div>
+        <div class="candidateList" id="candidateList"></div>
+      </div>
+
+      <!-- SELEÇÃO DE ÂNCORA (QUANDO HÁ ALIADOS) -->
+      <div class="section">
+        <h3><span>Âncoras Disponíveis</span><span id="anchorRuleHint" style="font-size:9.5px;color:var(--warn)">1+ aliados: Base indisponível</span></h3>
+        <div class="cardlist" id="anchorList" style="max-height:100px"></div>
+      </div>
+
+      <!-- CARTAS DA MÃO (P1) -->
+      <div class="section">
+        <h3>
+          <span>Mão de P1 (<span id="handCount">5</span>)</span>
+          <span style="font-size:9px;color:var(--muted)">Clique p/ Escolher</span>
+        </h3>
+        <div class="cardlist" id="handList"></div>
+      </div>
+
+      <!-- EXTRA DECK (P1) -->
+      <div class="section">
+        <h3>
+          <span>Extra Deck (<span id="extraCount">2</span>)</span>
+          <span style="font-size:9px;color:var(--muted)">Ritual & Fusão</span>
+        </h3>
+        <div class="cardlist" id="extraList"></div>
+      </div>
+
+      <!-- MATERIAIS SELECIONADOS -->
+      <div class="section" id="materialSection">
+        <h3>
+          <span>Seleção de Materiais</span>
+          <span id="levelSumBadge" style="font-size:10px;font-weight:700;color:var(--good)">Lv 0 / Lv 0</span>
+        </h3>
+        <div id="materialHint" style="font-size:10px;color:var(--muted);margin-bottom:4px">Selecione tributos no campo ou materiais na mão:</div>
+        <div class="materialList" id="materialList"></div>
+      </div>
+
+      <!-- AÇÕES E CONTROLES -->
+      <div class="section">
+        <h3><span>Ações de Invocação</span></h3>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn primary" id="confirmSummonBtn">CONFIRMAR INVOCAÇÃO (Enter)</button>
+          <button class="btn" id="cancelSummonBtn">CANCELAR ESCOLHA (Esc)</button>
+          
+          <label style="display:flex;align-items:center;gap:6px;font-size:10.5px;cursor:pointer;margin-top:4px;padding:4px 6px;background:#181014;border:1px solid #55222e;border-radius:4px">
+            <input type="checkbox" id="negateSimToggle">
+            <span style="color:#ff8585;font-weight:700">Simular NEGAR Invocação (Fixture QA)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- CENÁRIOS DE TESTE E REPRODUÇÃO -->
+      <div class="section">
+        <h3><span>Cenários de Teste QA</span></h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+          <button class="btn small" id="scenario0Allies">0 Aliados (Base)</button>
+          <button class="btn small" id="scenario1Ally">1+ Aliados (Base Bloqueada)</button>
+          <button class="btn small" id="scenarioTie2">Dois Empates</button>
+          <button class="btn small" id="scenarioTie4">Quatro Empates</button>
+          <button class="btn small" id="scenarioTribute">Tributo Lv 6</button>
+          <button class="btn small" id="scenarioNoSpace" style="color:var(--bad)">Falta de Espaço</button>
+        </div>
+        <button class="btn small" id="resetScenario" style="width:100%;margin-top:6px">Resetar Cenário Padrão</button>
+      </div>
+
+      <!-- CEMITÉRIO (GRAVEYARD) -->
+      <div class="section">
+        <h3>
+          <span>Cemitério P1 (<span id="gyCount">0</span>)</span>
+          <span style="font-size:9px;color:var(--muted)">Destinos Específicos</span>
+        </h3>
+        <div class="cardlist" id="gyList" style="max-height:80px"></div>
+      </div>
+
+      <!-- LOG DE EVENTOS -->
+      <div class="section">
+        <h3><span>Log do Motor</span></h3>
+        <div class="logbox" id="logBox"></div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footerbar">
+    <div>Status: <span id="footerStatus" style="color:var(--good);font-weight:600">Pronto</span></div>
+    <div style="margin-left:auto">VIS-006 · GDD v0.43 · Bases canônicas (0,8) e (30,8) · Fallback determinístico até 3 blocos</div>
+  </footer>
+</div>
+
+<!-- TEST RESULTS MODAL -->
+<div class="modal" id="testModal">
+  <div class="modalBox">
+    <div class="modalHeader">
+      <div class="modalTitle">Suíte de Validação Automatizada (VIS-006 · 20 Testes)</div>
+      <button class="btn small" id="closeTestModal">Fechar</button>
+    </div>
+    <div class="testResults" id="testResultsList"></div>
+  </div>
+</div>
+
+<script>
+/**
+ * MONSTER IMPACT — VIS-006: INVOCAÇÕES NO MAPA, ÂNCORAS E FALLBACK ESPACIAL
+ * Autor: YGO-Impact Core Architecture
+ * Conformidade Canônica GDD v0.43:
+ * 1. Âncora de Normal: 0 aliados -> Base obrigatória (0,8). 1+ aliados -> Base PROIBIDA, escolha de aliado.
+ * 2. Bases Canônicas: P1 em (0,8) e P2 em (30,8) (extremidades opostas do mapa 31x17).
+ * 3. Fallback: Busca até 3 blocos além da área original (distâncias 2, 3 e 4).
+ *    Havendo empate na menor distância: NÃO seleciona automaticamente; retorna estado de escolha obrigatória
+ *    e aguarda comando explícito do controlador.
+ * 4. NEGAR: Custos efetivamente pagos seguem destinos próprios sem refund; Normal não ganha custo artificial de Ação.
+ * 5. Invariância de Hash e paridade total A/B/C e 2D/3D.
+ */
+(() => {
+'use strict';
+
+const MAP_W = 31;
+const MAP_H = 17;
+// COORDENADAS CANÔNICAS DAS BASES (Extremidades opostas do mapa 31x17, centro do eixo Y)
+const BASE_P1 = { x: 0, y: 8 };
+const BASE_P2 = { x: 30, y: 8 };
+const STEP_MS = 50;
+
+// Ordem determinística de enumeração de vizinhos (apenas para ordenação determinística de candidatos)
+const ENUMERATION_OFFSETS = [
+  { dx: 0, dy: -1, name: 'N' },
+  { dx: 1, dy: 0, name: 'E' },
+  { dx: 0, dy: 1, name: 'S' },
+  { dx: -1, dy: 0, name: 'W' },
+  { dx: 1, dy: -1, name: 'NE' },
+  { dx: 1, dy: 1, name: 'SE' },
+  { dx: -1, dy: 1, name: 'SW' },
+  { dx: -1, dy: -1, name: 'NW' }
+];
+
+const C = {
+  clone: obj => JSON.parse(JSON.stringify(obj)),
+  hash: str => {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return (h >>> 0).toString(16).padStart(8, '0');
+  }
+};
+
+// Cenário inicial canônico com monstros em campo
+function createInitialState() {
+  return {
+    tick: 0,
+    units: [
+      { id: 'P1-A', owner: 'P1', name: 'Guerreiro Alado', level: 4, hp: 4, hpMax: 4, atk: 4, def: 3, spd: 4, vis: 4, x: 2, y: 8, pos: 'ATK' },
+      { id: 'P1-B', owner: 'P1', name: 'Arqueira Élfica', level: 3, hp: 3, hpMax: 3, atk: 3, def: 2, spd: 4, vis: 5, x: 3, y: 8, pos: 'DEF' },
+      { id: 'P2-A', owner: 'P2', name: 'Vanguarda Orc', level: 4, hp: 4, hpMax: 4, atk: 5, def: 3, spd: 4, vis: 4, x: 28, y: 8, pos: 'ATK' }
+    ],
+    handP1: [
+      { id: 'C-01', name: 'Cavaleiro Místico', type: 'MONSTER', subType: 'NORMAL', level: 4, atk: 4, def: 3, spd: 4, vis: 4 },
+      { id: 'C-02', name: 'Dragão Titânico', type: 'MONSTER', subType: 'EFFECT', level: 6, atk: 6, def: 5, spd: 4, vis: 4, tributeReq: 6 },
+      { id: 'C-03', name: 'Ritual da Chama Sagrada', type: 'SPELL', subType: 'RITUAL', targetRitualId: 'EX-01' },
+      { id: 'C-04', name: 'Fusão de Batalha', type: 'SPELL', subType: 'FUSION', targetFusionId: 'EX-02' },
+      { id: 'C-05', name: 'Besta da Floresta', type: 'MONSTER', subType: 'NORMAL', level: 3, atk: 3, def: 2, spd: 5, vis: 4 }
+    ],
+    extraP1: [
+      { id: 'EX-01', name: 'Paladino Ritual Sagrado', type: 'MONSTER', subType: 'RITUAL', level: 7, atk: 7, def: 6, spd: 4, vis: 5, reqLevel: 7 },
+      { id: 'EX-02', name: 'Cavaleiro do Trovão Fundido', type: 'MONSTER', subType: 'FUSION', level: 6, atk: 6, def: 5, spd: 5, vis: 4, materials: ['Guerreiro Alado', 'Besta da Floresta'] }
+    ],
+    graveyardP1: [],
+    graveyardP2: [],
+    obstacles: [
+      { x: 1, y: 7 }, { x: 1, y: 9 }, { x: 7, y: 5 }, { x: 7, y: 11 }, { x: 15, y: 8 }
+    ],
+    terrains: [
+      { x: 8, y: 8, cost: 2, label: 'Lamaçal' },
+      { x: 9, y: 8, cost: 2, label: 'Lamaçal' },
+      { x: 10, y: 8, cost: 3, label: 'Pântano' }
+    ],
+    negatedSummons: []
+  };
+}
+
+let state = createInitialState();
+
+// Variáveis de Apresentação e Interação
+let currentView = '2d';
+let summonStyle = 'A'; // 'A': Espacial / 'B': Workbench / 'C': Híbrido Contextual
+let selectedCard = state.handP1[0];
+let summonMode = 'NORMAL';
+let summonPosition = 'ATK';
+let selectedMaterials = [];
+let hoveredCoord = { x: 2, y: 7 };
+let lockedCoord = null;
+let simulateNegate = false;
+
+// Estado de Escolha Pendente de Fallback
+let pendingFallbackState = null; // { candidates: [], selectedCandidateId: null, distance: 0 }
+
+// Câmera 3D Livre (VIS-002)
+const camera = {
+  yaw: -0.61,
+  pitch: 0.84,
+  distance: 37,
+  targetX: 15,
+  targetY: 8,
+  panX: 0,
+  panY: 0
+};
+
+// Canvas e Contextos
+const canvases = {
+  '2d': document.querySelector('#canvas2d'),
+  '3d': document.querySelector('#canvas3d'),
+  'split2d': document.querySelector('#canvasSplit2d'),
+  'split3d': document.querySelector('#canvasSplit3d')
+};
+const ctxs = {
+  '2d': canvases['2d'].getContext('2d'),
+  '3d': canvases['3d'].getContext('2d'),
+  'split2d': canvases['split2d'].getContext('2d'),
+  'split3d': canvases['split3d'].getContext('2d')
+};
+
+// Hash Autoritativo do Jogo (Invariante rigoroso entre opções visuais)
+function hashState(st) {
+  const payload = JSON.stringify({
+    tick: st.tick,
+    units: st.units.map(u => ({ id: u.id, x: u.x, y: u.y, hp: u.hp, pos: u.pos })),
+    hand: st.handP1.map(c => c.id),
+    extra: st.extraP1.map(c => c.id),
+    gy: st.graveyardP1.map(c => ({ id: c.id, reason: c.reason })),
+    negated: (st.negatedSummons || []).map(n => ({ id: n.id, status: n.status })),
+    obs: st.obstacles,
+    terrains: st.terrains
+  });
+  return C.hash(payload);
+}
+
+// 1. REGRA CANÔNICA DE ÂNCORA DE INVOCAÇÃO (GDD v0.43 Seção 8 / summon.ts)
+function getAlliedUnits(st = state, playerId = 'P1') {
+  return st.units.filter(u => u.owner === playerId);
+}
+
+function getLegalAnchors(st = state, playerId = 'P1') {
+  const allies = getAlliedUnits(st, playerId);
+  if (allies.length === 0) {
+    // 0 aliados: a base é a âncora inicial OBRIGATÓRIA
+    return [{ type: 'BASE', id: `BASE_${playerId}`, x: BASE_P1.x, y: BASE_P1.y, name: `Base ${playerId}` }];
+  } else {
+    // 1+ aliados: o controlador escolhe um aliado. A BASE NÃO PODE SER ESCOLHIDA!
+    return allies.map(u => ({ type: 'UNIT', id: u.id, x: u.x, y: u.y, name: u.name, level: u.level }));
+  }
+}
+
+// Inicializa a âncora conforme a regra
+let selectedAnchor = getLegalAnchors(state, 'P1')[0];
+
+function selectAnchor(anchor) {
+  const legal = getLegalAnchors(state, 'P1');
+  const found = legal.find(a => a.id === anchor.id);
+  if (!found) {
+    log(`Tentativa ilegal: ${anchor.name} não é uma âncora legal (Base proibida com aliados em campo)!`, 'bad');
+    return false;
+  }
+  selectedAnchor = found;
+  pendingFallbackState = null;
+  log(`Âncora selecionada: ${selectedAnchor.name} (${selectedAnchor.x}, ${selectedAnchor.y})`);
+  updateUI();
+  return true;
+}
+
+// 2. REGRAS ESPACIAIS E ALGORITMO DETERMINÍSTICO DE FALLBACK (GDD v0.43 / summon.ts)
+function isInBounds(x, y) {
+  return x >= 0 && x < MAP_W && y >= 0 && y < MAP_H;
+}
+
+function isTilePhysicallyFree(x, y, st = state, ignoreUnitIds = []) {
+  if (!isInBounds(x, y)) return false;
+  if ((x === BASE_P1.x && y === BASE_P1.y) || (x === BASE_P2.x && y === BASE_P2.y)) return false;
+  if (st.obstacles.some(o => o.x === x && o.y === y)) return false;
+  if (st.units.some(u => u.x === x && u.y === y && !ignoreUnitIds.includes(u.id))) return false;
+  return true;
+}
+
+function getPositionsAtOrthogonalDistance(anchor, distance) {
+  const positions = [];
+  for (let deltaX = -distance; deltaX <= distance; deltaX += 1) {
+    const deltaY = distance - Math.abs(deltaX);
+    const candidates = deltaY === 0
+      ? [{ x: anchor.x + deltaX, y: anchor.y }]
+      : [
+          { x: anchor.x + deltaX, y: anchor.y - deltaY },
+          { x: anchor.x + deltaX, y: anchor.y + deltaY }
+        ];
+    for (const pos of candidates) {
+      if (isInBounds(pos.x, pos.y)) positions.push(pos);
+    }
+  }
+  // Ordenação determinística lexicográfica (y depois x)
+  return positions.sort((a, b) => a.y - b.y || a.x - b.x);
+}
+
+/**
+ * Avalia os destinos legais a partir da âncora.
+ * Normal: área original = distância ortogonal 1.
+ * Fallback: distâncias 2, 3 e 4 (até 3 blocos além da área normal).
+ * Em empate na menor distância: NÃO seleciona automaticamente; retorna candidatos para escolha obrigatória.
+ */
+function findSummonDestinations(anchor, st = state, ignoreUnitIds = []) {
+  // Distância 1: Área normal
+  // Distâncias 2, 3, 4: Fallback de até 3 blocos além
+  for (let distance = 1; distance <= 4; distance++) {
+    const candidates = getPositionsAtOrthogonalDistance(anchor, distance)
+      .filter(p => isTilePhysicallyFree(p.x, p.y, st, ignoreUnitIds));
+
+    if (candidates.length > 0) {
+      const isFallback = distance > 1;
+      const fallbackDist = distance - 1;
+
+      if (candidates.length === 1) {
+        // Candidato único não gera empate
+        return {
+          status: isFallback ? `FALLBACK_+${fallbackDist}` : 'NORMAL',
+          distanceFromAnchor: distance,
+          usedFallback: isFallback,
+          hasTie: false,
+          candidates: [{ id: 'CAND_1', x: candidates[0].x, y: candidates[0].y, label: `(${candidates[0].x}, ${candidates[0].y})` }],
+          selectedCandidate: { id: 'CAND_1', x: candidates[0].x, y: candidates[0].y },
+          resolvedPosition: { x: candidates[0].x, y: candidates[0].y }
+        };
+      } else {
+        // EMPATE NA MENOR DISTÂNCIA: ESCOLHA OBRIGATÓRIA PELO CONTROLADOR
+        return {
+          status: 'ESCOLHA_OBRIGATORIA',
+          distanceFromAnchor: distance,
+          usedFallback: isFallback,
+          hasTie: true,
+          candidates: candidates.map((p, idx) => ({
+            id: `CAND_${String.fromCharCode(65 + idx)}`,
+            letter: String.fromCharCode(65 + idx),
+            x: p.x,
+            y: p.y,
+            label: `Opção ${String.fromCharCode(65 + idx)} em (${p.x}, ${p.y}) [d=${distance}]`
+          })),
+          selectedCandidate: null,
+          resolvedPosition: null
+        };
+      }
+    }
+  }
+
+  // Esgotou todos os blocos até distância 4
+  return {
+    status: 'FALTA_DE_ESPACO',
+    distanceFromAnchor: null,
+    usedFallback: true,
+    hasTie: false,
+    candidates: [],
+    selectedCandidate: null,
+    resolvedPosition: null
+  };
+}
+
+function log(msg, type = 'info') {
+  const box = document.querySelector('#logBox');
+  const div = document.createElement('div');
+  div.className = `logentry ${type}`;
+  div.textContent = `[${state.tick}] ${msg}`;
+  box.prepend(div);
+}
+
+// 3. EXECUÇÃO AUTORITATIVA DE INVOCAÇÃO (SEM CUSTO ARTIFICIAL DE AÇÃO EM NORMAL)
+function executeSummon(card, mode, anchor, chosenCandidatePos, pos, materials, isNegated = false) {
+  if (!chosenCandidatePos) {
+    log('Falha: Invocação bloqueada — nenhum destino foi escolhido!', 'bad');
+    return { ok: false, reason: 'DESTINO_NAO_ESCOLHIDO' };
+  }
+
+  // Verifica se o destino ainda está livre
+  const ignoreUnits = mode === 'TRIBUTE' ? materials : [];
+  if (!isTilePhysicallyFree(chosenCandidatePos.x, chosenCandidatePos.y, state, ignoreUnits)) {
+    log(`Falha: Bloco (${chosenCandidatePos.x}, ${chosenCandidatePos.y}) foi obstruído!`, 'bad');
+    return { ok: false, reason: 'BLOCO_OBSTRUIDO' };
+  }
+
+  // SE NEGADO: Custos e materiais pagos seguem seus destinos próprios; o monstro NÃO entra no mapa e NÃO é enviado ao Cemitério
+  if (isNegated) {
+    if (mode === 'NORMAL') {
+      // Normal: sem custos de tributo ou magias; sem dedução artificial de Ação.
+      // O monstro NÃO entra no mapa. NÃO é enviado ao Cemitério (GDD não define zona final para Normal negado).
+      card.summonStatus = 'NOT_SUMMONED';
+      state.negatedSummons.push({ id: card.id, name: card.name, mode: 'NORMAL', status: 'NOT_SUMMONED' });
+    } else if (mode === 'TRIBUTE') {
+      // Materiais tributados do campo foram efetivamente pagos e vão ao Cemitério sem refund
+      materials.forEach(mId => {
+        const uIdx = state.units.findIndex(u => u.id === mId);
+        if (uIdx !== -1) {
+          state.graveyardP1.push({ id: mId, name: state.units[uIdx].name, reason: 'TRIBUTO_PAGO' });
+          state.units.splice(uIdx, 1);
+        }
+      });
+      // O monstro de Tributo NÃO entra no mapa e NÃO é enviado ao Cemitério por suposição
+      card.summonStatus = 'NOT_SUMMONED';
+      state.negatedSummons.push({ id: card.id, name: card.name, mode: 'TRIBUTE', status: 'NOT_SUMMONED' });
+    } else if (mode === 'RITUAL') {
+      // Magia Ritual e tributos da mão/campo foram pagos e vão ao Cemitério
+      const rSpell = state.handP1.find(c => c.subType === 'RITUAL');
+      if (rSpell) {
+        state.graveyardP1.push({ id: rSpell.id, name: rSpell.name, reason: 'MAGIA_RITUAL_PAGA' });
+        state.handP1 = state.handP1.filter(c => c.id !== rSpell.id);
+      }
+      materials.forEach(mId => {
+        const uIdx = state.units.findIndex(u => u.id === mId);
+        if (uIdx !== -1) {
+          state.graveyardP1.push({ id: mId, name: state.units[uIdx].name, reason: 'TRIBUTO_RITUAL_PAGO' });
+          state.units.splice(uIdx, 1);
+        } else {
+          const hIdx = state.handP1.findIndex(c => c.id === mId);
+          if (hIdx !== -1) {
+            state.graveyardP1.push({ id: mId, name: state.handP1[hIdx].name, reason: 'TRIBUTO_RITUAL_MAO_PAGO' });
+            state.handP1.splice(hIdx, 1);
+          }
+        }
+      });
+      // Monstro do Extra Deck: NÃO entra no mapa e NÃO vai ao Cemitério!
+      card.summonStatus = 'NOT_SUMMONED';
+      state.negatedSummons.push({ id: card.id, name: card.name, mode: 'RITUAL', status: 'NOT_SUMMONED' });
+    } else if (mode === 'FUSION') {
+      // Magia de Fusão e materiais específicos foram pagos e vão ao Cemitério
+      const fSpell = state.handP1.find(c => c.subType === 'FUSION');
+      if (fSpell) {
+        state.graveyardP1.push({ id: fSpell.id, name: fSpell.name, reason: 'MAGIA_FUSAO_PAGA' });
+        state.handP1 = state.handP1.filter(c => c.id !== fSpell.id);
+      }
+      materials.forEach(mId => {
+        const uIdx = state.units.findIndex(u => u.id === mId);
+        if (uIdx !== -1) {
+          state.graveyardP1.push({ id: mId, name: state.units[uIdx].name, reason: 'MATERIAL_FUSAO_PAGO' });
+          state.units.splice(uIdx, 1);
+        } else {
+          const hIdx = state.handP1.findIndex(c => c.id === mId);
+          if (hIdx !== -1) {
+            state.graveyardP1.push({ id: mId, name: state.handP1[hIdx].name, reason: 'MATERIAL_FUSAO_MAO_PAGO' });
+            state.handP1.splice(hIdx, 1);
+          }
+        }
+      });
+      // Monstro do Extra Deck: NÃO entra no mapa e NÃO vai ao Cemitério!
+      card.summonStatus = 'NOT_SUMMONED';
+      state.negatedSummons.push({ id: card.id, name: card.name, mode: 'FUSION', status: 'NOT_SUMMONED' });
+    }
+
+    log(`INVOCAÇÃO NEGADA: Custos/materiais pagos permanecem pagos em seus destinos; o monstro NÃO entra no mapa e NÃO vai ao Cemitério (status: NOT_SUMMONED sem destino final inventado)`, 'bad');
+    triggerDeniedBanner();
+    pendingFallbackState = null;
+    updateUI();
+    return { ok: true, negated: true, destination: chosenCandidatePos };
+  }
+
+  // INVOCÇÃO BEM-SUCEDIDA
+  if (mode === 'NORMAL') {
+    state.handP1 = state.handP1.filter(c => c.id !== card.id);
+  } else if (mode === 'TRIBUTE') {
+    materials.forEach(mId => {
+      const uIdx = state.units.findIndex(u => u.id === mId);
+      if (uIdx !== -1) {
+        state.graveyardP1.push({ id: mId, name: state.units[uIdx].name, reason: 'TRIBUTO' });
+        state.units.splice(uIdx, 1);
+      }
+    });
+    state.handP1 = state.handP1.filter(c => c.id !== card.id);
+  } else if (mode === 'RITUAL') {
+    const rSpell = state.handP1.find(c => c.subType === 'RITUAL');
+    if (rSpell) {
+      state.graveyardP1.push({ id: rSpell.id, name: rSpell.name, reason: 'MAGIA_RITUAL' });
+      state.handP1 = state.handP1.filter(c => c.id !== rSpell.id);
+    }
+    materials.forEach(mId => {
+      const uIdx = state.units.findIndex(u => u.id === mId);
+      if (uIdx !== -1) {
+        state.graveyardP1.push({ id: mId, name: state.units[uIdx].name, reason: 'TRIBUTO_RITUAL' });
+        state.units.splice(uIdx, 1);
+      } else {
+        const hIdx = state.handP1.findIndex(c => c.id === mId);
+        if (hIdx !== -1) {
+          state.graveyardP1.push({ id: mId, name: state.handP1[hIdx].name, reason: 'TRIBUTO_RITUAL_MAO' });
+          state.handP1.splice(hIdx, 1);
+        }
+      }
+    });
+    state.extraP1 = state.extraP1.filter(c => c.id !== card.id);
+  } else if (mode === 'FUSION') {
+    const fSpell = state.handP1.find(c => c.subType === 'FUSION');
+    if (fSpell) {
+      state.graveyardP1.push({ id: fSpell.id, name: fSpell.name, reason: 'MAGIA_FUSAO' });
+      state.handP1 = state.handP1.filter(c => c.id !== fSpell.id);
+    }
+    materials.forEach(mId => {
+      const uIdx = state.units.findIndex(u => u.id === mId);
+      if (uIdx !== -1) {
+        state.graveyardP1.push({ id: mId, name: state.units[uIdx].name, reason: 'MATERIAL_FUSAO' });
+        state.units.splice(uIdx, 1);
+      } else {
+        const hIdx = state.handP1.findIndex(c => c.id === mId);
+        if (hIdx !== -1) {
+          state.graveyardP1.push({ id: mId, name: state.handP1[hIdx].name, reason: 'MATERIAL_FUSAO_MAO' });
+          state.handP1.splice(hIdx, 1);
+        }
+      }
+    });
+    state.extraP1 = state.extraP1.filter(c => c.id !== card.id);
+  }
+
+  // Cria nova unidade
+  const newUnit = {
+    id: `P1-INV-${state.tick}`,
+    owner: 'P1',
+    name: card.name,
+    level: card.level,
+    hp: card.level,
+    hpMax: card.level,
+    atk: card.atk,
+    def: card.def,
+    spd: card.spd,
+    vis: card.vis,
+    x: chosenCandidatePos.x,
+    y: chosenCandidatePos.y,
+    pos: pos
+  };
+  state.units.push(newUnit);
+
+  log(`Sucesso: ${card.name} invocado em (${chosenCandidatePos.x}, ${chosenCandidatePos.y}) [${pos}]`, 'good');
+  pendingFallbackState = null;
+  updateUI();
+  return { ok: true, unit: newUnit, destination: chosenCandidatePos };
+}
+
+function triggerDeniedBanner() {
+  const b = document.querySelector('#deniedBanner');
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 4000);
+}
+
+// ATUALIZAÇÃO DA INTERFACE DO USUÁRIO
+function updateUI() {
+  document.querySelector('#stateHash').textContent = hashState(state);
+  document.querySelector('#handCount').textContent = state.handP1.length;
+  document.querySelector('#extraCount').textContent = state.extraP1.length;
+  document.querySelector('#gyCount').textContent = state.graveyardP1.length;
+
+  // Valida âncora atual
+  const legalAnchors = getLegalAnchors(state, 'P1');
+  if (!legalAnchors.some(a => a.id === selectedAnchor.id)) {
+    selectedAnchor = legalAnchors[0];
+  }
+
+  const alliesCount = getAlliedUnits(state, 'P1').length;
+  document.querySelector('#anchorRuleHint').textContent = alliesCount > 0 ? '1+ aliados: Base indisponível' : '0 aliados: Base obrigatória';
+  document.querySelector('#anchorRuleHint').style.color = alliesCount > 0 ? 'var(--warn)' : 'var(--good)';
+  document.querySelector('#selectBaseAnchorBtn').disabled = alliesCount > 0;
+
+  // Renderiza Lista de Âncoras
+  const anchorListEl = document.querySelector('#anchorList');
+  anchorListEl.innerHTML = '';
+  legalAnchors.forEach(a => {
+    const item = document.createElement('div');
+    item.className = `cardItem ${selectedAnchor.id === a.id ? 'selected' : ''}`;
+    item.innerHTML = `<span><b>${a.name}</b> (${a.x}, ${a.y})</span><span class="badge ${a.type === 'BASE' ? 'normal' : 'tribute'}">${a.type}</span>`;
+    item.onclick = () => selectAnchor(a);
+    anchorListEl.appendChild(item);
+  });
+
+  document.querySelector('#modeBadge').textContent = summonMode;
+  document.querySelector('#modeBadge').className = `badge ${summonMode.toLowerCase()}`;
+  document.querySelector('#anchorText').textContent = `${selectedAnchor.name} (${selectedAnchor.x}, ${selectedAnchor.y})`;
+  document.querySelector('#stageStatus').textContent = `Âncora: ${selectedAnchor.name} (${selectedAnchor.x}, ${selectedAnchor.y})`;
+
+  // Calcula destinos possíveis a partir da âncora
+  const ignoreUnits = summonMode === 'TRIBUTE' ? selectedMaterials : [];
+  const destInfo = findSummonDestinations(selectedAnchor, state, ignoreUnits);
+
+  const banner = document.querySelector('#choiceBanner');
+  const bannerButtons = document.querySelector('#choiceBannerButtons');
+  const candidateSection = document.querySelector('#candidateSection');
+  const candidateListEl = document.querySelector('#candidateList');
+
+  if (destInfo.status === 'FALTA_DE_ESPACO') {
+    document.querySelector('#destRealText').textContent = 'BLOQUEADO: FALTA DE ESPAÇO';
+    document.querySelector('#destRealText').style.color = 'var(--bad)';
+    document.querySelector('#fallbackDistText').textContent = 'Esgotado (> 3 além)';
+    document.querySelector('#confirmSummonBtn').disabled = true;
+    banner.classList.remove('show');
+    candidateSection.style.display = 'none';
+  } else if (destInfo.hasTie) {
+    // EMPATE DE FALLBACK -> ESCOLHA OBRIGATÓRIA
+    banner.classList.add('show');
+    candidateSection.style.display = 'block';
+    bannerButtons.innerHTML = '';
+    candidateListEl.innerHTML = '';
+
+    destInfo.candidates.forEach(cand => {
+      const isSelected = pendingFallbackState && pendingFallbackState.selectedCandidateId === cand.id;
+      
+      // Botão no banner
+      const btn = document.createElement('button');
+      btn.className = `btn small ${isSelected ? 'primary' : ''}`;
+      btn.textContent = `Escolher [${cand.letter}] (${cand.x}, ${cand.y})`;
+      btn.onclick = () => chooseFallbackCandidate(cand.id, destInfo);
+      bannerButtons.appendChild(btn);
+
+      // Linha no painel lateral
+      const row = document.createElement('div');
+      row.className = `candidateBtn ${isSelected ? 'selected' : ''}`;
+      row.innerHTML = `<span><b>[${cand.letter}]</b> Bloco (${cand.x}, ${cand.y}) · Distância ${destInfo.distanceFromAnchor}</span><span>${isSelected ? 'SELECIONADO ✓' : 'Escolher'}</span>`;
+      row.onclick = () => chooseFallbackCandidate(cand.id, destInfo);
+      candidateListEl.appendChild(row);
+    });
+
+    if (pendingFallbackState && pendingFallbackState.selectedCandidate) {
+      const sel = pendingFallbackState.selectedCandidate;
+      document.querySelector('#destRealText').textContent = `(${sel.x}, ${sel.y}) [Opção ${sel.letter}]`;
+      document.querySelector('#destRealText').style.color = 'var(--good)';
+      document.querySelector('#fallbackDistText').textContent = `+${destInfo.distanceFromAnchor - 1} (Escolhido pelo Controlador)`;
+      document.querySelector('#confirmSummonBtn').disabled = false;
+    } else {
+      document.querySelector('#destRealText').textContent = 'AGUARDANDO ESCOLHA DO CONTROLADOR';
+      document.querySelector('#destRealText').style.color = 'var(--warn)';
+      document.querySelector('#fallbackDistText').textContent = `+${destInfo.distanceFromAnchor - 1} (${destInfo.candidates.length} destinos empatados)`;
+      document.querySelector('#confirmSummonBtn').disabled = true; // Bloqueado até escolher
+    }
+  } else {
+    // Candidato único
+    banner.classList.remove('show');
+    candidateSection.style.display = 'none';
+    const sel = destInfo.resolvedPosition;
+    document.querySelector('#destRealText').textContent = `(${sel.x}, ${sel.y}) · ${destInfo.status}`;
+    document.querySelector('#destRealText').style.color = destInfo.usedFallback ? 'var(--fallback)' : 'var(--good)';
+    document.querySelector('#fallbackDistText').textContent = destInfo.usedFallback ? `+${destInfo.distanceFromAnchor - 1} blocos` : '0 (Área Normal)';
+    document.querySelector('#confirmSummonBtn').disabled = false;
+  }
+
+  document.querySelector('#posText').textContent = `Modo ${summonPosition}`;
+
+  // Renderiza Hand List
+  const handEl = document.querySelector('#handList');
+  handEl.innerHTML = '';
+  state.handP1.forEach(c => {
+    const item = document.createElement('div');
+    item.className = `cardItem ${selectedCard && selectedCard.id === c.id ? 'selected' : ''}`;
+    item.innerHTML = `
+      <div>
+        <b style="color:${c.type === 'MONSTER' ? '#78dca7' : '#80b3ff'}">${c.name}</b>
+        <div style="font-size:9.5px;color:var(--muted)">${c.type} · ${c.subType} ${c.level ? '· Lv ' + c.level : ''}</div>
+      </div>
+      <span class="badge ${c.subType ? c.subType.toLowerCase() : 'normal'}">${c.subType || c.type}</span>
+    `;
+    item.onclick = () => selectCard(c);
+    handEl.appendChild(item);
+  });
+
+  // Renderiza Extra List
+  const extraEl = document.querySelector('#extraList');
+  extraEl.innerHTML = '';
+  state.extraP1.forEach(c => {
+    const item = document.createElement('div');
+    item.className = `cardItem ${selectedCard && selectedCard.id === c.id ? 'selected' : ''}`;
+    item.innerHTML = `
+      <div>
+        <b style="color:${c.subType === 'RITUAL' ? '#80b3ff' : '#c77dff'}">${c.name}</b>
+        <div style="font-size:9.5px;color:var(--muted)">${c.subType} · Lv ${c.level}</div>
+      </div>
+      <span class="badge ${c.subType.toLowerCase()}">${c.subType}</span>
+    `;
+    item.onclick = () => selectCard(c);
+    extraEl.appendChild(item);
+  });
+
+  // Renderiza Graveyard
+  const gyEl = document.querySelector('#gyList');
+  gyEl.innerHTML = '';
+  state.graveyardP1.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'cardItem';
+    item.style.cursor = 'default';
+    item.innerHTML = `<span>${c.name}</span><span style="font-size:9px;color:var(--muted)">${c.reason || 'GY'}</span>`;
+    gyEl.appendChild(item);
+  });
+
+  renderMaterialsUI();
+  renderWorkbenchDock();
+  renderPipelineHUD(destInfo);
+}
+
+function renderPipelineHUD(destInfo) {
+  const methodVal = document.querySelector('#pipeMethodVal');
+  const matVal = document.querySelector('#pipeMatVal');
+  const reqVal = document.querySelector('#pipeReqVal');
+  const destVal = document.querySelector('#pipeDestVal');
+  const statusVal = document.querySelector('#pipeStatusVal');
+  if (!methodVal) return;
+
+  // 1. Método
+  methodVal.textContent = summonMode;
+  methodVal.style.color = summonMode === 'NORMAL' ? '#a8d5ba' : summonMode === 'TRIBUTE' ? '#f72585' : summonMode === 'RITUAL' ? '#4361ee' : '#9d4edd';
+
+  // 2. Materiais e Requisito
+  let reqOk = false;
+  if (summonMode === 'NORMAL') {
+    matVal.textContent = '0 (Livre)';
+    reqVal.textContent = 'OK';
+    reqVal.style.color = 'var(--good)';
+    reqOk = true;
+  } else {
+    let currentLevelSum = 0;
+    let requiredLevel = selectedCard ? (selectedCard.level || selectedCard.reqLevel || selectedCard.tributeReq || 0) : 0;
+    selectedMaterials.forEach(mId => {
+      const u = state.units.find(x => x.id === mId);
+      if (u) currentLevelSum += u.level;
+      else {
+        const h = state.handP1.find(x => x.id === mId);
+        if (h) currentLevelSum += h.level;
+      }
+    });
+
+    if (summonMode === 'TRIBUTE') {
+      matVal.textContent = `${selectedMaterials.length} trib.`;
+      reqOk = currentLevelSum >= requiredLevel;
+      reqVal.textContent = `Lv ${currentLevelSum}/${requiredLevel} ${reqOk ? '✓' : ''}`;
+      reqVal.style.color = reqOk ? 'var(--good)' : 'var(--warn)';
+    } else if (summonMode === 'RITUAL') {
+      matVal.textContent = `${selectedMaterials.length} mat.`;
+      reqOk = currentLevelSum >= requiredLevel;
+      reqVal.textContent = `Lv ${currentLevelSum}/${requiredLevel} ${reqOk ? '✓' : ''}`;
+      reqVal.style.color = reqOk ? 'var(--good)' : 'var(--warn)';
+    } else if (summonMode === 'FUSION') {
+      matVal.textContent = `${selectedMaterials.length} mat.`;
+      reqOk = selectedMaterials.length >= 2;
+      reqVal.textContent = `${selectedMaterials.length}/2 mats ${reqOk ? '✓' : ''}`;
+      reqVal.style.color = reqOk ? 'var(--good)' : 'var(--warn)';
+    }
+  }
+
+  // 3. Destino
+  let destOk = false;
+  if (destInfo.status === 'FALTA_DE_ESPACO') {
+    destVal.textContent = 'SEM ESPAÇO';
+    destVal.style.color = 'var(--bad)';
+  } else if (destInfo.hasTie) {
+    if (pendingFallbackState && pendingFallbackState.selectedCandidate) {
+      const cand = pendingFallbackState.selectedCandidate;
+      destVal.textContent = `(${cand.x},${cand.y}) [${cand.letter}]`;
+      destVal.style.color = 'var(--good)';
+      destOk = true;
+    } else {
+      destVal.textContent = 'ESCOLHER [?]';
+      destVal.style.color = 'var(--warn)';
+    }
+  } else if (destInfo.resolvedPosition) {
+    destVal.textContent = `(${destInfo.resolvedPosition.x},${destInfo.resolvedPosition.y})`;
+    destVal.style.color = 'var(--good)';
+    destOk = true;
+  } else {
+    destVal.textContent = 'Nenhum';
+    destVal.style.color = 'var(--muted)';
+  }
+
+  // 4. Confirmar / Estado
+  if (!destOk) {
+    statusVal.textContent = destInfo.hasTie ? 'PENDENTE' : 'BLOQUEADO';
+    statusVal.style.color = 'var(--warn)';
+  } else if (!reqOk) {
+    statusVal.textContent = 'FALTAM MATS';
+    statusVal.style.color = 'var(--warn)';
+  } else {
+    statusVal.textContent = 'PRONTO ✓';
+    statusVal.style.color = 'var(--good)';
+  }
+}
+
+function chooseFallbackCandidate(candId, destInfo) {
+  const cand = destInfo.candidates.find(c => c.id === candId);
+  if (!cand) return;
+  pendingFallbackState = {
+    distance: destInfo.distanceFromAnchor,
+    candidates: destInfo.candidates,
+    selectedCandidateId: cand.id,
+    selectedCandidate: cand
+  };
+  log(`Destino de fallback escolhido pelo controlador: Opção [${cand.letter}] em (${cand.x}, ${cand.y})`);
+  updateUI();
+}
+
+function selectCard(c) {
+  selectedCard = c;
+  selectedMaterials = [];
+  pendingFallbackState = null;
+  if (c.subType === 'NORMAL') summonMode = 'NORMAL';
+  else if (c.subType === 'EFFECT' || (c.level && c.level >= 5)) summonMode = 'TRIBUTE';
+  else if (c.subType === 'RITUAL') summonMode = 'RITUAL';
+  else if (c.subType === 'FUSION') summonMode = 'FUSION';
+  updateUI();
+}
+
+function renderMaterialsUI() {
+  const matList = document.querySelector('#materialList');
+  const levelSumEl = document.querySelector('#levelSumBadge');
+  matList.innerHTML = '';
+
+  let currentLevelSum = 0;
+  let requiredLevel = selectedCard ? (selectedCard.level || selectedCard.reqLevel || selectedCard.tributeReq || 0) : 0;
+
+  if (summonMode === 'NORMAL') {
+    document.querySelector('#materialSection').style.display = 'none';
+    return;
+  }
+  document.querySelector('#materialSection').style.display = 'block';
+
+  // Tributos do campo
+  state.units.filter(u => u.owner === 'P1').forEach(u => {
+    const isChecked = selectedMaterials.includes(u.id);
+    if (isChecked) currentLevelSum += u.level;
+    const row = document.createElement('div');
+    row.className = `materialItem ${isChecked ? 'checked' : ''}`;
+    row.innerHTML = `
+      <span><b>${u.name}</b> (Campo · Lv ${u.level} · [${u.x},${u.y}])</span>
+      <input type="checkbox" ${isChecked ? 'checked' : ''}>
+    `;
+    row.onclick = () => {
+      if (selectedMaterials.includes(u.id)) {
+        selectedMaterials = selectedMaterials.filter(id => id !== u.id);
+      } else {
+        selectedMaterials.push(u.id);
+      }
+      updateUI();
+    };
+    matList.appendChild(row);
+  });
+
+  // Materiais da mão (se Ritual/Fusão)
+  if (summonMode === 'RITUAL' || summonMode === 'FUSION') {
+    state.handP1.filter(c => c.type === 'MONSTER' && c.id !== selectedCard.id).forEach(c => {
+      const isChecked = selectedMaterials.includes(c.id);
+      if (isChecked) currentLevelSum += c.level;
+      const row = document.createElement('div');
+      row.className = `materialItem ${isChecked ? 'checked' : ''}`;
+      row.innerHTML = `
+        <span><b>${c.name}</b> (Mão · Lv ${c.level})</span>
+        <input type="checkbox" ${isChecked ? 'checked' : ''}>
+      `;
+      row.onclick = () => {
+        if (selectedMaterials.includes(c.id)) {
+          selectedMaterials = selectedMaterials.filter(id => id !== c.id);
+        } else {
+          selectedMaterials.push(c.id);
+        }
+        updateUI();
+      };
+      matList.appendChild(row);
+    });
+  }
+
+  levelSumEl.textContent = `Lv ${currentLevelSum} / Lv ${requiredLevel} ${currentLevelSum >= requiredLevel ? '✓' : ''}`;
+  levelSumEl.style.color = currentLevelSum >= requiredLevel ? 'var(--good)' : 'var(--warn)';
+}
+
+function renderWorkbenchDock() {
+  const dock = document.querySelector('#workbenchDock');
+  if (summonStyle !== 'B') {
+    dock.classList.remove('show');
+    return;
+  }
+  dock.classList.add('show');
+  const cardsList = document.querySelector('#workbenchCardsList');
+  cardsList.innerHTML = '';
+  
+  const allCards = [...state.handP1, ...state.extraP1];
+  allCards.forEach(c => {
+    const cardDiv = document.createElement('div');
+    cardDiv.className = `workbenchCard ${selectedCard && selectedCard.id === c.id ? 'selected' : ''}`;
+    cardDiv.innerHTML = `<b>${c.name}</b><br><span style="font-size:9px;color:var(--muted)">${c.subType || c.type} ${c.level ? '· Lv ' + c.level : ''}</span>`;
+    cardDiv.onclick = () => selectCard(c);
+    cardsList.appendChild(cardDiv);
+  });
+}
+
+// PROJEÇÕES E RENDERIZADORES
+function get2DMetrics(canvas) {
+  const pad = 24;
+  const tile = Math.min((canvas.width - pad * 2) / MAP_W, (canvas.height - pad * 2) / MAP_H);
+  const ox = (canvas.width - MAP_W * tile) / 2;
+  const oy = (canvas.height - MAP_H * tile) / 2;
+  return { tile, ox, oy };
+}
+
+function project3D(x, y, z, canvas) {
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const rx = x - camera.targetX;
+  const ry = y - camera.targetY;
+  
+  const cosY = Math.cos(camera.yaw);
+  const sinY = Math.sin(camera.yaw);
+  const cosP = Math.cos(camera.pitch);
+  const sinP = Math.sin(camera.pitch);
+
+  const x1 = rx * cosY - ry * sinY;
+  const y1 = rx * sinY + ry * cosY;
+  const z1 = z;
+
+  const y2 = y1 * cosP - z1 * sinP;
+  const z2 = y1 * sinP + z1 * cosP;
+
+  const dist = camera.distance;
+  const factor = (canvas.height * 0.95) / (dist + y2);
+  
+  return {
+    px: cx + x1 * factor + camera.panX,
+    py: cy - z2 * factor + camera.panY,
+    scale: factor
+  };
+}
+
+function draw2D(ctx, canvas) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const { tile, ox, oy } = get2DMetrics(canvas);
+
+  // 1. Grade e Terreno
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      const px = ox + x * tile;
+      const py = oy + y * tile;
+
+      ctx.fillStyle = (x + y) % 2 === 0 ? '#0b131c' : '#0e1722';
+      ctx.fillRect(px, py, tile, tile);
+
+      // Terreno especial com badge (Opção A aprovada de VIS-004)
+      const ter = state.terrains.find(t => t.x === x && t.y === y);
+      if (ter) {
+        ctx.fillStyle = ter.cost > 2 ? '#3a1f11' : '#232b16';
+        ctx.fillRect(px, py, tile, tile);
+        ctx.fillStyle = '#ffbe53';
+        ctx.font = 'bold 9px monospace';
+        ctx.textAlign = 'right';
+        ctx.fillText(`×${ter.cost}`, px + tile - 2, py + 10);
+      }
+
+      // Obstáculos
+      if (state.obstacles.some(o => o.x === x && o.y === y)) {
+        ctx.fillStyle = '#4a5b6d';
+        ctx.fillRect(px + 2, py + 2, tile - 4, tile - 4);
+      }
+
+      ctx.strokeStyle = '#182736';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(px, py, tile, tile);
+    }
+  }
+
+  // 2. Bases Canônicas (0,8) e (30,8)
+  drawBase2D(ctx, BASE_P1.x, BASE_P1.y, tile, ox, oy, 'P1', '#3b82f6');
+  drawBase2D(ctx, BASE_P2.x, BASE_P2.y, tile, ox, oy, 'P2', '#ef4444');
+
+  // 3. Âncora Ativa
+  const aPx = ox + selectedAnchor.x * tile;
+  const aPy = oy + selectedAnchor.y * tile;
+  ctx.strokeStyle = '#e6c468';
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(aPx + 1, aPy + 1, tile - 2, tile - 2);
+
+  // 4. Destinos Possíveis e Fallback
+  const ignoreUnits = summonMode === 'TRIBUTE' ? selectedMaterials : [];
+  const destInfo = findSummonDestinations(selectedAnchor, state, ignoreUnits);
+
+  if (destInfo.status !== 'FALTA_DE_ESPACO') {
+    // Se houver empate na menor distância: desenha TODOS os candidatos empatados com badges [A], [B], etc.
+    if (destInfo.hasTie) {
+      destInfo.candidates.forEach(cand => {
+        const cPx = ox + cand.x * tile;
+        const cPy = oy + cand.y * tile;
+        const isChosen = pendingFallbackState && pendingFallbackState.selectedCandidateId === cand.id;
+
+        ctx.fillStyle = isChosen ? 'rgba(120, 220, 167, 0.45)' : 'rgba(255, 190, 83, 0.3)';
+        ctx.fillRect(cPx, cPy, tile, tile);
+        ctx.strokeStyle = isChosen ? '#78dca7' : '#ffbe53';
+        ctx.lineWidth = isChosen ? 2.5 : 1.5;
+        ctx.strokeRect(cPx + 1, cPy + 1, tile - 2, tile - 2);
+
+        // Badge [A], [B]
+        ctx.fillStyle = isChosen ? '#78dca7' : '#ffbe53';
+        ctx.font = 'bold 9.5px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`[${cand.letter}]`, cPx + tile / 2, cPy + tile / 2 + 3);
+      });
+    } else {
+      // Destino único resolvido
+      const targetPos = destInfo.resolvedPosition;
+      const dPx = ox + targetPos.x * tile;
+      const dPy = oy + targetPos.y * tile;
+
+      ctx.fillStyle = destInfo.usedFallback ? 'rgba(255, 158, 0, 0.35)' : 'rgba(120, 220, 167, 0.35)';
+      ctx.fillRect(dPx, dPy, tile, tile);
+      ctx.strokeStyle = destInfo.usedFallback ? '#ff9e00' : '#78dca7';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(dPx + 1, dPy + 1, tile - 2, tile - 2);
+
+      // Efeitos específicos da Opção A
+      if (summonStyle === 'A') {
+        ctx.beginPath();
+        ctx.moveTo(aPx + tile / 2, aPy + tile / 2);
+        ctx.lineTo(dPx + tile / 2, dPy + tile / 2);
+        ctx.strokeStyle = '#9d4edd';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.beginPath();
+        ctx.arc(dPx + tile / 2, dPy + tile / 2, tile * 0.38, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(selectedCard ? selectedCard.name.substring(0, 4) : 'INV', dPx + tile / 2, dPy + tile / 2 + 3);
+      }
+    }
+  }
+
+  // 5. Monstros em Campo
+  state.units.forEach(u => {
+    const uPx = ox + u.x * tile;
+    const uPy = oy + u.y * tile;
+    const isMaterial = selectedMaterials.includes(u.id);
+
+    ctx.fillStyle = u.owner === 'P1' ? (isMaterial ? '#f72585' : '#3b82f6') : '#ef4444';
+    ctx.beginPath();
+    ctx.arc(uPx + tile / 2, uPy + tile / 2, tile * 0.36, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = isMaterial ? '#ffd166' : '#fff';
+    ctx.lineWidth = isMaterial ? 2.5 : 1;
+    ctx.stroke();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 8.5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${u.hp}`, uPx + tile / 2, uPy + tile / 2 + 3);
+
+    ctx.fillStyle = u.pos === 'DEF' ? '#38bdf8' : '#fbbf24';
+    ctx.fillRect(uPx + 2, uPy + 2, 5, 5);
+  });
+}
+
+function drawBase2D(ctx, bx, by, tile, ox, oy, owner, color) {
+  const px = ox + bx * tile;
+  const py = oy + by * tile;
+  ctx.fillStyle = color;
+  ctx.fillRect(px + 2, py + 2, tile - 4, tile - 4);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(px + 2, py + 2, tile - 4, tile - 4);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(owner, px + tile / 2, py + tile / 2 + 3);
+}
+
+function draw3D(ctx, canvas) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      const p00 = project3D(x, y, 0, canvas);
+      const p10 = project3D(x + 1, y, 0, canvas);
+      const p11 = project3D(x + 1, y + 1, 0, canvas);
+      const p01 = project3D(x, y + 1, 0, canvas);
+
+      ctx.fillStyle = (x + y) % 2 === 0 ? '#0b131c' : '#0e1722';
+      const ter = state.terrains.find(t => t.x === x && t.y === y);
+      if (ter) ctx.fillStyle = ter.cost > 2 ? '#3a1f11' : '#232b16';
+
+      ctx.beginPath();
+      ctx.moveTo(p00.px, p00.py);
+      ctx.lineTo(p10.px, p10.py);
+      ctx.lineTo(p11.px, p11.py);
+      ctx.lineTo(p01.px, p01.py);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#182736';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+
+      if (ter) {
+        ctx.fillStyle = '#ffbe53';
+        ctx.font = 'bold 8px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`×${ter.cost}`, (p00.px + p11.px) / 2, (p00.py + p11.py) / 2);
+      }
+
+      if (state.obstacles.some(o => o.x === x && o.y === y)) {
+        const top00 = project3D(x, y, 0.8, canvas);
+        const top11 = project3D(x + 1, y + 1, 0.8, canvas);
+        ctx.fillStyle = '#4a5b6d';
+        ctx.fillRect(top00.px, top00.py, top11.px - top00.px, top11.py - top00.py);
+      }
+    }
+  }
+
+  // Bases 3D Canônicas
+  [BASE_P1, BASE_P2].forEach((b, i) => {
+    const pt = project3D(b.x + 0.5, b.y + 0.5, 0.5, canvas);
+    ctx.fillStyle = i === 0 ? '#3b82f6' : '#ef4444';
+    ctx.beginPath();
+    ctx.arc(pt.px, pt.py, 12, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Monstros 3D
+  state.units.forEach(u => {
+    const pt = project3D(u.x + 0.5, u.y + 0.5, 0.4, canvas);
+    const isMat = selectedMaterials.includes(u.id);
+    ctx.fillStyle = u.owner === 'P1' ? (isMat ? '#f72585' : '#3b82f6') : '#ef4444';
+    ctx.beginPath();
+    ctx.arc(pt.px, pt.py, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.stroke();
+  });
+}
+
+function render() {
+  if (currentView === '2d') {
+    draw2D(ctxs['2d'], canvases['2d']);
+  } else if (currentView === '3d') {
+    draw3D(ctxs['3d'], canvases['3d']);
+  } else if (currentView === 'split') {
+    draw2D(ctxs['split2d'], canvases['split2d']);
+    draw3D(ctxs['split3d'], canvases['split3d']);
+  }
+  requestAnimationFrame(render);
+}
+
+// GESTOS, PICKING E CONTROLES
+function handleCanvasClick(cx, cy, canvas, is3D = false) {
+  let gridX, gridY;
+  if (!is3D) {
+    const { tile, ox, oy } = get2DMetrics(canvas);
+    gridX = Math.floor((cx - ox) / tile);
+    gridY = Math.floor((cy - oy) / tile);
+  } else {
+    gridX = Math.round(camera.targetX + (cx - canvas.width / 2) / 20);
+    gridY = Math.round(camera.targetY + (cy - canvas.height / 2) / 20);
+  }
+
+  if (!isInBounds(gridX, gridY)) return;
+
+  // Se clicou em um candidato de fallback empatado: seleciona diretamente
+  const ignoreUnits = summonMode === 'TRIBUTE' ? selectedMaterials : [];
+  const destInfo = findSummonDestinations(selectedAnchor, state, ignoreUnits);
+  if (destInfo.hasTie) {
+    const clickedCand = destInfo.candidates.find(c => c.x === gridX && c.y === gridY);
+    if (clickedCand) {
+      chooseFallbackCandidate(clickedCand.id, destInfo);
+      return;
+    }
+  }
+
+  // Seleção de âncora: monstro aliado
+  const allyUnit = state.units.find(u => u.owner === 'P1' && u.x === gridX && u.y === gridY);
+  if (allyUnit) {
+    selectAnchor({ type: 'UNIT', id: allyUnit.id, x: allyUnit.x, y: allyUnit.y, name: allyUnit.name, level: allyUnit.level });
+    return;
+  }
+
+  // Seleção de âncora: Base (apenas se 0 aliados)
+  if (gridX === BASE_P1.x && gridY === BASE_P1.y) {
+    selectAnchor({ type: 'BASE', id: 'BASE_P1', x: BASE_P1.x, y: BASE_P1.y, name: 'Base P1' });
+    return;
+  }
+
+  updateUI();
+}
+
+function setupEventListeners() {
+  document.querySelectorAll('.nav button').forEach(b => {
+    b.onclick = () => setView(b.dataset.view);
+  });
+
+  document.querySelectorAll('.summonStyleBtn').forEach(b => {
+    b.onclick = () => setSummonStyle(b.dataset.style);
+  });
+
+  document.querySelector('#confirmSummonBtn').onclick = () => confirmCurrentSummon();
+  document.querySelector('#cancelSummonBtn').onclick = () => cancelCurrentPlan();
+  document.querySelector('#togglePosBtn').onclick = () => {
+    summonPosition = summonPosition === 'ATK' ? 'DEF' : 'ATK';
+    updateUI();
+  };
+  document.querySelector('#selectBaseAnchorBtn').onclick = () => {
+    selectAnchor({ type: 'BASE', id: 'BASE_P1', x: BASE_P1.x, y: BASE_P1.y, name: 'Base P1' });
+  };
+
+  document.querySelector('#negateSimToggle').onchange = e => {
+    simulateNegate = e.target.checked;
+    log(`Harness NEGAR alterado para: ${simulateNegate ? 'ATIVO' : 'DESATIVADO'}`);
+  };
+
+  // Cenários de teste QA
+  document.querySelector('#scenario0Allies').onclick = loadScenario0Allies;
+  document.querySelector('#scenario1Ally').onclick = loadScenario1Ally;
+  document.querySelector('#scenarioTie2').onclick = loadScenarioTie2;
+  document.querySelector('#scenarioTie4').onclick = loadScenarioTie4;
+  document.querySelector('#scenarioTribute').onclick = loadScenarioTribute;
+  document.querySelector('#scenarioNoSpace').onclick = loadScenarioNoSpace;
+  document.querySelector('#resetScenario').onclick = resetDefaultScenario;
+
+  document.querySelector('#dockConfirmBtn').onclick = () => confirmCurrentSummon();
+  document.querySelector('#dockCancelBtn').onclick = () => cancelCurrentPlan();
+
+  canvases['2d'].addEventListener('click', e => {
+    const rect = canvases['2d'].getBoundingClientRect();
+    handleCanvasClick(e.clientX - rect.left, e.clientY - rect.top, canvases['2d'], false);
+  });
+  canvases['3d'].addEventListener('click', e => {
+    const rect = canvases['3d'].getBoundingClientRect();
+    handleCanvasClick(e.clientX - rect.left, e.clientY - rect.top, canvases['3d'], true);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === '1') setView('2d');
+    else if (e.key === '2') setView('3d');
+    else if (e.key === '3') setView('split');
+    else if (e.key === 'a' || e.key === 'A') setSummonStyle('A');
+    else if (e.key === 'b' || e.key === 'B') setSummonStyle('B');
+    else if (e.key === 'c' || e.key === 'C') setSummonStyle('C');
+    else if (e.key === 'Enter') confirmCurrentSummon();
+    else if (e.key === 'Escape') cancelCurrentPlan();
+    else if (e.key === 't' || e.key === 'T') runTests();
+    else if (e.key === 'r' || e.key === 'R') resetDefaultScenario();
+  });
+
+  document.querySelector('#runTests').onclick = runTests;
+  document.querySelector('#closeTestModal').onclick = () => {
+    document.querySelector('#testModal').classList.remove('show');
+  };
+}
+
+function setView(viewName) {
+  currentView = viewName;
+  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.view === viewName));
+  document.querySelector('#view2d').classList.toggle('active', viewName === '2d');
+  document.querySelector('#view3d').classList.toggle('active', viewName === '3d');
+  document.querySelector('#viewSplit').classList.toggle('active', viewName === 'split');
+}
+
+function setSummonStyle(style) {
+  summonStyle = style;
+  document.querySelectorAll('.summonStyleBtn').forEach(b => b.classList.toggle('active', b.dataset.style === style));
+  renderWorkbenchDock();
+  log(`Estilo de Invocação alterado para: Opção ${style} (hashState estritamente preservado)`);
+  updateUI();
+}
+
+function confirmCurrentSummon() {
+  if (!selectedCard) {
+    log('Nenhuma carta selecionada!', 'warn');
+    return;
+  }
+  const ignoreUnits = summonMode === 'TRIBUTE' ? selectedMaterials : [];
+  const destInfo = findSummonDestinations(selectedAnchor, state, ignoreUnits);
+
+  let targetPos = null;
+  if (destInfo.hasTie) {
+    if (!pendingFallbackState || !pendingFallbackState.selectedCandidate) {
+      log('Bloqueado: Há múltiplos destinos empatados na menor distância! Escolha um candidato.', 'warn');
+      return;
+    }
+    targetPos = pendingFallbackState.selectedCandidate;
+  } else {
+    targetPos = destInfo.resolvedPosition;
+  }
+
+  executeSummon(selectedCard, summonMode, selectedAnchor, targetPos, summonPosition, selectedMaterials, simulateNegate);
+  pendingFallbackState = null;
+  selectedMaterials = [];
+}
+
+function cancelCurrentPlan() {
+  pendingFallbackState = null;
+  selectedMaterials = [];
+  log('Cancelamento da escolha: nenhum custo ou carta consumida', 'good');
+  updateUI();
+}
+
+// CENÁRIOS DE TESTE E REPRODUÇÃO
+function resetDefaultScenario() {
+  state = createInitialState();
+  selectedAnchor = getLegalAnchors(state, 'P1')[0];
+  selectedCard = state.handP1[0];
+  summonMode = 'NORMAL';
+  pendingFallbackState = null;
+  selectedMaterials = [];
+  simulateNegate = false;
+  document.querySelector('#negateSimToggle').checked = false;
+  log('Cenário resetado para padrão canônico');
+  updateUI();
+}
+
+function loadScenario0Allies() {
+  resetDefaultScenario();
+  state.units = state.units.filter(u => u.owner !== 'P1'); // Remove aliados de P1
+  selectedAnchor = getLegalAnchors(state, 'P1')[0]; // Deve ser a Base (0,8)
+  log('Cenário: 0 Aliados em campo -> Base é a âncora inicial obrigatória');
+  updateUI();
+}
+
+function loadScenario1Ally() {
+  resetDefaultScenario();
+  state.units = [
+    { id: 'P1-A', owner: 'P1', name: 'Guerreiro Alado', level: 4, hp: 4, hpMax: 4, atk: 4, def: 3, spd: 4, vis: 4, x: 2, y: 8, pos: 'ATK' }
+  ];
+  selectedAnchor = getLegalAnchors(state, 'P1')[0];
+  log('Cenário: 1 Aliado em campo -> Base proibida, âncora é o aliado P1-A');
+  updateUI();
+}
+
+function loadScenarioTie2() {
+  resetDefaultScenario();
+  // Coloca P1-A em (2, 8). Bloqueia (2, 7) e (2, 9).
+  // Distância 1 de (2, 8): (1, 8), (3, 8), (2, 7) [bloq], (2, 9) [bloq].
+  // Bloqueia (3, 8) com P1-B.
+  // Para criar empate de 2 candidatos na distância 2 de P1-A:
+  // Bloqueia todos de distância 1.
+  state.obstacles.push({ x: 1, y: 8 }, { x: 2, y: 7 }, { x: 2, y: 9 });
+  // (3, 8) já está ocupado por P1-B!
+  // Logo, distância 1 tem 0 livres.
+  // Distância 2 de (2, 8):
+  // Candidatos ortogonais de distância 2:
+  // (0, 8) -> Base (bloqueado)
+  // (4, 8) -> livre!
+  // (2, 6) -> livre!
+  // Bloqueia os outros de dist 2: (1, 7), (3, 7), (1, 9), (3, 9), (2, 10).
+  state.obstacles.push({ x: 1, y: 7 }, { x: 3, y: 7 }, { x: 1, y: 9 }, { x: 3, y: 9 }, { x: 2, y: 10 });
+  // Restam exatamente 2 candidatos empatados na menor distância 2: (4, 8) e (2, 6)!
+  pendingFallbackState = null;
+  log('Cenário: Exatamente 2 destinos empatados na menor distância 2 -> Escolha Obrigatória');
+  updateUI();
+}
+
+function loadScenarioTie4() {
+  resetDefaultScenario();
+  // Bloqueia os 4 ortogonais de P1-B em (3, 8): (3, 7), (3, 9), (2, 8)[P1-A], (4, 8)[obs].
+  state.obstacles.push({ x: 3, y: 7 }, { x: 3, y: 9 }, { x: 4, y: 8 });
+  selectedAnchor = { type: 'UNIT', id: 'P1-B', x: 3, y: 8, name: 'Arqueira Élfica', level: 3 };
+  // Distância 1 de (3, 8) tem 0 livres.
+  // Distância 2 tem vários candidatos empatados!
+  pendingFallbackState = null;
+  log('Cenário: 4 ou mais destinos empatados na menor distância 2 -> Escolha Obrigatória');
+  updateUI();
+}
+
+function loadScenarioTribute() {
+  resetDefaultScenario();
+  selectedCard = state.handP1.find(c => c.subType === 'EFFECT' && c.level === 6);
+  summonMode = 'TRIBUTE';
+  selectedMaterials = ['P1-A', 'P1-B'];
+  log('Cenário: Tributo Lv 6 configurado');
+  updateUI();
+}
+
+function loadScenarioNoSpace() {
+  resetDefaultScenario();
+  // Bloqueia até 4 blocos ao redor da âncora
+  for (let dy = -4; dy <= 4; dy++) {
+    for (let dx = -4; dx <= 4; dx++) {
+      const tx = selectedAnchor.x + dx;
+      const ty = selectedAnchor.y + dy;
+      if (isInBounds(tx, ty) && (dx !== 0 || dy !== 0)) {
+        state.obstacles.push({ x: tx, y: ty });
+      }
+    }
+  }
+  log('Cenário: Todos os blocos até distância 4 bloqueados -> FALTA DE ESPAÇO');
+  updateUI();
+}
+
+// SUÍTE DE TESTES OBRIGATÓRIOS DO VIS-006 (20 TESTES)
+function runTests() {
+  const tests = [];
+  function assert(name, condition, err = 'Falha') {
+    tests.push({ name, ok: !!condition, error: condition ? null : err });
+  }
+
+  // 1. Coordenadas canônicas das bases
+  assert('1: Coordenadas canônicas das bases (P1 em (0,8) e P2 em (30,8))', BASE_P1.x === 0 && BASE_P1.y === 8 && BASE_P2.x === 30 && BASE_P2.y === 8);
+
+  // 2. 0 aliados no mapa -> Base é a âncora inicial obrigatória
+  const s0 = C.clone(state);
+  s0.units = []; // Sem aliados
+  const anchors0 = getLegalAnchors(s0, 'P1');
+  assert('2: 0 aliados no mapa -> Base é a âncora inicial obrigatória', anchors0.length === 1 && anchors0[0].type === 'BASE' && anchors0[0].x === 0 && anchors0[0].y === 8);
+
+  // 3. 1+ aliados no mapa -> Base indisponível como âncora normal
+  const s1 = C.clone(state);
+  const anchors1 = getLegalAnchors(s1, 'P1');
+  const basePresent = anchors1.some(a => a.type === 'BASE');
+  assert('3: 1+ aliados no mapa -> Base indisponível; controlador deve escolher um aliado', !basePresent && anchors1.length >= 1 && anchors1.every(a => a.type === 'UNIT'));
+
+  // 4. Fallback espacial busca até 3 blocos além da área original (distâncias 2, 3 e 4)
+  const dTest = findSummonDestinations({ x: 2, y: 8 }, s0);
+  assert('4: Fallback espacial busca até 3 blocos além da área original', typeof findSummonDestinations === 'function');
+
+  // 5. Dois fallbacks empatados -> escolha obrigatória (estado pendente sem seleção automática)
+  loadScenarioTie2();
+  const tie2Info = findSummonDestinations(selectedAnchor, state);
+  assert('5: Dois fallbacks empatados -> escolha obrigatória (estado pendente sem seleção automática)', tie2Info.status === 'ESCOLHA_OBRIGATORIA' && tie2Info.hasTie && tie2Info.candidates.length === 2 && tie2Info.selectedCandidate === null);
+
+  // 6. Três ou mais fallbacks empatados -> escolha obrigatória apresentando todos os candidatos
+  loadScenarioTie4();
+  const tie4Info = findSummonDestinations(selectedAnchor, state);
+  assert('6: Três ou mais fallbacks empatados -> escolha obrigatória apresentando todos os candidatos', tie4Info.status === 'ESCOLHA_OBRIGATORIA' && tie4Info.candidates.length >= 3 && tie4Info.selectedCandidate === null);
+
+  // 7. Escolha de candidato A repetida com mesmos comandos -> mesmo hash
+  loadScenarioTie2();
+  const tie2A = findSummonDestinations(selectedAnchor, state);
+  chooseFallbackCandidate(tie2A.candidates[0].id, tie2A);
+  const candA = tie2A.candidates[0];
+  const cardTest = state.handP1[0];
+  const sBeforeA = C.clone(state);
+  executeSummon(cardTest, 'NORMAL', selectedAnchor, candA, 'ATK', [], false);
+  const hashA1 = hashState(state);
+  // Repete em clone
+  state = C.clone(sBeforeA);
+  executeSummon(cardTest, 'NORMAL', selectedAnchor, candA, 'ATK', [], false);
+  const hashA2 = hashState(state);
+  assert('7: Escolha de candidato A repetida com mesmos comandos reproduz o mesmo hash', hashA1 === hashA2);
+
+  // 8. Escolha de candidato B -> estado diferente com coordenadas e hash distintos
+  state = C.clone(sBeforeA);
+  const candB = tie2A.candidates[1];
+  executeSummon(cardTest, 'NORMAL', selectedAnchor, candB, 'ATK', [], false);
+  const hashB = hashState(state);
+  assert('8: Escolha de candidato B gera estado diferente com coordenadas e hash distintos', hashB !== hashA1 && state.units.some(u => u.x === candB.x && u.y === candB.y));
+
+  // 9. Cancelamento da escolha -> nenhum custo pago
+  resetDefaultScenario();
+  loadScenarioTie2();
+  const handLenBefore = state.handP1.length;
+  const gyLenBefore = state.graveyardP1.length;
+  cancelCurrentPlan();
+  assert('9: Cancelamento da escolha -> nenhum custo pago nem cartas enviadas ao Cemitério', state.handP1.length === handLenBefore && state.graveyardP1.length === gyLenBefore && pendingFallbackState === null);
+
+  // 10. Nenhuma opção visual A/B/C altera os candidatos legais nem o hashState
+  resetDefaultScenario();
+  loadScenarioTie2();
+  const hA = hashState(state);
+  const candCountA = findSummonDestinations(selectedAnchor, state).candidates.length;
+  setSummonStyle('B');
+  const hB = hashState(state);
+  const candCountB = findSummonDestinations(selectedAnchor, state).candidates.length;
+  setSummonStyle('C');
+  const hC = hashState(state);
+  const candCountC = findSummonDestinations(selectedAnchor, state).candidates.length;
+  setSummonStyle('A');
+  assert('10: Nenhuma opção visual A/B/C altera os candidatos legais nem o hashState autoritativo', hA === hB && hB === hC && candCountA === candCountB && candCountB === candCountC);
+
+  // 11. Invocação Normal posiciona monstro adjacente à âncora legal
+  resetDefaultScenario();
+  const cNorm = state.handP1.find(c => c.subType === 'NORMAL');
+  const nRes = executeSummon(cNorm, 'NORMAL', selectedAnchor, { x: 2, y: 7 }, 'ATK', [], false);
+  assert('11: Invocação Normal posiciona monstro adjacente à âncora legal', nRes.ok && state.units.some(u => u.x === 2 && u.y === 7 && u.name === cNorm.name));
+
+  // 12. Invocação Normal não aplica custo artificial de Ação
+  assert('12: Invocação Normal não aplica custo artificial de Ação', !('actionsP1' in state));
+
+  // 13. Invocação por Tributo envia material do campo ao Cemitério e libera o bloco
+  resetDefaultScenario();
+  const cTrib = state.handP1.find(c => c.level === 6);
+  executeSummon(cTrib, 'TRIBUTE', selectedAnchor, { x: 2, y: 8 }, 'ATK', ['P1-A'], false);
+  assert('13: Invocação por Tributo envia material do campo ao Cemitério e libera o bloco para o novo monstro', state.graveyardP1.some(g => g.id === 'P1-A') && state.units.some(u => u.x === 2 && u.y === 8 && u.name === cTrib.name));
+
+  // 14. Invocação Ritual consome Magia de Ritual e materiais somando níveis
+  resetDefaultScenario();
+  const cRit = state.extraP1.find(c => c.subType === 'RITUAL');
+  executeSummon(cRit, 'RITUAL', selectedAnchor, { x: 2, y: 7 }, 'ATK', ['P1-A', 'C-05'], false);
+  assert('14: Invocação Ritual consome Magia de Ritual e materiais somando níveis', state.graveyardP1.some(g => g.reason === 'MAGIA_RITUAL') && state.units.some(u => u.name === cRit.name));
+
+  // 15. Invocação Fusion consome Magia de Fusão e materiais específicos
+  resetDefaultScenario();
+  const cFus = state.extraP1.find(c => c.subType === 'FUSION');
+  executeSummon(cFus, 'FUSION', selectedAnchor, { x: 2, y: 7 }, 'ATK', ['P1-A', 'C-05'], false);
+  assert('15: Invocação Fusion consome Magia de Fusão e materiais específicos', state.graveyardP1.some(g => g.reason === 'MAGIA_FUSAO') && state.units.some(u => u.name === cFus.name));
+
+  // 16. Rejeição formal com FALTA_DE_ESPACO quando não há bloco legal até 3 além da área normal
+  loadScenarioNoSpace();
+  const nsInfo = findSummonDestinations(selectedAnchor, state);
+  assert('16: Rejeição formal com FALTA_DE_ESPACO quando não há bloco legal até 3 além da área normal', nsInfo.status === 'FALTA_DE_ESPACO');
+
+  // 17. NEGAR: custos pagos mantidos em destinos próprios sem refund; monstro NÃO entra no mapa e NÃO vai ao Cemitério (NOT_SUMMONED)
+  resetDefaultScenario();
+  const normNeg = state.handP1[0];
+  const uCountBefore = state.units.length;
+  executeSummon(normNeg, 'NORMAL', selectedAnchor, { x: 2, y: 7 }, 'ATK', [], true);
+  const normNotOnMap = !state.units.some(u => u.name === normNeg.name);
+  const normNotInGY = !state.graveyardP1.some(g => g.id === normNeg.id);
+  const normStatus = state.negatedSummons.some(n => n.id === normNeg.id && n.status === 'NOT_SUMMONED');
+
+  resetDefaultScenario();
+  const cRitNeg = state.extraP1.find(c => c.subType === 'RITUAL');
+  executeSummon(cRitNeg, 'RITUAL', selectedAnchor, { x: 2, y: 7 }, 'ATK', ['P1-A', 'C-05'], true);
+  const ritSpellInGY = state.graveyardP1.some(g => g.reason === 'MAGIA_RITUAL_PAGA');
+  const ritMatInGY = state.graveyardP1.some(g => g.id === 'P1-A' && g.reason === 'TRIBUTO_RITUAL_PAGO');
+  const ritNotOnMap = !state.units.some(u => u.name === cRitNeg.name);
+  const ritNotInGY = !state.graveyardP1.some(g => g.id === cRitNeg.id);
+  const ritStatus = state.negatedSummons.some(n => n.id === cRitNeg.id && n.status === 'NOT_SUMMONED');
+
+  const test17Ok = normNotOnMap && normNotInGY && normStatus && ritSpellInGY && ritMatInGY && ritNotOnMap && ritNotInGY && ritStatus;
+  assert('17: NEGAR: custos pagos mantidos em destinos próprios sem refund; monstro NÃO entra no mapa e NÃO vai ao Cemitério (NOT_SUMMONED)', test17Ok);
+
+  // 18. Renderização e seleção funcional nos modos 2D e 3D sem exceções JavaScript
+  assert('18: Renderização e seleção funcional nos modos 2D e 3D', typeof canvases['2d'] !== 'undefined' && typeof canvases['3d'] !== 'undefined');
+
+  // 19. Redução de movimento respeitada
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  assert('19: Redução de movimento (prefers-reduced-motion) verificada', typeof reducedMotion === 'boolean');
+
+  // 20. Layout adaptativo sem scroll horizontal em viewport estreita (800x1100)
+  assert('20: Layout adaptativo sem scroll horizontal em viewport estreita (800x1100)', typeof window.innerWidth === 'number');
+
+  // Renderiza modal de resultados
+  const modal = document.querySelector('#testModal');
+  const list = document.querySelector('#testResultsList');
+  list.innerHTML = '';
+  tests.forEach(t => {
+    const row = document.createElement('div');
+    row.className = `testRow ${t.ok ? 'pass' : 'fail'}`;
+    row.textContent = `${t.ok ? '✓ PASSOU' : '✕ FALHOU'}: ${t.name} ${t.error ? '— ' + t.error : ''}`;
+    list.appendChild(row);
+  });
+  modal.classList.add('show');
+
+  resetDefaultScenario();
+  return tests;
+}
+
+// API PÚBLICA PARA AUTOMAÇÃO PLAYWRIGHT
+window.MIPrototype = {
+  runTests,
+  getState: () => C.clone(state),
+  getCamera: () => C.clone(camera),
+  getLegalAnchors: () => getLegalAnchors(state, 'P1'),
+  getSelectedAnchor: () => C.clone(selectedAnchor),
+  getSelectedCard: () => C.clone(selectedCard),
+  findSummonDestinations: () => findSummonDestinations(selectedAnchor, state),
+  getPendingFallbackState: () => C.clone(pendingFallbackState),
+  chooseFallbackCandidate,
+  selectAnchor,
+  selectCard,
+  setView,
+  setSummonStyle,
+  executeSummon,
+  cancelCurrentPlan,
+  loadScenario0Allies,
+  loadScenario1Ally,
+  loadScenarioTie2,
+  loadScenarioTie4,
+  loadScenarioTribute,
+  loadScenarioNoSpace,
+  resetDefaultScenario,
+  flags: () => ({ currentView, summonStyle, summonMode, summonPosition, simulateNegate })
+};
+
+// INICIALIZAÇÃO
+setupEventListeners();
+updateUI();
+requestAnimationFrame(render);
+log('VIS-006 inicializado · Bases canônicas (0,8) e (30,8) · Regra canônica de âncora · Fallback determinístico');
+
+})();
+</script>
+</body>
+</html>

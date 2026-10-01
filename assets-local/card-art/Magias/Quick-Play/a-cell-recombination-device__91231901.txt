@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: "A" Cell Recombination Device
+ID: 91231901
+Categoria: Magia
+Tipo da API: Spell Card
+Subtipo: Quick-Play
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+Target 1 face-up monster on the field; send 1 "Alien" monster from your Deck to the Graveyard, and if you do, place A-Counters on that monster equal to the Level of the sent monster. During your Main Phase, except the turn this card was sent to the Graveyard: You can banish this card from your Graveyard; add 1 "Alien" monster from your Deck to your hand.

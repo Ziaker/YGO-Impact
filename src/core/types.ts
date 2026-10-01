@@ -18,9 +18,26 @@ export interface CommandEnvelope {
 }
 
 export interface SimulationState {
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 16;
   readonly step: number;
   readonly seed: string;
+  readonly turn: import("./turn.ts").TurnState;
+  readonly priorityToken: import("./priority.ts").PriorityToken;
+  readonly randomAudit: readonly import("./random.ts").RandomDrawLog[];
+  readonly match: import("./match.ts").MatchState;
+  readonly cardSetup: import("./setup.ts").MatchCardSetup | null;
+  readonly pendingDrawModes: readonly import("./draw.ts").DrawSelection[];
+  readonly lastCompletedDrawTurn: number | null;
+  readonly content: import("./content.ts").MonsterCatalog | null;
+  readonly spatial: import("./spatial.ts").SpatialState | null;
+  readonly monsters: readonly import("./monster.ts").MonsterState[];
+  readonly fogKnowledge: readonly import("./fog.ts").PlayerFogKnowledge[];
+  readonly chainSystem: import("./chain.ts").ChainSystem;
+  readonly chainWindows: readonly import("./chain.ts").ChainWindow[];
+  readonly pendingBasicAttacks: readonly import("./battle.ts").PendingBasicAttack[];
+  readonly pendingBaseAttacks: readonly import("./battle.ts").PendingBaseAttack[];
+  readonly pendingReactionMovements: readonly import("./movement.ts").PendingReactionMovement[];
+  readonly lastCompletedSupportTurn: number | null;
 }
 
 export interface CoreEngine {
@@ -30,15 +47,24 @@ export interface CoreEngine {
   readonly stateHash: string;
 }
 
-export interface CommandProcessedEvent {
-  readonly type: "command_processed";
+export interface CommandAcceptedEvent {
+  readonly type: "command_accepted";
   readonly step: number;
   readonly sequence: number;
   readonly issuer: string;
   readonly kind: string;
 }
 
-export type CoreEvent = CommandProcessedEvent;
+export interface CommandRejectedEvent {
+  readonly type: "command_rejected";
+  readonly step: number;
+  readonly sequence: number;
+  readonly issuer: string;
+  readonly kind: string;
+  readonly reason: string;
+}
+
+export type CoreEvent = CommandAcceptedEvent | CommandRejectedEvent;
 
 export interface StepResult {
   readonly engine: CoreEngine;

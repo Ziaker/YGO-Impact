@@ -19,7 +19,7 @@ test("fixed simulation cadence is 20 Hz / 50 ms", () => {
 });
 
 test("commands registered during a step become eligible on the next step", () => {
-  const initial = createEngine("seed-1");
+  const initial = createEngine("seed-1", ["human:0", "ai:1"]);
   const queued = enqueueCommand(initial, { issuer: "human:0", kind: "noop" });
 
   assert.equal(initial.pendingCommands.length, 0);
@@ -32,7 +32,7 @@ test("commands registered during a step become eligible on the next step", () =>
 });
 
 test("registration sequence is stable and shared independently of issuer", () => {
-  let engine = createEngine("seed-2");
+  let engine = createEngine("seed-2", ["human:0", "ai:1"]);
   engine = enqueueCommand(engine, { issuer: "ai:1", kind: "second-name-but-first-registration" });
   engine = enqueueCommand(engine, { issuer: "human:0", kind: "first-name-but-second-registration" });
 
@@ -45,7 +45,7 @@ test("registration sequence is stable and shared independently of issuer", () =>
 
 test("same seed and command log produce identical per-step hashes", () => {
   const run = () => {
-    let engine = createEngine("replay-seed");
+    let engine = createEngine("replay-seed", ["human:0", "ai:1"]);
     const hashes = [engine.stateHash];
     engine = enqueueCommand(engine, { issuer: "human:0", kind: "noop", payload: { value: 7 } });
     engine = enqueueCommand(engine, { issuer: "ai:1", kind: "noop", payload: { value: -3 } });
@@ -72,7 +72,7 @@ test("authoritative numeric values reject floats and unsafe integers", () => {
 
 test("queued payloads are defensive immutable snapshots", () => {
   const payload = { nested: { value: 1 } };
-  const engine = enqueueCommand(createEngine("seed-3"), { issuer: "human:0", kind: "noop", payload });
+  const engine = enqueueCommand(createEngine("seed-3", ["human:0", "ai:1"]), { issuer: "human:0", kind: "noop", payload });
   payload.nested.value = 99;
 
   assert.equal(engine.pendingCommands[0].payload.nested.value, 1);
@@ -81,7 +81,7 @@ test("queued payloads are defensive immutable snapshots", () => {
 });
 
 test("returned authoritative structures are frozen", () => {
-  let engine = createEngine("seed-4");
+  let engine = createEngine("seed-4", ["human:0", "ai:1"]);
   engine = enqueueCommand(engine, { issuer: "human:0", kind: "noop", payload: { nested: [1, 2] } });
   const result = advanceStep(engine);
   assert.equal(Object.isFrozen(result.engine), true);

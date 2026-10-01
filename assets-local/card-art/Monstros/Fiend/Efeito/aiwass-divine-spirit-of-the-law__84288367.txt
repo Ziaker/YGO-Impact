@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Aiwass, Divine Spirit of the Law
+ID: 84288367
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Fiend
+Nível: 8
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+You can banish this card from your hand or field; add 1 "Aleister" monster from your Deck to your hand, then if this effect was activated on the field, immediately after this effect resolves, you can Normal Summon 1 Spellcaster monster. If a face-up Fusion Monster(s) you control is sent to the GY, except by battle, while this card is in your GY (except during the Damage Step): You can Special Summon this card, then you can Fusion Summon 1 "Invoked" monster from your Extra Deck, using monsters from your hand or field. You can only use each effect of "Aiwass, Divine Spirit of the Law" once per turn.

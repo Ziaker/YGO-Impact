@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: "Raise Moon" the City that Never Sleeps
+ID: 72978038
+Categoria: Magia
+Tipo da API: Spell Card
+Subtipo: Continuous
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+The first time each Level 7 "Raise Moon" monster you control would be destroyed by card effect each turn, it is not destroyed. Once per turn, during the End Phase: Shuffle all "Raise Moon" cards in your GY and banishment into the Deck. Once per turn: You can activate 1 of these effects;
+● Place 1 card from your hand on the top or bottom of the Deck, then draw 1 card.
+● If you control a Spellcaster "Raise Moon" Xyz Monster: You can draw 1 card.

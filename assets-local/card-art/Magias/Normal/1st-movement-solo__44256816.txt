@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: 1st Movement Solo
+ID: 44256816
+Categoria: Magia
+Tipo da API: Spell Card
+Subtipo: Normal
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+If you control no monsters: Special Summon 1 Level 4 or lower "Melodious" monster from your hand or Deck. You can only activate 1 "1st Movement Solo" per turn. You cannot Special Summon monsters during the turn you activate this card, except "Melodious" monsters.

@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monster Impact — VIS-006.2 · Identidade Visual da Invocação Fusão</title>
+  <style>
+    :root {
+      --bg: #070b11;
+      --panel: #0d1622f2;
+      --border: #1e293b;
+      --text: #e2e8f0;
+      --text-muted: #849cb5;
+      --fusion-violet: #a855f7;
+      --fusion-magenta: #d946ef;
+      --flame-orange: #fb923c;
+      --flame-rose: #f43f5e;
+      --cosmic-cyan: #06b6d4;
+      --cosmic-blue: #3b82f6;
+      --alchemy-gold: #ffd166;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOP HEADER */
+    header {
+      height: 52px;
+      background: #09101af5;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #fff;
+    }
+    .tag-vis {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #7c3aed22;
+      border: 1px solid #7c3aed88;
+      color: #c084fc;
+      letter-spacing: 0.5px;
+    }
+
+    /* STYLE SELECTOR (A / B / C) */
+    .style-selector {
+      display: flex;
+      background: #060a10;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      gap: 4px;
+    }
+    .style-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .style-btn:hover {
+      color: #fff;
+      background: #ffffff0a;
+    }
+    .style-btn.active {
+      background: #231238;
+      color: #fff;
+      border-color: #a855f7;
+    }
+    .style-btn .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* HEADER CONTROLS */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toggle-group {
+      display: flex;
+      background: #0a111a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .toggle-opt {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .toggle-opt.active {
+      background: #1e293b;
+      color: #fff;
+    }
+    .btn {
+      background: #131c2b;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn:hover { background: #1c283c; color: #fff; }
+
+    /* WORKSPACE */
+    main {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* OPTION DETAILS OVERLAY */
+    .option-overlay {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      width: 320px;
+      background: #09101ae8;
+      border: 1px solid #1e2e42;
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 24px #00000088;
+      backdrop-filter: blur(8px);
+      z-index: 50;
+      pointer-events: none;
+    }
+    .option-overlay h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .option-overlay p {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+    .stage-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .step-pill {
+      font-size: 9px;
+      font-weight: 700;
+      text-align: center;
+      padding: 5px 2px;
+      border-radius: 5px;
+      background: #080f1a;
+      border: 1px solid #1a2838;
+      color: var(--text-muted);
+      letter-spacing: 0.2px;
+      transition: all 0.2s;
+    }
+    .step-pill.active {
+      background: #2e1040;
+      border-color: #c084fc;
+      color: #fff;
+    }
+
+    /* PLAYBACK BAR */
+    .playback-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0a121ef2;
+      border: 1px solid #1e2e42;
+      padding: 8px 16px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 12px 30px #000000aa;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+    .play-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: #7c3aed;
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s, background 0.15s;
+    }
+    .play-btn:hover { transform: scale(1.06); background: #9333ea; }
+    .scrubber-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .scrubber {
+      width: 170px;
+      -webkit-appearance: none;
+      height: 5px;
+      background: #182738;
+      border-radius: 3px;
+      outline: none;
+    }
+    .scrubber::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #a855f7;
+      cursor: pointer;
+      box-shadow: 0 0 8px #a855f7aa;
+    }
+    .time-label {
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--text-muted);
+      width: 36px;
+    }
+    .unit-selector {
+      display: flex;
+      background: #0a111a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .unit-opt {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .unit-opt.active {
+      background: #2e1040;
+      color: #e9d5ff;
+    }
+
+    /* KEYBOARD HINTS */
+    .key-badge {
+      display: inline-block;
+      padding: 1px 4px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 3px;
+      font-size: 9px;
+      font-family: monospace;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header>
+    <div class="brand">
+      <span class="brand-title">MONSTER IMPACT</span>
+      <span class="tag-vis">VIS-006.2 · FUSÃO</span>
+    </div>
+
+    <!-- SELETOR DAS 3 PROPOSTAS DE FUSÃO -->
+    <div class="style-selector">
+      <button class="style-btn active" data-style="A" id="btnOptA">
+        <span class="dot" style="color:var(--fusion-magenta)"></span>
+        A · Vórtice Bicolor (Polimerização) [Aprovado]
+      </button>
+      <button class="style-btn" data-style="B" id="btnOptB">
+        <span class="dot" style="color:var(--flame-orange)"></span>
+        B · Colisão Elemental [Histórico]
+      </button>
+      <button class="style-btn" data-style="C" id="btnOptC">
+        <span class="dot" style="color:var(--alchemy-gold)"></span>
+        C · Selo Alquímico [Histórico]
+      </button>
+    </div>
+
+    <!-- CONTROLES DE CÂMERA -->
+    <div class="header-actions">
+      <div class="toggle-group">
+        <button class="toggle-opt active" id="btn3D">3D Tático</button>
+        <button class="toggle-opt" id="btn2D">2D Top-Down</button>
+      </div>
+      <button class="btn" id="btnResetCam" title="Resetar Câmera">⟲ Câmera</button>
+    </div>
+  </header>
+
+  <!-- WORKSPACE VISUAL -->
+  <main>
+    <canvas id="viewCanvas"></canvas>
+
+    <!-- PAINEL EXPLICATIVO DA DIREÇÃO ATIVA -->
+    <div class="option-overlay" id="overlayPanel" style="border-color:#7c3aed66;">
+      <h2 id="ovTitle" style="color:var(--fusion-violet)">Opção A — Vórtice Bicolor (Polimerização) [Aprovado]</h2>
+      <p id="ovDesc">Linguagem canônica aprovada para Invocação Fusão: dois fluxos espirais contrastantes (carmesim ígneo e ciano safira) giram em vórtice acelerado descendente. Ao colidirem no centro, fundem-se em clarão violeta com anel de choque e condensam o monstro.</p>
+      <div class="stage-steps">
+        <div class="step-pill active" id="pill1">1. Turbilhão (0-300ms)</div>
+        <div class="step-pill" id="pill2">2. Torsão (300-700ms)</div>
+        <div class="step-pill" id="pill3">3. Fusão (700-1050ms)</div>
+        <div class="step-pill" id="pill4">4. Fixação (1050-1300ms)</div>
+      </div>
+      <div style="font-size: 9.5px; color: #849cb5cc; margin-top: 8px; border-top: 1px solid #ffffff14; padding-top: 6px; line-height: 1.35;">
+        <strong>Decisão Oficial VIS-006.2:</strong> Opção A aprovada pelo autor como padrão visual de Invocação Fusão. Opções B e C mantidas como comparadores históricos.
+      </div>
+    </div>
+
+    <!-- BARRA DE REPRODUÇÃO FLUTUANTE -->
+    <div class="playback-bar">
+      <button class="play-btn" id="playBtn" title="Reproduzir / Pausar (Espaço)">❚❚</button>
+      <button class="btn" id="replayBtn" title="Reiniciar Animação (R)" style="padding:4px 8px;">↺</button>
+      
+      <div class="scrubber-container">
+        <input type="range" class="scrubber" id="scrubber" min="0" max="1000" value="0">
+        <span class="time-label" id="timeLabel">0.0s</span>
+      </div>
+
+      <div class="toggle-group">
+        <button class="toggle-opt active" id="spdNormal">1.0x</button>
+        <button class="toggle-opt" id="spdSlow">0.5x</button>
+      </div>
+
+      <div class="unit-selector">
+        <button class="unit-opt active" id="unitWarrior">Guerreiro de Fusão</button>
+        <button class="unit-opt" id="unitDragon">Dragão de Fusão</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ==========================================
+    // MONSTER IMPACT — VIS-006.2 IDENTIDADE VISUAL FUSÃO
+    // Palco fixo congelado (mapa 31x17, célula (7, 8), câmera VIS-002, badges VIS-004)
+    // Duração exata: 1300 ms (mesmo timing calibrado do VIS-006 e VIS-006.1)
+    // ==========================================
+
+    const MAP_W = 31;
+    const MAP_H = 17;
+    const TILE_SIZE = 56;
+    const TARGET_TILE = { x: 7, y: 8 };
+
+    let currentStyle = 'A'; // 'A' | 'B' | 'C'
+    let is3D = true;
+    let animProgress = 0;   // 0.0 a 1.0
+    let isPlaying = true;
+    let animSpeed = 1.0;
+    let animDuration = 1300; // ms
+    let lastTime = performance.now();
+    let selectedUnitType = 'warrior'; // 'warrior' | 'dragon'
+
+    // CÂMERA 3D (CONTRATO APROVADO VIS-002)
+    const camera = {
+      rotX: 54 * Math.PI / 180,
+      rotZ: -20 * Math.PI / 180,
+      zoom: 1.95,
+      panX: 0,
+      panY: 75,
+      isDragging: false,
+      lastMouseX: 0,
+      lastMouseY: 0
+    };
+
+    const canvas = document.getElementById('viewCanvas');
+    const ctx = canvas.getContext('2d');
+    const playBtn = document.getElementById('playBtn');
+    const replayBtn = document.getElementById('replayBtn');
+    const scrubber = document.getElementById('scrubber');
+    const timeLabel = document.getElementById('timeLabel');
+    const overlayPanel = document.getElementById('overlayPanel');
+    const ovTitle = document.getElementById('ovTitle');
+    const ovDesc = document.getElementById('ovDesc');
+    const pill1 = document.getElementById('pill1');
+    const pill2 = document.getElementById('pill2');
+    const pill3 = document.getElementById('pill3');
+    const pill4 = document.getElementById('pill4');
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = canvas.clientWidth * dpr;
+      canvas.height = canvas.clientHeight * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // INTERAÇÃO DE CÂMERA LIVRE
+    canvas.addEventListener('mousedown', e => {
+      camera.isDragging = true;
+      camera.lastMouseX = e.clientX;
+      camera.lastMouseY = e.clientY;
+    });
+    window.addEventListener('mouseup', () => { camera.isDragging = false; });
+    window.addEventListener('mousemove', e => {
+      if (!camera.isDragging) return;
+      const dx = e.clientX - camera.lastMouseX;
+      const dy = e.clientY - camera.lastMouseY;
+      camera.lastMouseX = e.clientX;
+      camera.lastMouseY = e.clientY;
+
+      if (e.buttons === 2 || e.shiftKey) {
+        camera.panX += dx;
+        camera.panY += dy;
+      } else {
+        camera.rotZ += dx * 0.006;
+        camera.rotX = Math.max(0.2, Math.min(Math.PI * 0.46, camera.rotX + dy * 0.006));
+      }
+    });
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      camera.zoom = Math.max(0.6, Math.min(2.5, camera.zoom * (e.deltaY > 0 ? 0.92 : 1.08)));
+    });
+
+    // PROJEÇÃO 2D / 3D CANÔNICA
+    function project(x, y, z = 0) {
+      const centerX = canvas.clientWidth / 2 + camera.panX;
+      const centerY = canvas.clientHeight / 2 + camera.panY;
+
+      const worldX = (x - TARGET_TILE.x) * TILE_SIZE;
+      const worldY = (y - TARGET_TILE.y) * TILE_SIZE;
+      const worldZ = z * TILE_SIZE;
+
+      if (!is3D) {
+        return {
+          x: centerX + worldX * camera.zoom,
+          y: centerY + worldY * camera.zoom,
+          scale: camera.zoom
+        };
+      }
+
+      const cosZ = Math.cos(camera.rotZ);
+      const sinZ = Math.sin(camera.rotZ);
+      const rx = worldX * cosZ - worldY * sinZ;
+      const ry = worldX * sinZ + worldY * cosZ;
+
+      const cosX = Math.cos(camera.rotX);
+      const sinX = Math.sin(camera.rotX);
+      const py = ry * cosX - worldZ * sinX;
+      const pz = ry * sinX + worldZ * cosX;
+
+      const fov = 1100;
+      const factor = (fov / (fov + pz)) * camera.zoom;
+
+      return {
+        x: centerX + rx * factor,
+        y: centerY + py * factor,
+        scale: factor
+      };
+    }
+
+    function projectGround(dx, dy, dz = 0) {
+      return project(TARGET_TILE.x + dx / TILE_SIZE, TARGET_TILE.y + dy / TILE_SIZE, dz);
+    }
+
+    function drawGroundCircle(radius, strokeStyle, fillStyle, lineWidth = 1, shadowBlur = 0, shadowColor = null, startA = 0, endA = Math.PI * 2, segs = 40) {
+      ctx.save();
+      if (shadowBlur > 0 && shadowColor) {
+        ctx.shadowBlur = shadowBlur;
+        ctx.shadowColor = shadowColor;
+      }
+      ctx.beginPath();
+      const step = (endA - startA) / segs;
+      for (let i = 0; i <= segs; i++) {
+        const a = startA + i * step;
+        const pt = projectGround(Math.cos(a) * radius, Math.sin(a) * radius, 0);
+        if (i === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      }
+      if (fillStyle) {
+        ctx.closePath();
+        ctx.fillStyle = fillStyle;
+        ctx.fill();
+      }
+      if (strokeStyle) {
+        const p0 = projectGround(radius, 0, 0);
+        ctx.strokeStyle = strokeStyle;
+        ctx.lineWidth = lineWidth * p0.scale;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // PALCO FIXO CANÔNICO (GRADE 31x17 COM CÉLULA ALVO E BADGES)
+    function renderBoard() {
+      ctx.fillStyle = '#070b11';
+      ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+      const rangeX = 7;
+      const rangeY = 5;
+
+      for (let dy = -rangeY; dy <= rangeY; dy++) {
+        for (let dx = -rangeX; dx <= rangeX; dx++) {
+          const gx = TARGET_TILE.x + dx;
+          const gy = TARGET_TILE.y + dy;
+          if (gx < 0 || gx >= MAP_W || gy < 0 || gy >= MAP_H) continue;
+
+          const p0 = project(gx - 0.48, gy - 0.48, 0);
+          const p1 = project(gx + 0.48, gy - 0.48, 0);
+          const p2 = project(gx + 0.48, gy + 0.48, 0);
+          const p3 = project(gx - 0.48, gy + 0.48, 0);
+
+          const isTarget = (gx === TARGET_TILE.x && gy === TARGET_TILE.y);
+
+          ctx.beginPath();
+          ctx.moveTo(p0.x, p0.y);
+          ctx.lineTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.lineTo(p3.x, p3.y);
+          ctx.closePath();
+
+          if (isTarget) {
+            ctx.fillStyle = currentStyle === 'A' ? '#a855f718' : currentStyle === 'B' ? '#ea580c18' : '#eab30818';
+            ctx.strokeStyle = currentStyle === 'A' ? '#c084fc' : currentStyle === 'B' ? '#f97316' : '#ffd166';
+            ctx.lineWidth = 2;
+          } else {
+            ctx.fillStyle = '#0d1622';
+            ctx.strokeStyle = '#182738';
+            ctx.lineWidth = 1;
+          }
+
+          ctx.fill();
+          ctx.stroke();
+
+          // Coordenadas discretas e badges VIS-004 Opção A
+          if (!isTarget && (dx % 2 === 0 && dy % 2 === 0)) {
+            ctx.fillStyle = '#2c4257';
+            ctx.font = '8px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${gx},${gy}`, p0.x + (p2.x - p0.x) * 0.5, p0.y + (p2.y - p0.y) * 0.5);
+          }
+        }
+      }
+
+      // Base P1 em (0, 8)
+      const basePos = project(0, 8, 0);
+      ctx.fillStyle = '#102436';
+      ctx.strokeStyle = '#00f0ff44';
+      ctx.beginPath();
+      ctx.arc(basePos.x, basePos.y, 22 * basePos.scale, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#00f0ffaa';
+      ctx.font = `${Math.round(8 * basePos.scale)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText('BASE P1', basePos.x, basePos.y + 3);
+    }
+
+    // RENDERIZAÇÃO DA UNIDADE SÓLIDA DE FUSÃO COM BADGE VIS-004
+    function renderSolidMonster(target, opacity = 1.0, scaleMod = 1.0, zOffset = 0) {
+      if (opacity <= 0.01) return;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+
+      const base = project(target.x, target.y, zOffset);
+      const top = project(target.x, target.y, zOffset + 1.55 * scaleMod);
+
+      // Sombra projetada no piso
+      const ground = project(target.x, target.y, 0);
+      const shadowScale = Math.max(0.35, 1.0 - zOffset * 0.4) * scaleMod;
+      ctx.fillStyle = `rgba(0, 0, 0, ${0.7 * opacity * Math.max(0, 1.0 - zOffset * 0.3)})`;
+      ctx.beginPath();
+      ctx.ellipse(ground.x, ground.y, 25 * ground.scale * shadowScale, 13 * ground.scale * shadowScale, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      const radius = 23 * base.scale * scaleMod;
+      const height = (base.y - top.y);
+
+      // Pedestal de Fusão (Violeta Profundo com gradiente púrpura/magenta)
+      const grad = ctx.createLinearGradient(base.x - radius, 0, base.x + radius, 0);
+      if (selectedUnitType === 'warrior') {
+        grad.addColorStop(0, '#2e1040');
+        grad.addColorStop(0.3, '#6b21a8');
+        grad.addColorStop(0.7, '#9333ea');
+        grad.addColorStop(1, '#1b0728');
+      } else {
+        grad.addColorStop(0, '#3b0731');
+        grad.addColorStop(0.3, '#86198f');
+        grad.addColorStop(0.7, '#c026d3');
+        grad.addColorStop(1, '#240420');
+      }
+
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = '#f5d0fe';
+      ctx.lineWidth = 2;
+      ctx.shadowColor = '#d946ef';
+      ctx.shadowBlur = 12 * opacity;
+
+      ctx.beginPath();
+      ctx.roundRect(base.x - radius, top.y, radius * 2, height, 8 * base.scale);
+      ctx.fill();
+      ctx.stroke();
+
+      // Ícone de Fusão no monstro
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${Math.round(15 * base.scale)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(selectedUnitType === 'warrior' ? '⚔' : '🐲', base.x, top.y + height * 0.48);
+
+      // Tag de Atributos Táticos (Indicação de Fusão Canônica)
+      ctx.fillStyle = '#140b20';
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(base.x - 32 * base.scale, top.y - 15 * base.scale, 64 * base.scale, 12 * base.scale, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#e9d5ff';
+      ctx.font = `bold ${Math.round(8.5 * base.scale)}px monospace`;
+      ctx.fillText('FUSÃO · N8', base.x, top.y - 6 * base.scale);
+
+      ctx.restore();
+    }
+
+    // ========================================================
+    // OPÇÃO A: VÓRTICE BICOLOR (ESPIRAL DE POLIMERIZAÇÃO)
+    // Cores: Carmesim/Laranja (#f43f5e / #fb923c) & Ciano/Safira (#06b6d4 / #3b82f6)
+    // Convergência: Mistura violenta em Violeta/Magenta (#c026d3 / #d946ef / #ffffff)
+    // ========================================================
+    function renderFusionA(progress) {
+      // Fase 1: Turbilhão Espiral Bicolor (0 - 0.23) ~ 0 - 300ms
+      // Fase 2: Torsão & Interpenetração (0.23 - 0.54) ~ 300 - 700ms
+      // Fase 3: Fusão de Plasma & Anel de Choque (0.54 - 0.81) ~ 700 - 1050ms
+      // Fase 4: Fixação Sólida & Dispersão (0.81 - 1.0) ~ 1050 - 1300ms
+
+      const tSec = progress * 1.3;
+      const angleRot = progress * Math.PI * 8.5; // rotação acelerada
+
+      // 1. ANÉIS NO CHÃO
+      const baseAlpha = Math.min(1.0, progress * 4.0) * (progress > 0.85 ? Math.max(0, 1.0 - (progress - 0.85) * 6.0) : 1.0);
+      if (baseAlpha > 0.01) {
+        // Círculo externo bicolor dividido
+        drawGroundCircle(26, `rgba(168, 85, 247, ${baseAlpha * 0.7})`, null, 1.5, 8, '#a855f7');
+        drawGroundCircle(18, `rgba(217, 70, 239, ${baseAlpha * 0.5})`, `rgba(124, 58, 237, ${baseAlpha * 0.08})`, 1);
+      }
+
+      // 2. DUAS CORRENTES ESPIRAIS CÔNICAS CONVERGENTES (Carmesim e Ciano)
+      if (progress < 0.85) {
+        const spiralAlpha = progress < 0.65 ? Math.min(1.0, progress * 3.0) : Math.max(0, 1.0 - (progress - 0.65) * 4.5);
+        const numPoints = 65;
+        const maxH = 2.0;
+
+        ctx.save();
+        ctx.lineWidth = 2.5 * camera.zoom;
+
+        // Corrente 1: Carmesim Ígneo
+        ctx.strokeStyle = `rgba(244, 63, 94, ${spiralAlpha})`;
+        ctx.shadowColor = '#f43f5e';
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        for (let i = 0; i < numPoints; i++) {
+          const u = i / numPoints;
+          const a = angleRot + u * Math.PI * 4.5;
+          const r = (24 * (1.0 - u * 0.65)) * (1.0 - progress * 0.35);
+          const z = (1.0 - u) * maxH * (1.0 - progress * 0.25);
+          const p = projectGround(Math.cos(a) * r, Math.sin(a) * r, z);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+
+        // Corrente 2: Ciano/Safira (Defasada em 180 graus)
+        ctx.strokeStyle = `rgba(6, 182, 212, ${spiralAlpha})`;
+        ctx.shadowColor = '#06b6d4';
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        for (let i = 0; i < numPoints; i++) {
+          const u = i / numPoints;
+          const a = angleRot + Math.PI + u * Math.PI * 4.5;
+          const r = (24 * (1.0 - u * 0.65)) * (1.0 - progress * 0.35);
+          const z = (1.0 - u) * maxH * (1.0 - progress * 0.25);
+          const p = projectGround(Math.cos(a) * r, Math.sin(a) * r, z);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        // Partículas bicolores em órbita
+        const particleCount = 20;
+        for (let p = 0; p < particleCount; p++) {
+          const pFrac = (progress * 3.5 + p / particleCount) % 1.0;
+          const isRed = p % 2 === 0;
+          const a = angleRot * 1.4 + p * (Math.PI * 2 / particleCount) + (isRed ? 0 : Math.PI);
+          const r = (20 * (1.0 - pFrac * 0.6));
+          const z = (1.0 - pFrac) * maxH;
+          const pt = projectGround(Math.cos(a) * r, Math.sin(a) * r, z);
+          
+          ctx.save();
+          ctx.fillStyle = isRed ? '#fb923c' : '#38bdf8';
+          ctx.shadowColor = isRed ? '#f97316' : '#00f0ff';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, Math.max(1.2, (2.2 - pFrac * 1.0) * pt.scale), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // 3. FASE 3: IMPACTO DE FUSÃO & ONDA DE CHOQUE VIOLETA (t = 0.54 a 0.85)
+      if (progress >= 0.52 && progress <= 0.88) {
+        const shockP = (progress - 0.52) / 0.36; // 0.0 a 1.0
+        const shockRadius = 4 + shockP * 48;
+        const shockAlpha = Math.max(0, 1.0 - shockP) * 0.85;
+
+        drawGroundCircle(shockRadius, `rgba(217, 70, 239, ${shockAlpha})`, `rgba(168, 85, 247, ${shockAlpha * 0.15})`, 3, 14, '#d946ef');
+        
+        // Flash central de plasma violeta puro
+        if (shockP < 0.4) {
+          const flashAlpha = (1.0 - shockP / 0.4);
+          const center = project(TARGET_TILE.x, TARGET_TILE.y, 0.75);
+          ctx.save();
+          ctx.fillStyle = `rgba(255, 255, 255, ${flashAlpha * 0.95})`;
+          ctx.shadowColor = '#d946ef';
+          ctx.shadowBlur = 28;
+          ctx.beginPath();
+          ctx.arc(center.x, center.y, 22 * center.scale * (1.0 + shockP), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // 4. MATERIALIZAÇÃO SÓLIDA DO MONSTRO DE FUSÃO
+      if (progress >= 0.54) {
+        const monsterNorm = (progress - 0.54) / 0.46; // 0.0 a 1.0
+        const monsterAlpha = Math.min(1.0, monsterNorm * 1.8);
+        const zOffset = (1.0 - Math.min(1.0, monsterNorm * 1.5)) * 0.4;
+        renderSolidMonster(TARGET_TILE, monsterAlpha, 1.0, zOffset);
+      }
+
+      // 5. FILAMENTOS RESIDUAIS DE POLIMERIZAÇÃO ORBITANDO A UNIDADE (0.75 a 1.0)
+      if (progress >= 0.75) {
+        const resNorm = (progress - 0.75) / 0.25;
+        const resAlpha = Math.max(0, 1.0 - resNorm) * 0.75;
+        const center = project(TARGET_TILE.x, TARGET_TILE.y, 0.5);
+
+        ctx.save();
+        ctx.lineWidth = 1.5 * camera.zoom;
+        ctx.strokeStyle = `rgba(192, 132, 252, ${resAlpha})`;
+        ctx.shadowColor = '#c084fc';
+        ctx.shadowBlur = 6;
+        for (let i = 0; i < 3; i++) {
+          const a = angleRot * 0.7 + i * (Math.PI * 2 / 3);
+          const r = 24 * (1.0 - resNorm * 0.3);
+          const p1 = projectGround(Math.cos(a) * r, Math.sin(a) * r, 0.2 + i * 0.35);
+          const p2 = projectGround(Math.cos(a + 0.9) * r, Math.sin(a + 0.9) * r, 0.4 + i * 0.35);
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+
+    // ========================================================
+    // OPÇÃO B: COLISÃO E AMÁLGAMA ELEMENTAL
+    // Dois núcleos densos aceleram em lados opostos e colidem no centro com explosão de ponto zero
+    // ========================================================
+    function renderFusionB(progress) {
+      // Fase 1: Carga dos Núcleos (0 - 0.23) ~ 0 - 300ms
+      // Fase 2: Aceleração Frontal & Trajetória (0.23 - 0.50) ~ 300 - 650ms
+      // Fase 3: Impacto de Ponto Zero & Onda Esférica (0.50 - 0.77) ~ 650 - 1000ms
+      // Fase 4: Fixação Gravitacional & Resfriamento (0.77 - 1.0) ~ 1000 - 1300ms
+
+      const tSec = progress * 1.3;
+
+      // 1. CAMPO GRAVITACIONAL DE BASE
+      const gridGlow = Math.min(1.0, progress * 4.0) * (progress > 0.85 ? Math.max(0, 1.0 - (progress - 0.85) * 6.0) : 1.0);
+      if (gridGlow > 0.01) {
+        drawGroundCircle(22, `rgba(249, 115, 22, ${gridGlow * 0.75})`, `rgba(234, 88, 12, ${gridGlow * 0.1})`, 1.5, 10, '#f97316');
+      }
+
+      // 2. OS DOIS NÚCLEOS COLISORES (Leste e Oeste)
+      if (progress < 0.58) {
+        const coreProgress = Math.min(1.0, progress / 0.50); // 0 a 1 até a colisão
+        const dist = 32 * (1.0 - Math.pow(coreProgress, 2.5)); // aproximação parabólica acelerada
+        const heightZ = Math.sin(coreProgress * Math.PI) * 0.75 + 0.35;
+        const trailAlpha = Math.min(1.0, progress * 3.5);
+
+        // Núcleo A: Laranja/Âmbar (Vem da Esquerda / dx negativo)
+        const posA = projectGround(-dist, 0, heightZ);
+        // Núcleo B: Púrpura Profundo (Vem da Direita / dx positivo)
+        const posB = projectGround(dist, 0, heightZ);
+
+        // Rastros dinâmicos de alta velocidade
+        ctx.save();
+        ctx.lineWidth = 3.5 * camera.zoom;
+        
+        // Rastro A
+        ctx.strokeStyle = `rgba(251, 146, 60, ${trailAlpha * 0.8})`;
+        ctx.shadowColor = '#ea580c';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        const tailA = projectGround(-dist - 14 * (1.0 - coreProgress), 0, heightZ);
+        ctx.moveTo(tailA.x, tailA.y);
+        ctx.lineTo(posA.x, posA.y);
+        ctx.stroke();
+
+        // Rastro B
+        ctx.strokeStyle = `rgba(168, 85, 247, ${trailAlpha * 0.8})`;
+        ctx.shadowColor = '#9333ea';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        const tailB = projectGround(dist + 14 * (1.0 - coreProgress), 0, heightZ);
+        ctx.moveTo(tailB.x, tailB.y);
+        ctx.lineTo(posB.x, posB.y);
+        ctx.stroke();
+
+        // Esfera Núcleo A
+        ctx.fillStyle = '#ffedd5';
+        ctx.shadowColor = '#f97316';
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.arc(posA.x, posA.y, 6.5 * posA.scale, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Esfera Núcleo B
+        ctx.fillStyle = '#fae8ff';
+        ctx.shadowColor = '#c084fc';
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.arc(posB.x, posB.y, 6.5 * posB.scale, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+
+        // Arcos elétricos entre os dois núcleos conforme se aproximam
+        if (dist < 18 && dist > 1) {
+          ctx.save();
+          ctx.strokeStyle = '#ffffffdd';
+          ctx.lineWidth = 1.5;
+          ctx.shadowColor = '#ffd166';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.moveTo(posA.x, posA.y);
+          const midX = (posA.x + posB.x) * 0.5 + (Math.random() - 0.5) * 12;
+          const midY = (posA.y + posB.y) * 0.5 + (Math.random() - 0.5) * 12;
+          ctx.lineTo(midX, midY);
+          ctx.lineTo(posB.x, posB.y);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // 3. FASE 3: IMPACTO DE PONTO ZERO & ONDA DE CHOQUE (0.50 - 0.85)
+      if (progress >= 0.49 && progress <= 0.85) {
+        const impactP = (progress - 0.49) / 0.36; // 0.0 a 1.0
+        const center = project(TARGET_TILE.x, TARGET_TILE.y, 0.4);
+
+        // Esfera volumétrica translúcida de choque se expandindo
+        const sphereR = (4 + impactP * 36) * center.scale;
+        const sphereAlpha = Math.max(0, 1.0 - impactP);
+
+        ctx.save();
+        ctx.fillStyle = `rgba(255, 237, 213, ${sphereAlpha * 0.35})`;
+        ctx.strokeStyle = `rgba(249, 115, 22, ${sphereAlpha * 0.9})`;
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#f97316';
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, sphereR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Estilhaços de plasma / centelhas radiais
+        const sparkCount = 12;
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#fb923c';
+        ctx.shadowBlur = 6;
+        for (let s = 0; s < sparkCount; s++) {
+          const sa = s * (Math.PI * 2 / sparkCount) + impactP * 2.0;
+          const sr = (impactP * 40 + (s % 3) * 6);
+          const sp = projectGround(Math.cos(sa) * sr, Math.sin(sa) * sr, 0.3 + Math.sin(s) * 0.4);
+          ctx.beginPath();
+          ctx.arc(sp.x, sp.y, Math.max(1, (2.5 - impactP * 2.0) * sp.scale), 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // 4. MATERIALIZAÇÃO DO MONSTRO A PARTIR DO IMPACTO
+      if (progress >= 0.50) {
+        const monsterNorm = (progress - 0.50) / 0.50;
+        const monsterAlpha = Math.min(1.0, monsterNorm * 2.0);
+        const zOffset = (1.0 - Math.min(1.0, monsterNorm * 1.6)) * 0.5;
+        renderSolidMonster(TARGET_TILE, monsterAlpha, 1.0, zOffset);
+      }
+    }
+
+    // ========================================================
+    // OPÇÃO C: SELO ALQUÍMICO DE TRANSMUTAÇÃO
+    // Anéis e triângulos concêntricos girando em direções opostas com travamento geométrico e prisma
+    // ========================================================
+    function renderFusionC(progress) {
+      // Fase 1: Círculos Opostos & Triângulos (0 - 0.23) ~ 0 - 300ms
+      // Fase 2: Acoplamento & Travamento Geométrico (0.23 - 0.54) ~ 300 - 700ms
+      // Fase 3: Transmutação Prismática Vertical (0.54 - 0.81) ~ 700 - 1050ms
+      // Fase 4: Fixação Cristalina & Dissipação (0.81 - 1.0) ~ 1050 - 1300ms
+
+      const rot1 = progress * Math.PI * 4.0;
+      const rot2 = -progress * Math.PI * 4.0;
+
+      // 1. ANÉIS ALQUÍMICOS CONCÊNTRICOS NO SOLO
+      const ringAlpha = Math.min(1.0, progress * 3.5) * (progress > 0.85 ? Math.max(0, 1.0 - (progress - 0.85) * 6.0) : 1.0);
+      if (ringAlpha > 0.01) {
+        // Anel Externo Dourado
+        drawGroundCircle(26, `rgba(255, 209, 102, ${ringAlpha * 0.85})`, null, 1.8, 12, '#ffd166');
+        // Anel Interno Violeta
+        drawGroundCircle(18, `rgba(168, 85, 247, ${ringAlpha * 0.75})`, `rgba(255, 209, 102, ${ringAlpha * 0.06})`, 1.2, 8, '#a855f7');
+
+        // Triângulos Alquímicos Opostos (Fogo / Água)
+        ctx.save();
+        ctx.lineWidth = 1.6 * camera.zoom;
+        ctx.strokeStyle = `rgba(255, 209, 102, ${ringAlpha * 0.8})`;
+        ctx.shadowColor = '#ffd166';
+        ctx.shadowBlur = 8;
+
+        // Triângulo 1 (Gira horário)
+        ctx.beginPath();
+        for (let i = 0; i < 3; i++) {
+          const a = rot1 + i * (Math.PI * 2 / 3);
+          const p = projectGround(Math.cos(a) * 18, Math.sin(a) * 18, 0);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // Triângulo 2 (Gira anti-horário)
+        ctx.strokeStyle = `rgba(192, 132, 252, ${ringAlpha * 0.8})`;
+        ctx.shadowColor = '#c084fc';
+        ctx.beginPath();
+        for (let i = 0; i < 3; i++) {
+          const a = rot2 + Math.PI / 3 + i * (Math.PI * 2 / 3);
+          const p = projectGround(Math.cos(a) * 18, Math.sin(a) * 18, 0);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      // 2. FASE 2: TRAVAMENTO GEOMÉTRICO (t = 0.50 a 0.65)
+      if (progress >= 0.48 && progress <= 0.68) {
+        const lockP = (progress - 0.48) / 0.20;
+        const lockFlash = (1.0 - Math.abs(lockP - 0.5) * 2.0);
+        
+        ctx.save();
+        ctx.fillStyle = `rgba(255, 255, 255, ${lockFlash * 0.85})`;
+        ctx.shadowColor = '#ffd166';
+        ctx.shadowBlur = 24;
+        const center = project(TARGET_TILE.x, TARGET_TILE.y, 0.1);
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, 20 * center.scale * lockFlash, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 3. FASE 3: PRISMA DE TRANSMUTAÇÃO VERTICAL (t = 0.54 a 0.88)
+      if (progress >= 0.52 && progress <= 0.90) {
+        const prismP = (progress - 0.52) / 0.38;
+        const prismAlpha = Math.max(0, 1.0 - prismP) * 0.75;
+        const prismHeight = 1.9;
+
+        ctx.save();
+        ctx.fillStyle = `rgba(217, 70, 239, ${prismAlpha * 0.25})`;
+        ctx.strokeStyle = `rgba(255, 209, 102, ${prismAlpha * 0.85})`;
+        ctx.lineWidth = 1.8 * camera.zoom;
+        ctx.shadowColor = '#ffd166';
+        ctx.shadowBlur = 10;
+
+        // Prisma hexagonal de luz
+        const numSides = 6;
+        for (let s = 0; s < numSides; s++) {
+          const a1 = s * (Math.PI * 2 / numSides);
+          const a2 = (s + 1) * (Math.PI * 2 / numSides);
+          const b1 = projectGround(Math.cos(a1) * 16, Math.sin(a1) * 16, 0);
+          const b2 = projectGround(Math.cos(a2) * 16, Math.sin(a2) * 16, 0);
+          const t1 = projectGround(Math.cos(a1) * 12, Math.sin(a1) * 12, prismHeight);
+          const t2 = projectGround(Math.cos(a2) * 12, Math.sin(a2) * 12, prismHeight);
+
+          ctx.beginPath();
+          ctx.moveTo(b1.x, b1.y);
+          ctx.lineTo(b2.x, b2.y);
+          ctx.lineTo(t2.x, t2.y);
+          ctx.lineTo(t1.x, t1.y);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // 4. MATERIALIZAÇÃO DO MONSTRO DE FUSÃO
+      if (progress >= 0.54) {
+        const monsterNorm = (progress - 0.54) / 0.46;
+        const monsterAlpha = Math.min(1.0, monsterNorm * 1.8);
+        renderSolidMonster(TARGET_TILE, monsterAlpha, 1.0, 0);
+      }
+    }
+
+    // ATUALIZAÇÃO DO OVERLAY E ETAPAS
+    function updateOverlay() {
+      if (currentStyle === 'A') {
+        ovTitle.textContent = 'Opção A — Vórtice Bicolor (Polimerização) [Aprovado]';
+        ovTitle.style.color = 'var(--fusion-violet)';
+        ovDesc.textContent = 'Linguagem canônica aprovada para Invocação Fusão: dois fluxos espirais contrastantes (carmesim ígneo e ciano safira) giram em vórtice acelerado descendente. Ao colidirem no centro, fundem-se em clarão violeta com anel de choque e condensam o monstro.';
+        overlayPanel.style.borderColor = '#7c3aed66';
+        pill1.textContent = '1. Turbilhão (0-300ms)';
+        pill2.textContent = '2. Torsão (300-700ms)';
+        pill3.textContent = '3. Fusão (700-1050ms)';
+        pill4.textContent = '4. Fixação (1050-1300ms)';
+      } else if (currentStyle === 'B') {
+        ovTitle.textContent = 'Opção B — Colisão Elemental [Histórico]';
+        ovTitle.style.color = 'var(--flame-orange)';
+        ovDesc.textContent = 'Alternativa histórica de Invocação Fusão: dois núcleos de matéria e plasma emergem nos flancos opostos da célula, aceleram parabolicamente em rota de colisão e colidem no centro com explosão de ponto zero e onda de choque esférica.';
+        overlayPanel.style.borderColor = '#ea580c66';
+        pill1.textContent = '1. Carga (0-300ms)';
+        pill2.textContent = '2. Aceleração (300-650ms)';
+        pill3.textContent = '3. Ponto Zero (650-1000ms)';
+        pill4.textContent = '4. Gravidade (1000-1300ms)';
+      } else if (currentStyle === 'C') {
+        ovTitle.textContent = 'Opção C — Selo Alquímico [Histórico]';
+        ovTitle.style.color = 'var(--alchemy-gold)';
+        ovDesc.textContent = 'Alternativa histórica de Invocação Fusão: dois anéis alquímicos concêntricos giram em sentidos opostos com triângulos herméticos. No ápice, travam geometricamente com flash estático e projetam um prisma vertical que sintetiza a criatura.';
+        overlayPanel.style.borderColor = '#ffd16666';
+        pill1.textContent = '1. Oposição (0-300ms)';
+        pill2.textContent = '2. Travamento (300-700ms)';
+        pill3.textContent = '3. Prisma (700-1050ms)';
+        pill4.textContent = '4. Cristalização (1050-1300ms)';
+      }
+
+      pill1.className = `step-pill ${animProgress < 0.23 ? 'active' : ''}`;
+      pill2.className = `step-pill ${animProgress >= 0.23 && animProgress < 0.54 ? 'active' : ''}`;
+      pill3.className = `step-pill ${animProgress >= 0.54 && animProgress < 0.81 ? 'active' : ''}`;
+      pill4.className = `step-pill ${animProgress >= 0.81 ? 'active' : ''}`;
+    }
+
+    // LOOP PRINCIPAL
+    function loop(now) {
+      const dt = (now - lastTime);
+      lastTime = now;
+
+      if (isPlaying) {
+        animProgress += (dt / (animDuration / animSpeed));
+        if (animProgress > 1.0) {
+          animProgress = 1.0;
+          isPlaying = false;
+          playBtn.textContent = '↺';
+        }
+        scrubber.value = Math.round(animProgress * 1000);
+        timeLabel.textContent = `${(animProgress * (animDuration / 1000)).toFixed(1)}s`;
+      }
+
+      renderBoard();
+
+      if (currentStyle === 'A') renderFusionA(animProgress);
+      else if (currentStyle === 'B') renderFusionB(animProgress);
+      else if (currentStyle === 'C') renderFusionC(animProgress);
+
+      updateOverlay();
+
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    // CONTROLES DE REPRODUÇÃO
+    function triggerSummon() {
+      animProgress = 0.0;
+      isPlaying = true;
+      playBtn.textContent = '❚❚';
+      lastTime = performance.now();
+    }
+
+    playBtn.onclick = () => {
+      if (animProgress >= 1.0) {
+        triggerSummon();
+      } else {
+        isPlaying = !isPlaying;
+        playBtn.textContent = isPlaying ? '❚❚' : '▶';
+        lastTime = performance.now();
+      }
+    };
+
+    replayBtn.onclick = () => triggerSummon();
+
+    scrubber.oninput = e => {
+      animProgress = parseFloat(e.target.value) / 1000;
+      isPlaying = false;
+      playBtn.textContent = '▶';
+      timeLabel.textContent = `${(animProgress * (animDuration / 1000)).toFixed(1)}s`;
+    };
+
+    window.addEventListener('keydown', e => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        triggerSummon();
+      } else if (e.key === 'r' || e.key === 'R') {
+        triggerSummon();
+      } else if (e.key === 'a' || e.key === 'A') {
+        setStyle('A');
+      } else if (e.key === 'b' || e.key === 'B') {
+        setStyle('B');
+      } else if (e.key === 'c' || e.key === 'C') {
+        setStyle('C');
+      } else if (e.key === 'v' || e.key === 'V') {
+        setView3D(!is3D);
+      }
+    });
+
+    function setStyle(style) {
+      currentStyle = style;
+      document.querySelectorAll('.style-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.style === style);
+      });
+      triggerSummon();
+    }
+
+    document.getElementById('btnOptA').onclick = () => setStyle('A');
+    document.getElementById('btnOptB').onclick = () => setStyle('B');
+    document.getElementById('btnOptC').onclick = () => setStyle('C');
+
+    function setView3D(val) {
+      is3D = val;
+      document.getElementById('btn3D').classList.toggle('active', val);
+      document.getElementById('btn2D').classList.toggle('active', !val);
+    }
+    document.getElementById('btn3D').onclick = () => setView3D(true);
+    document.getElementById('btn2D').onclick = () => setView3D(false);
+
+    document.getElementById('btnResetCam').onclick = () => {
+      camera.rotX = 54 * Math.PI / 180;
+      camera.rotZ = -20 * Math.PI / 180;
+      camera.zoom = 1.95;
+      camera.panX = 0;
+      camera.panY = 75;
+    };
+
+    document.getElementById('spdNormal').onclick = () => {
+      animSpeed = 1.0;
+      document.getElementById('spdNormal').classList.add('active');
+      document.getElementById('spdSlow').classList.remove('active');
+    };
+    document.getElementById('spdSlow').onclick = () => {
+      animSpeed = 0.5;
+      document.getElementById('spdSlow').classList.add('active');
+      document.getElementById('spdNormal').classList.remove('active');
+    };
+
+    document.getElementById('unitWarrior').onclick = () => {
+      selectedUnitType = 'warrior';
+      document.getElementById('unitWarrior').classList.add('active');
+      document.getElementById('unitDragon').classList.remove('active');
+    };
+    document.getElementById('unitDragon').onclick = () => {
+      selectedUnitType = 'dragon';
+      document.getElementById('unitDragon').classList.add('active');
+      document.getElementById('unitWarrior').classList.remove('active');
+    };
+
+    // API GLOBAL PARA TESTES AUTOMATIZADOS E CAPTURA
+    window.MIVisual = {
+      setStyle,
+      setView3D,
+      triggerSummon,
+      setUnitType: type => {
+        selectedUnitType = type;
+        document.getElementById('unitWarrior').classList.toggle('active', type === 'warrior');
+        document.getElementById('unitDragon').classList.toggle('active', type === 'dragon');
+      },
+      setProgress: p => {
+        animProgress = Math.max(0, Math.min(1.0, p));
+        isPlaying = false;
+        playBtn.textContent = '▶';
+        scrubber.value = Math.round(animProgress * 1000);
+        timeLabel.textContent = `${(animProgress * (animDuration / 1000)).toFixed(1)}s`;
+      },
+      getState: () => ({ currentStyle, is3D, animProgress, isPlaying, selectedUnitType })
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Alpha, the Master of Beasts
+ID: 73304257
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Beast
+Nível: 8
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+Cannot be Normal Summoned/Set. Must first be Special Summoned (from your hand) while the total ATK of all monsters your opponent controls is more than that of all monsters you control. You can target any number of Beast, Beast-Warrior, and/or Winged Beast monsters you control; return them to the hand, then, return face-up monsters your opponent controls to the hand, equal to the number of cards you returned to the hand, also for the rest of this turn, "Alpha, the Master of Beasts" you control cannot attack directly. You can only use this effect of "Alpha, the Master of Beasts" once per turn.

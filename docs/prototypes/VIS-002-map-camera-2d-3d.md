@@ -378,7 +378,7 @@ A aprovação de VIS-002 permite que protótipos futuros assumam:
 - foco traseiro por duplo clique;
 - equivalência lógica entre projeções.
 
-Ela **não** permite assumir qual layout de HUD de VIS-001 venceu enquanto o autor não decidir esse experimento separadamente.
+Ela **não** aprova por herança nenhum layout de HUD. Essa decisão foi tomada separadamente depois: a versão melhorada de VIS-001 foi aprovada pelo autor em 2026-09-29, conforme `VIS-001-hud-layout.md`.
 
 ---
 

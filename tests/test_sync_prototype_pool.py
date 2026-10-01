@@ -161,6 +161,18 @@ class ExpandedPrototypePoolTests(unittest.TestCase):
         chosen = module._choose_unique(cards, 1, used, context="teste")
         self.assertEqual(chosen[0]["name"], "B")
 
+    def test_psychic_normals_allow_only_the_authorized_rushcard_exception(self):
+        cards = []
+        for index in range(6):
+            cards.append(fake_card(index + 1, f"Unique {index}", "Normal Monster", "Psychic", 3))
+        for index in range(4):
+            card = fake_card(20 + index, f"Rush {index}", "Normal Monster", "Psychic", 3, archetype="Psychic Musician")
+            card["_monster_impact_source"] = "rushcard"
+            cards.append(card)
+        chosen = module._select_normals_for_race(cards, "Psychic", set())
+        self.assertEqual(len(chosen), 10)
+        self.assertEqual(sum(module.archetype_name(card) == "Psychic Musician" for card in chosen), 4)
+
 
 if __name__ == "__main__":
     unittest.main()

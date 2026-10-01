@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: A.I.'s Ritual
+ID: 85327820
+Categoria: Magia
+Tipo da API: Spell Card
+Subtipo: Ritual
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+This card can be used to Ritual Summon any Cyberse Ritual Monster. You must also Tribute "@Ignister" monsters from your hand or field whose total Levels equal or exceed the Level of the Ritual Monster you Ritual Summon. If you control an "@Ignister" monster when this effect is activated, you can also use "@Ignister" monster(s) in your GY, by banishing them.

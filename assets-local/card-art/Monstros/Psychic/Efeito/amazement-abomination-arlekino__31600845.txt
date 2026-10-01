@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Amazement Abomination Arlekino
+ID: 31600845
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Psychic
+Nível: 7
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+If you control an "Amazement" monster: You can Special Summon this card from your hand, then you can add 1 "Amazement Family Faces" from your Deck or GY to your hand. During your opponent's turn (Quick Effect): You can target 1 other Effect Monster on the field with more than 0 ATK; shuffle this card into the Deck, and if you do, Special Summon 1 "Amazement Administrator Arlekino" from your Deck, then change the ATK of the targeted monster to 0. You can only use each effect of "Amazement Abomination Arlekino" once per turn.

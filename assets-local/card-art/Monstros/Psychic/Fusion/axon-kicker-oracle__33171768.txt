@@ -1,0 +1,16 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Axon Kicker Oracle
+ID: 33171768
+Categoria: Monstro
+Tipo da API: Fusion Monster
+RACE: Psychic
+Nível: 10
+Tipo Monster Impact: Fusion
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+1 Psychic monster + 1 Synchro, Xyz, or Link Monster
+After this card is Fusion Summoned, it gains 1000 ATK for each Synchro, Xyz, and Link Monster used as its material, until the end of the next turn. You can only use each of the following effects of "Axon Kicker Oracle" once per turn. When your opponent would Special Summon a monster(s) (Quick Effect): You can negate the Summon, and if you do, banish that monster(s). If this Fusion Summoned card is sent to the GY: You can banish 1 "Teleport" Normal or Quick-Play Spell from your GY; Special Summon this card.

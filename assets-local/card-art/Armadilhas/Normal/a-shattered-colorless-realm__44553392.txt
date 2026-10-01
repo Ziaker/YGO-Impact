@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: A Shattered, Colorless Realm
+ID: 44553392
+Categoria: Armadilha
+Tipo da API: Trap Card
+Subtipo: Normal
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+If "Vicious Astraloud" is on the field: Target 1 card on the field; destroy it, then, if the destroyed card's original name was "Vicious Astraloud", you can Special Summon 1 of your banished "Visas Starfrost", or if it was not, you can make 1 "Vicious Astraloud" you control gain 1500 ATK.

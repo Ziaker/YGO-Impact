@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Monster Impact — VIS-008: Microprotótipos de Destruição, Impacto na Base e Resolução</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #07090e;
+      --panel-bg: rgba(13, 17, 23, 0.94);
+      --border: rgba(56, 189, 248, 0.25);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --danger: #f43f5e;
+      --gold: #f59e0b;
+      --green: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background-color: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      user-select: none;
+    }
+
+    #stage-container {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    #vfx-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* BARRA SUPERIOR */
+    .top-bar {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .badge-tag {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      pointer-events: auto;
+    }
+
+    /* SELETOR DE ELEMENTO (ABAS SUPERIORES) */
+    .element-tabs {
+      display: flex;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 4px;
+      border-radius: 10px;
+      pointer-events: auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #04121e;
+      font-weight: 700;
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+
+    /* PAINEL LATERAL ESQUERDO: CONTROLE A/B/C DO ELEMENTO */
+    .left-panel {
+      position: absolute;
+      top: 76px;
+      left: 20px;
+      width: 390px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .panel-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-question {
+      font-size: 12px;
+      color: var(--accent);
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    /* SELETOR DAS 3 OPÇÕES */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .opt-btn {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      padding: 10px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .opt-btn:hover {
+      background: rgba(51, 65, 85, 0.8);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .opt-btn.active {
+      background: #38bdf8;
+      color: #04121e;
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .option-details {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+
+    .option-details b {
+      color: #fff;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .trigger-btn {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4);
+      transition: all 0.15s ease;
+    }
+
+    .trigger-btn:hover {
+      background: linear-gradient(135deg, #0369a1, #1d4ed8);
+      transform: translateY(-1px);
+    }
+
+    .trigger-btn:active {
+      transform: translateY(1px);
+    }
+
+    /* INSTRUÇÕES INFERIORES */
+    .bottom-hint {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+
+    .bottom-hint kbd {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #fff;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div id="stage-container"></div>
+  <canvas id="vfx-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="badge-tag">MONSTER IMPACT &bull; VIS-008 (Destruição, Hit na Base & Correntes)</div>
+
+    <div class="element-tabs" id="elementTabs">
+      <button class="tab-btn active" data-elem="el8">1. Destruição do Monstro</button>
+      <button class="tab-btn" data-elem="el9">2. Impacto na Base</button>
+      <button class="tab-btn" data-elem="el10">3. Elos de Corrente (LIFO)</button>
+    </div>
+  </div>
+
+  <div class="left-panel">
+    <div class="panel-header">
+      <div class="panel-title" id="panelTitle">1. Destruição do Monstro</div>
+      <div class="panel-question" id="panelQuestion">Como uma unidade destruída deve desaparecer visualmente?</div>
+    </div>
+
+    <div class="options-grid">
+      <button class="opt-btn active" id="btnOptA" onclick="setOption('A')">Opção A</button>
+      <button class="opt-btn" id="btnOptB" onclick="setOption('B')">Opção B</button>
+      <button class="opt-btn" id="btnOptC" onclick="setOption('C')">Opção C</button>
+    </div>
+
+    <div class="option-details" id="optionDetails">
+      <!-- Injetado dinamicamente -->
+    </div>
+
+    <button class="trigger-btn" id="btnTrigger" onclick="triggerActiveEffect()">
+      <span>&#9889; Executar Efeito no Campo</span> <kbd style="font-size:11px;opacity:0.8;background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:4px;">Espaço</kbd>
+    </button>
+  </div>
+
+  <div class="bottom-hint">
+    Teclas <kbd>1</kbd>, <kbd>2</kbd>, <kbd>3</kbd>: troca elemento &bull; Teclas <kbd>A</kbd>, <kbd>B</kbd>, <kbd>C</kbd>: seleciona opção &bull; <kbd>Espaço</kbd>: disparar
+  </div>
+
+  <!-- BIBLIOTECAS LOCAIS VENDORADAS (100% OFFLINE) -->
+  <script src="three.min.js"></script>
+  <script src="OrbitControls.js"></script>
+
+  <script>
+    // ==========================================================================
+    // 1. PALCO FIXO APROVADO (CONGELADO DO VIS-ENV-001)
+    // ==========================================================================
+    const container = document.getElementById('stage-container');
+    const vfxCanvas = document.getElementById('vfx-canvas');
+    const ctx = vfxCanvas.getContext('2d');
+
+    const BOARD_W = 31;
+    const BOARD_D = 17;
+    const TILE_SIZE = 1.0;
+    const CENTER_X = BOARD_W / 2;
+    const CENTER_Z = BOARD_D / 2;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x07090e);
+    scene.fog = new THREE.FogExp2(0x07090e, 0.012);
+
+    const aspect = window.innerWidth / window.innerHeight;
+    const persCamera = new THREE.PerspectiveCamera(40, aspect, 0.5, 500);
+    persCamera.position.set(CENTER_X, 15, CENTER_Z + 20);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(persCamera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.maxPolarAngle = Math.PI / 2 - 0.05;
+    controls.minDistance = 10;
+    controls.maxDistance = 100;
+    controls.target.set(CENTER_X, 0, CENTER_Z);
+    controls.update();
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xfff8ee, 1.2);
+    dirLight.position.set(CENTER_X - 15, 38, CENTER_Z - 20);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // Platô em Ardósia Nobre (Plano XZ, Y=0)
+    const slabGeo = new THREE.BoxGeometry(BOARD_W + 3, 2.4, BOARD_D + 3);
+    const slabMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.65, metalness: 0.25 });
+    const slabMesh = new THREE.Mesh(slabGeo, slabMat);
+    slabMesh.position.set(CENTER_X, -1.2, CENTER_Z);
+    slabMesh.receiveShadow = true;
+    scene.add(slabMesh);
+
+    // Grade Tática
+    const gridHelper = new THREE.GridHelper(Math.max(BOARD_W, BOARD_D), Math.max(BOARD_W, BOARD_D), 0x38bdf8, 0x1e293b);
+    gridHelper.position.set(CENTER_X, 0.02, CENTER_Z);
+    scene.add(gridHelper);
+
+    // Bases dos Jogadores
+    // Base Inimiga em x=29.5, z=8.5 (relevante para o hit na base)
+    const BASE_ENEMY_WORLD = new THREE.Vector3(29.5, 0.25, 8.5);
+    const bGeo = new THREE.CylinderGeometry(2.4, 2.6, 0.5, 20);
+    const bMat = new THREE.MeshStandardMaterial({ color: 0xbe123c, roughness: 0.4, metalness: 0.6 });
+    const bMesh = new THREE.Mesh(bGeo, bMat);
+    bMesh.position.set(BASE_ENEMY_WORLD.x, BASE_ENEMY_WORLD.y, BASE_ENEMY_WORLD.z);
+    scene.add(bMesh);
+
+    const obGeo = new THREE.ConeGeometry(0.8, 4.0, 4);
+    const obMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.2, metalness: 0.8 });
+    const obelisk = new THREE.Mesh(obGeo, obMat);
+    obelisk.position.set(BASE_ENEMY_WORLD.x, 2.5, BASE_ENEMY_WORLD.z);
+    scene.add(obelisk);
+
+    // Unidades de Teste no Corredor Central
+    const ALLY_WORLD = new THREE.Vector3(13.5, 1.1, 8.5);
+    const ENEMY_WORLD = new THREE.Vector3(18.5, 1.1, 8.5);
+    const EXTRA_ALLY_WORLD = new THREE.Vector3(10.5, 1.1, 7.0);
+
+    function createUnitFigure(worldPos, isAlly, colorHex) {
+      const g = new THREE.Group();
+
+      const pedGeo = new THREE.CylinderGeometry(0.75, 0.85, 0.35, 16);
+      const pedMat = new THREE.MeshStandardMaterial({ color: isAlly ? 0x0f2942 : 0x3b1219, roughness: 0.4 });
+      const ped = new THREE.Mesh(pedGeo, pedMat);
+      ped.position.y = 0.18;
+      g.add(ped);
+
+      const ringGeo = new THREE.TorusGeometry(0.8, 0.05, 8, 24);
+      const ringMat = new THREE.MeshBasicMaterial({ color: isAlly ? 0x38bdf8 : 0xf43f5e });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = 0.36;
+      g.add(ring);
+
+      const figGeo = new THREE.DodecahedronGeometry(0.55);
+      const figMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.3, metalness: 0.7, emissive: colorHex, emissiveIntensity: 0.2 });
+      const fig = new THREE.Mesh(figGeo, figMat);
+      fig.position.y = 1.1;
+      g.add(fig);
+
+      g.position.set(worldPos.x, 0, worldPos.z);
+      scene.add(g);
+      return { group: g, fig, ped, ring };
+    }
+
+    const allyUnit = createUnitFigure(ALLY_WORLD, true, 0xd97706);
+    const enemyUnit = createUnitFigure(ENEMY_WORLD, false, 0xa855f7);
+    const extraAllyUnit = createUnitFigure(EXTRA_ALLY_WORLD, true, 0x10b981);
+
+    // ==========================================================================
+    // 2. SISTEMA DE PROJEÇÃO GRÁFICA 2D-LIKE
+    // ==========================================================================
+    function toScreen(vec3) {
+      const v = vec3.clone().project(persCamera);
+      return {
+        x: (v.x * 0.5 + 0.5) * window.innerWidth,
+        y: (-(v.y * 0.5) + 0.5) * window.innerHeight
+      };
+    }
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      vfxCanvas.width = window.innerWidth * dpr;
+      vfxCanvas.height = window.innerHeight * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', () => {
+      persCamera.aspect = window.innerWidth / window.innerHeight;
+      persCamera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      resizeCanvas();
+    });
+    resizeCanvas();
+
+    // ==========================================================================
+    // 3. DEFINIÇÃO DOS 3 ELEMENTOS DO VIS-008 COM 3 OPÇÕES CADA
+    // ==========================================================================
+    const COMBAT_ELEMENTS = {
+      el8: {
+        id: 'el8',
+        title: '1. Destruição do Monstro (Morte / Envio ao GY)',
+        question: 'Como uma unidade destruída deve desaparecer visualmente?',
+        options: {
+          A: {
+            name: 'Dissolução Gráfica Limpa com Fade Out',
+            desc: 'A criatura reduz suavemente sua opacidade enquanto 8 partículas geométricas planas sobem e desvanecem sem deixar ruído.'
+          },
+          B: {
+            name: 'Fragmentação Geométrica Plana (Shards 2D)',
+            desc: 'A silhueta é fatiada em 6 polígonos planos que se afastam radialmente e se desintegram em 300ms. Corte limpo.'
+          },
+          C: {
+            name: 'Colapso Luminoso para o Pedestal',
+            desc: 'Um pulso de luz branca de 100ms colapsa verticalmente para dentro do pedestal, deixando o anel de time apagar de forma elegante.'
+          }
+        }
+      },
+      el9: {
+        id: 'el9',
+        title: '2. Impacto na Base',
+        question: 'Como um hit direto na base de 5 vidas deve parecer?',
+        options: {
+          A: {
+            name: 'Pulso de Onda Plana no Anel da Base',
+            desc: 'Um anel gráfico vermelho escarlate expande no piso da base com tremor suave do obelisco central. Resposta tática nítida.'
+          },
+          B: {
+            name: 'Rachadura Gráfica no Bloco com Flash de Alerta',
+            desc: 'Fissura angular temporária desenha-se na superfície da base com flash estroboscópico de alerta em vermelho.'
+          },
+          C: {
+            name: 'Marcador Numérico Flutuante ("IMPACTO 1/5")',
+            desc: 'Um badge tático surge acima da base indicando a perda exata e a vida restante da base em tipografia esportiva.'
+          }
+        }
+      },
+      el10: {
+        id: 'el10',
+        title: '3. Elos de Corrente e Resolução (LIFO)',
+        question: 'Como os elos de Corrente devem ser indicados de forma gráfica e tática?',
+        options: {
+          A: {
+            name: 'Badges Numéricos Sobrepostos Planos (CL1, CL2, CL3)',
+            desc: 'Badges compactos numerados surgem acima das criaturas ativadoras e resolvem em ordem inversa (LIFO) com estalo gráfico.'
+          },
+          B: {
+            name: 'Conector Gráfico Vetorial no Piso',
+            desc: 'Linhas vetoriais luminosas no chão conectam os ativadores em ordem de elo, desvanecendo na sequência reversa de resolução.'
+          },
+          C: {
+            name: 'Faixa Gráfica Compacta no Topo com Cards 2D',
+            desc: 'Cards translúcidos compactos empilham-se no topo da tela e recolhem-se da direita para a esquerda conforme resolvem.'
+          }
+        }
+      }
+    };
+
+    let activeElementKey = 'el8';
+    let activeOptionKey = 'A';
+    let activeAnimations = [];
+
+    // ==========================================================================
+    // 4. INTERFACE E CONTROLES
+    // ==========================================================================
+    function updateUI() {
+      const elem = COMBAT_ELEMENTS[activeElementKey];
+      document.getElementById('panelTitle').textContent = elem.title;
+      document.getElementById('panelQuestion').textContent = elem.question;
+
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.elem === activeElementKey);
+      });
+
+      ['A', 'B', 'C'].forEach(opt => {
+        const btn = document.getElementById(`btnOpt${opt}`);
+        btn.classList.toggle('active', opt === activeOptionKey);
+      });
+
+      const optData = elem.options[activeOptionKey];
+      document.getElementById('optionDetails').innerHTML = `
+        <b>Opção ${activeOptionKey} — ${optData.name}</b>
+        ${optData.desc}
+      `;
+    }
+
+    function setElement(key) {
+      activeElementKey = key;
+      if (key === 'el9') {
+        controls.target.set(26.5, 0, 8.5);
+        persCamera.position.set(26.5, 14, 25.5);
+      } else {
+        controls.target.set(CENTER_X, 0, CENTER_Z);
+        persCamera.position.set(CENTER_X, 15, CENTER_Z + 20);
+      }
+      controls.update();
+      updateUI();
+      triggerActiveEffect();
+    }
+
+    function setOption(opt) {
+      activeOptionKey = opt;
+      updateUI();
+      triggerActiveEffect();
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => setElement(btn.dataset.elem));
+    });
+
+    // ==========================================================================
+    // 5. MOTOR DE DISPARO DOS EFEITOS
+    // ==========================================================================
+    function triggerActiveEffect() {
+      activeAnimations = [];
+      enemyUnit.fig.scale.setScalar(1.0); // Reset
+
+      const pEnemy = toScreen(ENEMY_WORLD);
+      const pBase = toScreen(BASE_ENEMY_WORLD);
+      const pAlly1 = toScreen(ALLY_WORLD);
+      const pAlly2 = toScreen(EXTRA_ALLY_WORLD);
+
+      if (activeElementKey === 'el8') {
+        // --- 1. DESTRUIÇÃO ---
+        activeAnimations.push({
+          type: 'destroy',
+          opt: activeOptionKey,
+          time: 0,
+          maxTime: 0.8,
+          target: pEnemy
+        });
+
+      } else if (activeElementKey === 'el9') {
+        // --- 2. IMPACTO NA BASE ---
+        activeAnimations.push({
+          type: 'base_hit',
+          opt: activeOptionKey,
+          time: 0,
+          maxTime: 0.8,
+          target: pBase
+        });
+
+      } else if (activeElementKey === 'el10') {
+        // --- 3. CORRENTES (LIFO) ---
+        activeAnimations.push({
+          type: 'chains',
+          opt: activeOptionKey,
+          time: 0,
+          maxTime: 1.4,
+          units: [pAlly1, pEnemy, pAlly2]
+        });
+      }
+    }
+
+    // ==========================================================================
+    // 6. RENDERIZADOR GRÁFICO 2D (CANVAS OVERLAY)
+    // ==========================================================================
+    function renderVFX(dt) {
+      ctx.clearRect(0, 0, vfxCanvas.width, vfxCanvas.height);
+
+      for (let i = activeAnimations.length - 1; i >= 0; i--) {
+        const anim = activeAnimations[i];
+        anim.time += dt;
+        const p = Math.min(1, anim.time / anim.maxTime);
+
+        // ----------------------------------------------------
+        // EL-8: DESTRUIÇÃO
+        // ----------------------------------------------------
+        if (anim.type === 'destroy') {
+          enemyUnit.fig.scale.setScalar(Math.max(0.01, 1 - p * 1.5));
+          const t = anim.target;
+          ctx.save();
+          if (anim.opt === 'A') {
+            // Opção A: Dissolução gráfica limpa
+            const alpha = 1 - p;
+            ctx.fillStyle = `rgba(168, 85, 247, ${alpha})`;
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, 28 * (1 - p * 0.3), 0, Math.PI * 2);
+            ctx.fill();
+
+            // 8 partículas planas que sobem
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            for (let k = 0; k < 8; k++) {
+              const ang = k * Math.PI / 4;
+              const dist = 15 + p * 30;
+              ctx.fillRect(t.x + Math.cos(ang) * dist - 3, t.y + Math.sin(ang) * dist - (p * 40) - 3, 6, 6);
+            }
+
+          } else if (anim.opt === 'B') {
+            // Opção B: Fragmentação geométrica plana (shards 2D)
+            const shardCount = 6;
+            for (let s = 0; s < shardCount; s++) {
+              const ang = (s * Math.PI * 2) / shardCount;
+              const dist = p * 45;
+              const sx = t.x + Math.cos(ang) * dist;
+              const sy = t.y + Math.sin(ang) * dist;
+              ctx.save();
+              ctx.translate(sx, sy);
+              ctx.rotate(ang + p * 3);
+              ctx.fillStyle = `rgba(244, 63, 94, ${1 - p})`;
+              ctx.beginPath();
+              ctx.moveTo(-10, -5); ctx.lineTo(10, 0); ctx.lineTo(0, 12);
+              ctx.closePath();
+              ctx.fill();
+              ctx.restore();
+            }
+
+          } else if (anim.opt === 'C') {
+            // Opção C: Colapso luminoso para o pedestal
+            if (p < 0.3) {
+              ctx.fillStyle = '#ffffff';
+              ctx.beginPath();
+              ctx.arc(t.x, t.y, 35 * (1 + p), 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              const colP = (p - 0.3) / 0.7;
+              ctx.strokeStyle = `rgba(56, 189, 248, ${1 - colP})`;
+              ctx.lineWidth = 4 * (1 - colP);
+              ctx.beginPath();
+              ctx.ellipse(t.x, t.y + 15, 30 * (1 - colP), 12 * (1 - colP), 0, 0, Math.PI * 2);
+              ctx.stroke();
+            }
+          }
+          ctx.restore();
+
+        // ----------------------------------------------------
+        // EL-9: IMPACTO NA BASE
+        // ----------------------------------------------------
+        } else if (anim.type === 'base_hit') {
+          const t = anim.target;
+          ctx.save();
+          if (anim.opt === 'A') {
+            // Opção A: Pulso de onda plana no anel da base
+            const r = 60 * p;
+            ctx.strokeStyle = `rgba(244, 63, 94, ${1 - p})`;
+            ctx.lineWidth = 5 * (1 - p);
+            ctx.beginPath();
+            ctx.ellipse(t.x, t.y, r, r * 0.45, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+          } else if (anim.opt === 'B') {
+            // Opção B: Rachadura gráfica no bloco
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(t.x - 30, t.y - 15);
+            ctx.lineTo(t.x - 5, t.y);
+            ctx.lineTo(t.x + 10, t.y - 10);
+            ctx.lineTo(t.x + 35, t.y + 15);
+            ctx.stroke();
+
+            // Flash de aviso
+            if (p < 0.2) {
+              ctx.fillStyle = 'rgba(244, 63, 94, 0.4)';
+              ctx.fillRect(t.x - 50, t.y - 40, 100, 80);
+            }
+
+          } else if (anim.opt === 'C') {
+            // Opção C: Marcador numérico de impacto na base
+            const by = t.y - 50 - (20 * p);
+            ctx.fillStyle = `rgba(15, 23, 42, ${0.9 * (1 - p * 0.4)})`;
+            ctx.strokeStyle = `rgba(244, 63, 94, ${1 - p * 0.4})`;
+            ctx.lineWidth = 2;
+            ctx.fillRect(t.x - 65, by, 130, 30);
+            ctx.strokeRect(t.x - 65, by, 130, 30);
+
+            ctx.font = 'bold 13px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#f43f5e';
+            ctx.fillText('IMPACTO 1 / 5', t.x, by + 20);
+          }
+          ctx.restore();
+
+        // ----------------------------------------------------
+        // EL-10: CORRENTES (LIFO)
+        // ----------------------------------------------------
+        } else if (anim.type === 'chains') {
+          ctx.save();
+          const [p1, p2, p3] = anim.units;
+
+          if (anim.opt === 'A') {
+            // Opção A: Badges numéricos sobrepostos
+            function drawBadge(pos, label, isResolving) {
+              ctx.save();
+              ctx.fillStyle = isResolving ? '#f59e0b' : '#0284c7';
+              ctx.fillRect(pos.x - 22, pos.y - 50, 44, 22);
+              ctx.strokeStyle = '#ffffff';
+              ctx.lineWidth = 1.5;
+              ctx.strokeRect(pos.x - 22, pos.y - 50, 44, 22);
+              ctx.font = 'bold 12px monospace';
+              ctx.textAlign = 'center';
+              ctx.fillStyle = '#ffffff';
+              ctx.fillText(label, pos.x, pos.y - 35);
+              ctx.restore();
+            }
+
+            // Ordem LIFO: CL1 ativado, CL2 ativado, CL3 ativado. Depois resolve 3 -> 2 -> 1.
+            drawBadge(p1, 'CL1', p > 0.7);
+            if (p > 0.2) drawBadge(p2, 'CL2', p > 0.5 && p <= 0.7);
+            if (p > 0.4) drawBadge(p3, 'CL3', p <= 0.5);
+
+          } else if (anim.opt === 'B') {
+            // Opção B: Conector gráfico vetorial no piso
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([6, 6]);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.stroke();
+
+            // Ponto de pulso móvel
+            const dotX = p3.x + (p1.x - p3.x) * p;
+            const dotY = p3.y + (p1.y - p3.y) * p;
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(dotX, dotY, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+          } else if (anim.opt === 'C') {
+            // Opção C: Faixa gráfica no topo com cards
+            const topY = 70;
+            const cards = ['CL1: Magia', 'CL2: Armadilha', 'CL3: Contra'];
+            cards.forEach((c, idx) => {
+              const cx = window.innerWidth / 2 - 140 + idx * 100;
+              ctx.fillStyle = (idx === 2 && p < 0.4) || (idx === 1 && p >= 0.4 && p < 0.7) || (idx === 0 && p >= 0.7) ? '#f59e0b' : 'rgba(15, 23, 42, 0.85)';
+              ctx.strokeStyle = '#38bdf8';
+              ctx.lineWidth = 1.5;
+              ctx.fillRect(cx, topY, 90, 26);
+              ctx.strokeRect(cx, topY, 90, 26);
+              ctx.font = 'bold 11px -apple-system, sans-serif';
+              ctx.textAlign = 'center';
+              ctx.fillStyle = '#ffffff';
+              ctx.fillText(c, cx + 45, topY + 17);
+            });
+          }
+          ctx.restore();
+        }
+
+        if (anim.time >= anim.maxTime) {
+          if (anim.type === 'destroy') {
+            enemyUnit.fig.scale.setScalar(1.0);
+          }
+          activeAnimations.splice(i, 1);
+        }
+      }
+    }
+
+    // ==========================================================================
+    // 7. LOOP DE RENDERIZAÇÃO
+    // ==========================================================================
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = clock.getDelta();
+      controls.update();
+      renderer.render(scene, persCamera);
+      renderVFX(dt);
+    }
+    animate();
+
+    // ==========================================================================
+    // 8. TECLAS DE ATALHO E API
+    // ==========================================================================
+    window.addEventListener('keydown', e => {
+      const k = e.key.toLowerCase();
+      if (k === '1') setElement('el8');
+      else if (k === '2') setElement('el9');
+      else if (k === '3') setElement('el10');
+      else if (k === 'a') setOption('A');
+      else if (k === 'b') setOption('B');
+      else if (k === 'c') setOption('C');
+      else if (e.key === ' ') { e.preventDefault(); triggerActiveEffect(); }
+    });
+
+    window.MIVisual008 = {
+      setElement,
+      setOption,
+      trigger: triggerActiveEffect,
+      getState: () => ({
+        element: activeElementKey,
+        option: activeOptionKey,
+        animCount: activeAnimations.length
+      })
+    };
+
+    updateUI();
+  </script>
+</body>
+</html>

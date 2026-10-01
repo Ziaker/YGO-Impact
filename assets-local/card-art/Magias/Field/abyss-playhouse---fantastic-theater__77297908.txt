@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Abyss Playhouse - Fantastic Theater
+ID: 77297908
+Categoria: Magia
+Tipo da API: Spell Card
+Subtipo: Field
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+You can reveal 1 "Abyss Actor" Pendulum Monster and 1 "Abyss Script" Spell in your hand; add 1 "Abyss Script" Spell from your Deck to your hand, with a different name than that revealed Spell. While you control a Pendulum Summoned "Abyss Actor" Pendulum Monster, any monster effect activated by your opponent becomes "Destroy 1 Set Spell/Trap your opponent controls". You can only use each effect of "Abyss Playhouse - Fantastic Theater" once per turn.

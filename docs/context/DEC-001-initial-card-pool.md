@@ -103,3 +103,15 @@ A seleção automática:
 - **136 cartas no pool automático atual**.
 
 Esse total é uma decisão de conteúdo desta etapa e não altera por si só os limites de construção de Deck definidos no GDD.
+
+## Estado de materialização
+
+A política acima está definida, mas o snapshot versionado ainda contém **96 cartas**. Em 2026-09-29, a execução real da sincronização confirmou que o catálogo atual do YGOPRODeck oferece apenas dois Normal Monsters Psychic de Nível 2–4 e não retorna mais os candidatos Rush curados usados como suplemento.
+
+O autor aprovou o **RushCard como fonte auxiliar somente para os Psychic Normais ausentes**, mantendo o YGOPRODeck como fonte principal. A consulta real ao RushCard encontrou dez Psychic Normais de Nível 2–4, mas oito deles pertencem a somente dois arquétipos nomeados (`Psychic Musician` e `Shaman Bandit`). Aplicando a regra já aprovada de no máximo um monstro por arquétipo nomeado, o máximo combinado das duas fontes é **seis Psychic Normais elegíveis**, quatro abaixo da cota.
+
+O autor aprovou uma exceção restrita aos quatro slots restantes: `Psychic Musician` e `Shaman Bandit` podem se repetir somente entre os Psychic Normais vindos do RushCard. A seleção real passou a fechar em **136 cartas**, mantendo a regra de unicidade para todas as demais RACE, tipos e arquétipos.
+
+O RushCard fornece imagens das cartas montadas, mas não uma ilustração limpa equivalente a `image_url_cropped`. Os oito Psychic vindos dessa fonte permanecem na seleção de conteúdo com `art_status: pending-clean-cropped-art`; a automação é proibida de salvar a carta montada como se fosse arte recortada.
+
+Os testes automatizados validam a política e a execução real em modo de simulação confirmou as 136 cartas. A sincronização de arte só estará completa quando houver fonte legítima das oito ilustrações limpas pendentes.

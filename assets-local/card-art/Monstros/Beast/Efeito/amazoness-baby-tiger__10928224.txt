@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Amazoness Baby Tiger
+ID: 10928224
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Beast
+Nível: 2
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+This card's name becomes "Amazoness Tiger" while on the field or in the GY. If an "Amazoness" monster is Normal or Special Summoned to your field while this card is in your hand or GY: You can Special Summon this card. You can only use this effect of "Amazoness Baby Tiger" once per turn. Gains 100 ATK for each "Amazoness" card in your GY.

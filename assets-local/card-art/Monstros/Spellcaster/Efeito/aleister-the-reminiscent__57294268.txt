@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Aleister the Reminiscent
+ID: 57294268
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Spellcaster
+Nível: 4
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+If this card is in your hand: You can target 1 Spellcaster monster or 1 Fusion Monster on the field; Special Summon this card, and if you do, the targeted monster gains 1000 ATK until the end of this turn. If this card is Normal or Special Summoned, or flipped face-up: You can banish 1 "Invoked" monster from your Extra Deck; add 1 "Invocation", or 1 Spell that mentions it, from your Deck to your hand. You can only use each effect of "Aleister the Reminiscent" once per turn.

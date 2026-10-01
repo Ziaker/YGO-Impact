@@ -66,8 +66,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Sincroniza TXT para todas as artes de cartas."); p.add_argument("--root", type=Path, default=base.DEFAULT_OUTPUT); p.add_argument("--dry-run", action="store_true"); p.add_argument("--timeout", type=float, default=30.0); p.add_argument("--retries", type=int, default=2); args = p.parse_args(argv)
     try:
         manifest = load_manifest(args.root / "manifest.json"); files = manifest["files"]; arts = discover(args.root, manifest); planned = written = 0
+        try:
+            all_catalog = base.fetch_all_cards(timeout=args.timeout, retries=args.retries)
+            catalog_lookup = {int(c["id"]): c for c in all_catalog if "id" in c and str(c["id"]).isdigit()}
+        except Exception:
+            catalog_lookup = {}
         for card_id, paths in arts.items():
-            card = fetch(card_id, timeout=args.timeout, retries=args.retries); text = render(card); payload = text.encode("utf-8"); digest = hashlib.sha256(payload).hexdigest()
+            card = catalog_lookup.get(card_id) or fetch(card_id, timeout=args.timeout, retries=args.retries); text = render(card); payload = text.encode("utf-8"); digest = hashlib.sha256(payload).hexdigest()
             for art in paths:
                 txt = art.with_suffix(".txt"); planned += 1
                 if args.dry_run: print(f"PLAN {txt.as_posix()}"); continue

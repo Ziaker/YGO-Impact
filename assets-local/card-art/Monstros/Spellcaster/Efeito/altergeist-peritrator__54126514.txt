@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Altergeist Peritrator
+ID: 54126514
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Spellcaster
+Nível: 1
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+This card can attack directly. You can only use each of the following effects of "Altergeist Peritrator" once per turn. When this card inflicts battle damage to your opponent: You can draw 1 card. If this card is sent from the field to the GY: You can send 1 "Altergeist" card from your hand, Deck, or face-up field to the GY, except "Altergeist Peritrator".

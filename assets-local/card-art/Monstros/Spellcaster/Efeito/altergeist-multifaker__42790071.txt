@@ -1,0 +1,15 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Altergeist Multifaker
+ID: 42790071
+Categoria: Monstro
+Tipo da API: Effect Monster
+RACE: Spellcaster
+Nível: 3
+Tipo Monster Impact: Efeito
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+If you activate a Trap Card (except during the Damage Step): You can Special Summon this card from your hand. If this card is Special Summoned: You can Special Summon 1 "Altergeist" monster from your Deck in Defense Position, except "Altergeist Multifaker". You cannot Special Summon monsters the turn you activate this effect, except "Altergeist" monsters. You can only use each effect of "Altergeist Multifaker" once per turn.

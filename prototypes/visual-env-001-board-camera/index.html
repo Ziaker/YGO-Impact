@@ -1,0 +1,1298 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Monster Impact — VIS-ENV-001 · Palco 3D WebGL & Efeitos Elementais</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #030508;
+      --panel: #070d16f2;
+      --panel-border: #1e2c3c;
+      --accent: #f59e0b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --elem-fire: #ef4444;
+      --elem-water: #0ea5e9;
+      --elem-earth: #d97706;
+      --elem-wind: #10b981;
+      --elem-light: #eab308;
+      --elem-dark: #a855f7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: var(--text); }
+
+    #webgl-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* BARRA SUPERIOR */
+    .top-bar {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 8px 14px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 12px 35px #000000aa;
+      pointer-events: auto;
+    }
+
+    .brand-title {
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .brand-badge {
+      font-size: 10px;
+      font-weight: 700;
+      background: #ffffff14;
+      border: 1px solid #ffffff24;
+      border-radius: 6px;
+      padding: 2px 7px;
+      color: var(--accent);
+    }
+
+    .style-selector {
+      display: flex;
+      gap: 6px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 5px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 12px 35px #000000aa;
+      pointer-events: auto;
+    }
+
+    .style-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 7px 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .style-btn:hover { color: #fff; background: #ffffff0d; }
+    .style-btn.active.optA {
+      background: #38bdf8;
+      color: #04121d;
+      font-weight: 850;
+      box-shadow: 0 0 18px #38bdf866;
+    }
+    .style-btn.active.optB {
+      background: #a855f7;
+      color: #fff;
+      font-weight: 850;
+      box-shadow: 0 0 18px #a855f766;
+    }
+    .style-btn.active.optC {
+      background: #eab308;
+      color: #1e1302;
+      font-weight: 850;
+      box-shadow: 0 0 18px #eab30866;
+    }
+
+    .cam-presets {
+      display: flex;
+      gap: 5px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 5px 8px;
+      backdrop-filter: blur(18px);
+      pointer-events: auto;
+    }
+
+    .cam-btn {
+      background: #ffffff0a;
+      border: 1px solid #ffffff15;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 5px 9px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .cam-btn:hover { background: #ffffff1f; color: #fff; }
+    .cam-btn.active { background: #ffffff2d; color: #fff; border-color: var(--accent); }
+
+    /* CARD DE DETALHES */
+    .option-card {
+      position: absolute;
+      top: 68px;
+      left: 14px;
+      width: 310px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 14px 40px #000000aa;
+      pointer-events: auto;
+      z-index: 15;
+      font-size: 11.5px;
+      line-height: 1.45;
+    }
+    .option-title { font-size: 13px; font-weight: 850; color: #fff; margin-bottom: 4px; }
+    .option-desc { color: var(--text-muted); margin-bottom: 8px; font-size: 11px; }
+    .feature-list { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #ffffff14; padding-top: 8px; font-size: 10.5px; }
+    .feature-item { display: flex; gap: 6px; color: #cbd5e1; }
+    .feature-item b { color: #fff; white-space: nowrap; }
+
+    /* SELETOR DOS 6 ELEMENTOS DO GDD COM EFEITOS GEOMÉTRICOS DISTINTOS */
+    .element-bar {
+      position: absolute;
+      top: 68px;
+      right: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 14px 40px #000000aa;
+      pointer-events: auto;
+      z-index: 15;
+      width: 280px;
+    }
+
+    .elem-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .elem-title small { font-size: 9px; color: var(--accent); }
+
+    .elem-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      margin-top: 4px;
+    }
+
+    .elem-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 7px 4px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: #ffffff0a;
+      color: #e2e8f0;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .elem-btn:hover { transform: translateY(-1px); }
+    .elem-btn.fire { border-color: var(--elem-fire); color: var(--elem-fire); background: #ef44441a; }
+    .elem-btn.water { border-color: var(--elem-water); color: var(--elem-water); background: #0ea5e91a; }
+    .elem-btn.earth { border-color: var(--elem-earth); color: var(--elem-earth); background: #d977061a; }
+    .elem-btn.wind { border-color: var(--elem-wind); color: var(--elem-wind); background: #10b9811a; }
+    .elem-btn.light { border-color: var(--elem-light); color: var(--elem-light); background: #eab3081a; }
+    .elem-btn.dark { border-color: var(--elem-dark); color: var(--elem-dark); background: #a855f71a; }
+
+    .elem-btn.active {
+      box-shadow: 0 0 14px currentColor;
+      font-weight: 850;
+    }
+
+    .elem-desc-box {
+      margin-top: 6px;
+      background: #00000055;
+      border: 1px solid #ffffff14;
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .elem-desc-box b { color: #fff; }
+
+    /* BARRA INFERIOR */
+    .bottom-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 35px;
+      padding: 7px 18px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 16px 45px #000000cc;
+      z-index: 20;
+    }
+
+    .action-btn {
+      background: #ffffff0d;
+      border: 1px solid #ffffff1f;
+      border-radius: 20px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .15s;
+    }
+    .action-btn:hover { background: #ffffff22; border-color: #ffffff44; transform: translateY(-1px); }
+    .action-btn.active {
+      background: var(--accent);
+      color: #0c1218;
+      border-color: var(--accent);
+      box-shadow: 0 0 16px #f59e0b66;
+    }
+
+    .sep-vert { width: 1px; height: 22px; background: #ffffff1f; }
+
+    .nav-hint {
+      position: absolute;
+      bottom: 64px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: #ffffff99;
+      background: #00000088;
+      padding: 4px 12px;
+      border-radius: 15px;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+    }
+
+    @media (max-width: 900px) {
+      .top-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+      .brand-cluster, .style-selector, .cam-presets { justify-content: center; }
+      .option-card { top: auto; bottom: 85px; left: 10px; right: 10px; width: auto; }
+      .element-bar { top: 135px; right: 10px; width: 240px; }
+      .bottom-bar { flex-wrap: wrap; justify-content: center; border-radius: 20px; width: calc(100% - 20px); }
+    }
+  </style>
+
+  <!-- LIBS 3D LOCAIS (100% OFFLINE) -->
+  <script src="three.min.js"></script>
+  <script src="OrbitControls.js"></script>
+</head>
+<body>
+
+  <div id="webgl-container"></div>
+
+  <!-- TOPO -->
+  <header class="top-bar">
+    <div class="brand-cluster">
+      <span class="brand-title">Monster Impact</span>
+      <span class="brand-badge">VIS-ENV-001</span>
+      <span style="font-size: 10px; color: var(--text-muted);">WebGL 3D & Efeitos</span>
+    </div>
+
+    <div class="style-selector">
+      <button class="style-btn active optA" id="btnOptA" onclick="setStyle('A')">
+        <span>⚔</span> A — Coliseu Sagrado
+      </button>
+      <button class="style-btn optB" id="btnOptB" onclick="setStyle('B')">
+        <span>⚡</span> B — Arena Cibernética Solid Vision
+      </button>
+      <button class="style-btn optC" id="btnOptC" onclick="setStyle('C')">
+        <span>𓂀</span> C — Templo Arcaico Milenar
+      </button>
+    </div>
+
+    <div class="cam-presets">
+      <button class="cam-btn active" id="camAll" onclick="setCameraPreset('all')">Visão Geral (31×17)</button>
+      <button class="cam-btn" id="camAlly" onclick="setCameraPreset('ally')">Base Aliada</button>
+      <button class="cam-btn" id="camCenter" onclick="setCameraPreset('center')">Centro</button>
+      <button class="cam-btn" id="camEnemy" onclick="setCameraPreset('enemy')">Base Inimiga</button>
+    </div>
+  </header>
+
+  <!-- CARD DO CENÁRIO -->
+  <aside class="option-card" id="optionCard">
+    <div class="option-title" id="optTitle">A — Coliseu Sagrado das Lâminas</div>
+    <div class="option-desc" id="optDesc">
+      Palco 3D WebGL em ardósia nobre com 4 pilares monumentais, tochas acesas e sombras suaves projetadas em tempo real.
+    </div>
+    <div class="feature-list" id="optFeatures">
+      <div class="feature-item"><b>Câmera:</b> <span>Projeção 3D isométrica inclinada (Pitch 42°) com órbita e inércia suaves.</span></div>
+      <div class="feature-item"><b>Ambiente:</b> <span>Ardósia nobre chanfrada com iluminação de tochas místicas e sombras.</span></div>
+      <div class="feature-item"><b>Grid:</b> <span>Células 3D com incisão em baixo-relevo e pedestais táteis das unidades.</span></div>
+    </div>
+  </aside>
+
+  <!-- PAINEL DOS 6 ELEMENTOS DO GDD COM FÍSICA E FORMATO DISTINTOS -->
+  <aside class="element-bar">
+    <div class="elem-title">
+      <span>6 Elementos Canônicos</span>
+      <small>GDD §18.3</small>
+    </div>
+    <div style="font-size: 10px; color: var(--text-muted); line-height: 1.3;">
+      Formatos geométricos e dinâmicas físicas exclusivas:
+    </div>
+    <div class="elem-grid">
+      <button class="elem-btn fire active" id="btnElemFire" onclick="triggerElementalAttack('fire')">
+        <span>🔥 FOGO</span>
+        <small>Torrente</small>
+      </button>
+      <button class="elem-btn water" id="btnElemWater" onclick="triggerElementalAttack('water')">
+        <span>💧 ÁGUA</span>
+        <small>Gêiser Espiral</small>
+      </button>
+      <button class="elem-btn earth" id="btnElemEarth" onclick="triggerElementalAttack('earth')">
+        <span>🌍 TERRA</span>
+        <small>Pilar Tectônico</small>
+      </button>
+      <button class="elem-btn wind" id="btnElemWind" onclick="triggerElementalAttack('wind')">
+        <span>🌪️ VENTO</span>
+        <small>Ciclone Vácuo</small>
+      </button>
+      <button class="elem-btn light" id="btnElemLight" onclick="triggerElementalAttack('light')">
+        <span>☀️ LUZ</span>
+        <small>Feixe Divino</small>
+      </button>
+      <button class="elem-btn dark" id="btnElemDark" onclick="triggerElementalAttack('dark')">
+        <span>🌑 TREVAS</span>
+        <small>Singularidade</small>
+      </button>
+    </div>
+
+    <div class="elem-desc-box" id="elemDescBox">
+      <b id="elemNameLabel">FOGO (FIRE)</b>: <span id="elemTextLabel">Torrente ondulante de fogo turbulento com chamas contínuas, anel térmico e brasas incandescentes.</span>
+    </div>
+  </aside>
+
+  <div class="nav-hint">Arrastar botão esquerdo: orbitar • Botão direito / Shift: deslocar (pan) • Roda: zoom</div>
+
+  <!-- BARRA INFERIOR -->
+  <footer class="bottom-bar">
+    <button class="action-btn" id="btnMovePreview" onclick="toggleMovePreview()">
+      <span>👣</span> Alcance de Movimento
+    </button>
+    <button class="action-btn" id="btnFireDemo" onclick="triggerElementalAttack(currentElement)">
+      <span>⚡</span> Disparar Golpe (<span id="lblActiveElem" style="text-transform:uppercase; color: var(--elem-fire);">FOGO</span>)
+    </button>
+
+    <div class="sep-vert"></div>
+
+    <button class="action-btn" id="btn2D" onclick="toggle2D()">
+      <span id="label2D">3D</span>
+    </button>
+    <button class="action-btn" id="btnReset" onclick="resetCamera()" title="Restaurar câmera (R)">
+      <span>↺ Reset</span>
+    </button>
+  </footer>
+
+  <script>
+    /* ==========================================================================
+       MONSTER IMPACT · VIS-ENV-001 — CÂMERA 3D WEBGL & EFEITOS ELEMENTAIS
+       Padrão Three.js: Chão no plano XZ (Y = 0), Y é a ELEVAÇÃO / ALTURA!
+       ========================================================================== */
+
+    const MAP_W = 31;
+    const MAP_H = 17;
+    const TILE_SIZE = 2.0;
+    const BOARD_W = MAP_W * TILE_SIZE; // 62 units along X
+    const BOARD_D = MAP_H * TILE_SIZE; // 34 units along Z
+    const CENTER_X = BOARD_W / 2;      // 31
+    const CENTER_Z = BOARD_D / 2;      // 17
+
+    let currentStyle = 'A';
+    let is2DMode = false;
+    let showMovementRange = false;
+    let currentElement = 'fire';
+
+    // CONFIGURAÇÃO DOS 6 ELEMENTOS CANÔNICOS (GDD v0.43 / src/core/monster.ts)
+    const ELEMENT_CONFIGS = {
+      fire: {
+        name: 'FOGO (FIRE)',
+        desc: 'Torrente ondulante de chamas turbulentas projetadas em arco com anel térmico incandescente e brasas no alvo.',
+        color: 0xef4444,
+        secColor: 0xf97316,
+        glowColor: '#ef4444'
+      },
+      water: {
+        name: 'ÁGUA (WATER)',
+        desc: 'Serpente marinha em dupla espiral hidrodinâmica que colide no chão e eclode em um gêiser vertical de água e spray.',
+        color: 0x0ea5e9,
+        secColor: 0x38bdf8,
+        glowColor: '#0ea5e9'
+      },
+      earth: {
+        name: 'TERRA (EARTH)',
+        desc: 'Cataclismo tectônico: pilares de basalto e estalactites que irrompem do chão em cascata progressiva até o alvo.',
+        color: 0xd97706,
+        secColor: 0xb45309,
+        glowColor: '#d97706'
+      },
+      wind: {
+        name: 'VENTO (WIND)',
+        desc: 'Lâminas duplas de vácuo em foice verde esmeralda girando em alta velocidade, levantando um ciclone afunilado.',
+        color: 0x10b981,
+        secColor: 0x34d399,
+        glowColor: '#10b981'
+      },
+      light: {
+        name: 'LUZ (LIGHT)',
+        desc: 'Pilar divino retilíneo que desaba do céu como feixe celestial com anéis de glifos sagrados dourados em expansão.',
+        color: 0xfacc15,
+        secColor: 0xffffff,
+        glowColor: '#eab308'
+      },
+      dark: {
+        name: 'TREVAS (DARK)',
+        desc: 'Singularidade abissal (buraco negro) com disco de acreção violeta, garras de sombra e descargas elétricas espectrais.',
+        color: 0xa855f7,
+        secColor: 0x7e22ce,
+        glowColor: '#a855f7'
+      }
+    };
+
+    // CENÁRIOS
+    const STYLES = {
+      A: {
+        name: 'Coliseu Sagrado das Lâminas',
+        bg: 0x05080e,
+        slabColor: 0x141e2a,
+        slabSide: 0x0a1017,
+        gridColor: 0x223547,
+        torchColor: 0x38bdf8,
+        desc: 'Palco 3D WebGL em ardósia nobre com 4 pilares monumentais, tochas acesas e sombras suaves projetadas em tempo real.',
+        features: [
+          ['Câmera', 'Projeção 3D isométrica inclinada (Pitch 42°) com órbita e inércia suaves.'],
+          ['Ambiente', 'Ardósia nobre chanfrada com iluminação de tochas místicas e sombras.'],
+          ['Grid', 'Células 3D com incisão em baixo-relevo e pedestais táteis das unidades.']
+        ],
+        camPos: { x: CENTER_X, y: 26, z: CENTER_Z + 36 },
+        camTarget: { x: CENTER_X, y: 0, z: CENTER_Z }
+      },
+      B: {
+        name: 'Arena Cibernética Solid Vision',
+        bg: 0x030209,
+        slabColor: 0x0d0a1c,
+        slabSide: 0x06040f,
+        gridColor: 0x4c1d95,
+        torchColor: 0xa855f7,
+        desc: 'Arena futurista holográfica estilo KaibaCorp com piso de vidro escuro reflexivo, fluxos de energia neon e geradores hexagonais.',
+        features: [
+          ['Câmera', 'Câmera esportiva de duelo com transmissão fluida e perspectiva cinematográfica.'],
+          ['Ambiente', 'Piso holográfico escuro com circuitos quânticos pulsantes e pilares laser.'],
+          ['Grid', 'Grade com veios luminosos em neon magenta e ciano.']
+        ],
+        camPos: { x: CENTER_X + 12, y: 22, z: CENTER_Z + 30 },
+        camTarget: { x: CENTER_X, y: 0, z: CENTER_Z }
+      },
+      C: {
+        name: 'Templo Arcaico Milenar',
+        bg: 0x080603,
+        slabColor: 0x281c0c,
+        slabSide: 0x150e05,
+        gridColor: 0x854d0e,
+        torchColor: 0xeab308,
+        desc: 'Santuário milenar egípcio em arenito dourado com canais de ouro derretido, obeliscos cerimoniais e iluminação zenital do sol desértico.',
+        features: [
+          ['Câmera', 'Visão elevada de alto comando com excelente amplitude de leitura espacial.'],
+          ['Ambiente', 'Arenito dourado maciço, incrustações em latão e obeliscos de culto.'],
+          ['Grid', 'Canais de ouro escovado gravados na pedra milenar.']
+        ],
+        camPos: { x: CENTER_X, y: 34, z: CENTER_Z + 28 },
+        camTarget: { x: CENTER_X, y: 0, z: CENTER_Z }
+      }
+    };
+
+    // SETUP THREE.JS
+    const container = document.getElementById('webgl-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(STYLES.A.bg);
+    scene.fog = new THREE.FogExp2(STYLES.A.bg, 0.008);
+
+    const aspect = window.innerWidth / window.innerHeight;
+    const persCamera = new THREE.PerspectiveCamera(40, aspect, 0.5, 500);
+    persCamera.position.set(STYLES.A.camPos.x, STYLES.A.camPos.y, STYLES.A.camPos.z);
+
+    const orthoSize = 25;
+    const orthoCamera = new THREE.OrthographicCamera(-orthoSize * aspect, orthoSize * aspect, orthoSize, -orthoSize, 0.5, 500);
+    orthoCamera.position.set(CENTER_X, 60, CENTER_Z);
+    orthoCamera.lookAt(CENTER_X, 0, CENTER_Z);
+
+    let activeCamera = persCamera;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    // CONTROLES DE ÓRBITA VERDADEIROS (Y É O EIXO VERTICAL DO MUNDO)
+    const controls = new THREE.OrbitControls(persCamera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.maxPolarAngle = Math.PI / 2 - 0.05; // Impede descer abaixo do chão
+    controls.minDistance = 10;
+    controls.maxDistance = 110;
+    controls.target.set(CENTER_X, 0, CENTER_Z);
+    controls.update();
+
+    // LUZES
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xfff8ee, 1.3);
+    dirLight.position.set(CENTER_X - 15, 38, CENTER_Z - 20);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 10;
+    dirLight.shadow.camera.far = 130;
+    dirLight.shadow.camera.left = -45;
+    dirLight.shadow.camera.right = 45;
+    dirLight.shadow.camera.top = 45;
+    dirLight.shadow.camera.bottom = -45;
+    dirLight.shadow.bias = -0.0005;
+    scene.add(dirLight);
+
+    // 4 TOCHAS / PONTOS DE LUZ NOS CANTOS
+    const torchLights = [];
+    const cornerOffsets = [
+      { x: -1, z: -1 }, { x: BOARD_W + 1, z: -1 },
+      { x: -1, z: BOARD_D + 1 }, { x: BOARD_W + 1, z: BOARD_D + 1 }
+    ];
+    for (const pos of cornerOffsets) {
+      const pl = new THREE.PointLight(STYLES.A.torchColor, 1.5, 30);
+      pl.position.set(pos.x, 7, pos.z);
+      scene.add(pl);
+      torchLights.push(pl);
+    }
+
+    const environmentGroup = new THREE.Group();
+    scene.add(environmentGroup);
+
+    // 1. BASE MONUMENTAL CHANFRADA (XZ PLANO)
+    let slabMesh;
+    function buildBoardSlab(cfg) {
+      if (slabMesh) environmentGroup.remove(slabMesh);
+
+      const slabGeo = new THREE.BoxGeometry(BOARD_W + 3, 2.4, BOARD_D + 3);
+      const slabMat = new THREE.MeshStandardMaterial({
+        color: cfg.slabColor,
+        roughness: 0.65,
+        metalness: 0.25
+      });
+      slabMesh = new THREE.Mesh(slabGeo, slabMat);
+      slabMesh.position.set(CENTER_X, -1.2, CENTER_Z);
+      slabMesh.receiveShadow = true;
+      environmentGroup.add(slabMesh);
+    }
+    buildBoardSlab(STYLES.A);
+
+    // 2. GRADE TÁTICA 31x17 NO PLANO XZ
+    const gridGroup = new THREE.Group();
+    scene.add(gridGroup);
+
+    function buildGridLines(cfg) {
+      while(gridGroup.children.length > 0) gridGroup.remove(gridGroup.children[0]);
+
+      const lineMat = new THREE.LineBasicMaterial({ color: cfg.gridColor, transparent: true, opacity: 0.8 });
+      const majorMat = new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.65 });
+
+      // Linhas ao longo de X (paralelas a X, separadas em Z)
+      for (let z = 0; z <= MAP_H; z++) {
+        const geo = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 0.02, z * TILE_SIZE),
+          new THREE.Vector3(BOARD_W, 0.02, z * TILE_SIZE)
+        ]);
+        const isMajor = (z === 0 || z === MAP_H || z === 8);
+        gridGroup.add(new THREE.Line(geo, isMajor ? majorMat : lineMat));
+      }
+      // Linhas ao longo de Z (paralelas a Z, separadas em X)
+      for (let x = 0; x <= MAP_W; x++) {
+        const geo = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(x * TILE_SIZE, 0.02, 0),
+          new THREE.Vector3(x * TILE_SIZE, 0.02, BOARD_D)
+        ]);
+        const isMajor = (x === 0 || x === MAP_W || x === 10 || x === 21);
+        gridGroup.add(new THREE.Line(geo, isMajor ? majorMat : lineMat));
+      }
+    }
+    buildGridLines(STYLES.A);
+
+    // 3. PILARES VERTICAIS EM Y NOS 4 CANTOS
+    const pillarsGroup = new THREE.Group();
+    scene.add(pillarsGroup);
+
+    function buildPillars(cfg) {
+      while(pillarsGroup.children.length > 0) pillarsGroup.remove(pillarsGroup.children[0]);
+
+      for (const pos of cornerOffsets) {
+        const pGeo = new THREE.CylinderGeometry(1.2, 1.4, 7, 8);
+        const pMat = new THREE.MeshStandardMaterial({ color: cfg.slabSide, roughness: 0.8 });
+        const mesh = new THREE.Mesh(pGeo, pMat);
+        mesh.position.set(pos.x, 3.5, pos.z);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        pillarsGroup.add(mesh);
+
+        // Chama / Tocha
+        const flameGeo = new THREE.DodecahedronGeometry(0.5);
+        const flameMat = new THREE.MeshBasicMaterial({ color: cfg.torchColor });
+        const flame = new THREE.Mesh(flameGeo, flameMat);
+        flame.position.set(pos.x, 7.2, pos.z);
+        pillarsGroup.add(flame);
+      }
+    }
+    buildPillars(STYLES.A);
+
+    // 4. BASES DOS JOGADORES (COLUNAS 1 E 29)
+    const basesGroup = new THREE.Group();
+    scene.add(basesGroup);
+
+    function buildBases() {
+      // Base Aliada (X = 1.5, Z = 8.5)
+      const b1Geo = new THREE.CylinderGeometry(2.4, 2.6, 0.5, 20);
+      const b1Mat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4, metalness: 0.6 });
+      const b1 = new THREE.Mesh(b1Geo, b1Mat);
+      b1.position.set(1.5 * TILE_SIZE, 0.25, 8.5 * TILE_SIZE);
+      b1.castShadow = true;
+      basesGroup.add(b1);
+
+      const ob1Geo = new THREE.ConeGeometry(0.8, 4.0, 4);
+      const ob1Mat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.8 });
+      const ob1 = new THREE.Mesh(ob1Geo, ob1Mat);
+      ob1.position.set(1.5 * TILE_SIZE, 2.5, 8.5 * TILE_SIZE);
+      ob1.castShadow = true;
+      basesGroup.add(ob1);
+
+      // Base Inimiga (X = 29.5, Z = 8.5)
+      const b2Geo = new THREE.CylinderGeometry(2.4, 2.6, 0.5, 20);
+      const b2Mat = new THREE.MeshStandardMaterial({ color: 0xbe123c, roughness: 0.4, metalness: 0.6 });
+      const b2 = new THREE.Mesh(b2Geo, b2Mat);
+      b2.position.set(29.5 * TILE_SIZE, 0.25, 8.5 * TILE_SIZE);
+      b2.castShadow = true;
+      basesGroup.add(b2);
+
+      const ob2Geo = new THREE.ConeGeometry(0.8, 4.0, 4);
+      const ob2Mat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.2, metalness: 0.8 });
+      const ob2 = new THREE.Mesh(ob2Geo, ob2Mat);
+      ob2.position.set(29.5 * TILE_SIZE, 2.5, 8.5 * TILE_SIZE);
+      ob2.castShadow = true;
+      basesGroup.add(ob2);
+    }
+    buildBases();
+
+    // 5. OBSTÁCULOS MONUMENTAIS 3D
+    const obstaclesGroup = new THREE.Group();
+    scene.add(obstaclesGroup);
+    const obstacles = [
+      { x: 10, y: 5 }, { x: 10, y: 11 },
+      { x: 15, y: 4 }, { x: 15, y: 12 },
+      { x: 20, y: 5 }, { x: 20, y: 11 }
+    ];
+
+    function buildObstacles(cfg) {
+      while(obstaclesGroup.children.length > 0) obstaclesGroup.remove(obstaclesGroup.children[0]);
+
+      for (const obs of obstacles) {
+        const obsGeo = new THREE.BoxGeometry(TILE_SIZE * 0.85, 3.2, TILE_SIZE * 0.85);
+        const obsMat = new THREE.MeshStandardMaterial({
+          color: cfg.slabSide,
+          roughness: 0.7,
+          metalness: 0.2
+        });
+        const mesh = new THREE.Mesh(obsGeo, obsMat);
+        mesh.position.set((obs.x + 0.5) * TILE_SIZE, 1.6, (obs.y + 0.5) * TILE_SIZE);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        obstaclesGroup.add(mesh);
+      }
+    }
+    buildObstacles(STYLES.A);
+
+    // 6. MONSTROS / MINIATURAS 3D COM ELEVAÇÃO EM Y
+    const unitsGroup = new THREE.Group();
+    scene.add(unitsGroup);
+
+    const units = [
+      { id: 'u1', name: 'Guerreiro da Terra', team: 'ally', x: 13, y: 8, elem: 'earth', atk: 1800 },
+      { id: 'u2', name: 'Maga do Fogo', team: 'ally', x: 10, y: 7, elem: 'fire', atk: 1600 },
+      { id: 'u3', name: 'Harpia do Vento', team: 'ally', x: 10, y: 9, elem: 'wind', atk: 1500 },
+      { id: 'e1', name: 'Guardião Espectral', team: 'enemy', x: 18, y: 8, elem: 'dark', atk: 1900 },
+      { id: 'e2', name: 'Serpente da Água', team: 'enemy', x: 21, y: 7, elem: 'water', atk: 2000 },
+      { id: 'e3', name: 'Dragão da Luz', team: 'enemy', x: 21, y: 9, elem: 'light', atk: 2400 }
+    ];
+
+    function buildMonsters() {
+      for (const u of units) {
+        const uGroup = new THREE.Group();
+        const isAlly = u.team === 'ally';
+        const elemCfg = ELEMENT_CONFIGS[u.elem];
+
+        // Pedestal Cilíndrico
+        const pedGeo = new THREE.CylinderGeometry(0.75, 0.85, 0.35, 16);
+        const pedMat = new THREE.MeshStandardMaterial({
+          color: isAlly ? 0x0f2942 : 0x3b1219,
+          roughness: 0.4,
+          metalness: 0.6
+        });
+        const pedMesh = new THREE.Mesh(pedGeo, pedMat);
+        pedMesh.position.y = 0.18;
+        pedMesh.castShadow = true;
+        uGroup.add(pedMesh);
+
+        // Anel Neon de Time
+        const ringGeo = new THREE.TorusGeometry(0.8, 0.05, 8, 24);
+        const ringMat = new THREE.MeshBasicMaterial({ color: isAlly ? 0x38bdf8 : 0xf43f5e });
+        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh.rotation.x = Math.PI / 2;
+        ringMesh.position.y = 0.36;
+        uGroup.add(ringMesh);
+
+        // Miniatura 3D Vertical da Criatura
+        const figGeo = new THREE.DodecahedronGeometry(0.55);
+        const figMat = new THREE.MeshStandardMaterial({
+          color: elemCfg.color,
+          roughness: 0.3,
+          metalness: 0.7,
+          emissive: elemCfg.color,
+          emissiveIntensity: 0.25
+        });
+        const figMesh = new THREE.Mesh(figGeo, figMat);
+        figMesh.position.y = 1.1;
+        figMesh.castShadow = true;
+        uGroup.add(figMesh);
+
+        uGroup.position.set((u.x + 0.5) * TILE_SIZE, 0, (u.y + 0.5) * TILE_SIZE);
+        unitsGroup.add(uGroup);
+      }
+    }
+    buildMonsters();
+
+    // 7. REALCE DE MOVIMENTO 3D
+    const moveRangeGroup = new THREE.Group();
+    scene.add(moveRangeGroup);
+
+    function updateMoveRange() {
+      while(moveRangeGroup.children.length > 0) moveRangeGroup.remove(moveRangeGroup.children[0]);
+      if (!showMovementRange) return;
+
+      const selUnit = units[0]; // u1
+      const spd = 3;
+      for (let dx = -spd; dx <= spd; dx++) {
+        for (let dy = -spd; dy <= spd; dy++) {
+          if (Math.abs(dx) + Math.abs(dy) <= spd && !(dx === 0 && dy === 0)) {
+            const tx = selUnit.x + dx;
+            const ty = selUnit.y + dy;
+            if (tx >= 0 && tx < MAP_W && ty >= 0 && ty < MAP_H) {
+              const tileGeo = new THREE.PlaneGeometry(TILE_SIZE * 0.92, TILE_SIZE * 0.92);
+              const tileMat = new THREE.MeshBasicMaterial({
+                color: 0x38bdf8,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+              });
+              const m = new THREE.Mesh(tileGeo, tileMat);
+              m.rotation.x = Math.PI / 2;
+              m.position.set((tx + 0.5) * TILE_SIZE, 0.05, (ty + 0.5) * TILE_SIZE);
+              moveRangeGroup.add(m);
+            }
+          }
+        }
+      }
+    }
+
+    // ==========================================================================
+    // EFEITOS ELEMENTAIS 3D ÚNICOS (FORMATOS & FÍSICAS TOTALMENTE DISTINTOS!)
+    // ==========================================================================
+    const effectsGroup = new THREE.Group();
+    scene.add(effectsGroup);
+
+    let activeEffect = null;
+
+    function triggerElementalAttack(elemKey) {
+      currentElement = elemKey;
+      const cfg = ELEMENT_CONFIGS[elemKey];
+
+      document.querySelectorAll('.elem-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`btnElem${elemKey.charAt(0).toUpperCase() + elemKey.slice(1)}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.getElementById('lblActiveElem').textContent = elemKey;
+      document.getElementById('lblActiveElem').style.color = cfg.glowColor;
+      document.getElementById('elemNameLabel').textContent = cfg.name;
+      document.getElementById('elemTextLabel').textContent = cfg.desc;
+
+      if (activeEffect) {
+        effectsGroup.remove(activeEffect.group);
+        activeEffect = null;
+      }
+
+      // Origem no monstro aliado vanguard (13.5, 8.5) -> Alvo no monstro inimigo vanguard (18.5, 8.5)
+      const pStart = new THREE.Vector3((13 + 0.5) * TILE_SIZE, 1.1, (8 + 0.5) * TILE_SIZE);
+      const pTarget = new THREE.Vector3((18 + 0.5) * TILE_SIZE, 1.1, (8 + 0.5) * TILE_SIZE);
+
+      const effectGroup = new THREE.Group();
+
+      if (elemKey === 'fire') {
+        // 🔥 FOGO: Torrente de fogo cônica horizontal + núcleo de plasma + anel térmico + brasas
+        const coneLength = 4.8;
+        const coneGeo = new THREE.ConeGeometry(1.4, coneLength, 16, 2, true);
+        const coneMat = new THREE.MeshBasicMaterial({
+          color: 0xef4444,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.85
+        });
+        const coneMesh = new THREE.Mesh(coneGeo, coneMat);
+        coneMesh.rotation.z = -Math.PI / 2; // Aponta no eixo X para o alvo
+        coneMesh.position.set(pStart.x + coneLength / 2, 1.1, pStart.z);
+        effectGroup.add(coneMesh);
+
+        // Núcleo de plasma incandescente
+        const coreGeo = new THREE.SphereGeometry(1.0, 16, 16);
+        const coreMat = new THREE.MeshBasicMaterial({ color: 0xf97316 });
+        const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+        coreMesh.position.copy(pTarget);
+        effectGroup.add(coreMesh);
+
+        // Anel térmico no solo
+        const ringGeo = new THREE.RingGeometry(1.0, 1.8, 24);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xdc2626, side: THREE.DoubleSide });
+        const craterRing = new THREE.Mesh(ringGeo, ringMat);
+        craterRing.rotation.x = Math.PI / 2;
+        craterRing.position.set(pTarget.x, 0.05, pTarget.z);
+        effectGroup.add(craterRing);
+
+        // 12 Brasas incandescentes subindo em espiral
+        const embers = [];
+        for (let i = 0; i < 12; i++) {
+          const emGeo = new THREE.OctahedronGeometry(0.14);
+          const emMat = new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0xfbbf24 : 0xf97316 });
+          const em = new THREE.Mesh(emGeo, emMat);
+          const rx = pStart.x + Math.random() * 5.0;
+          const rz = pStart.z + (Math.random() - 0.5) * 1.5;
+          em.position.set(rx, 1.0 + Math.random() * 1.2, rz);
+          effectGroup.add(em);
+          embers.push(em);
+        }
+
+        effectsGroup.add(effectGroup);
+        activeEffect = { type: 'fire', group: effectGroup, time: 0, maxTime: 0.8, coneMesh, coreMesh, craterRing, embers };
+
+      } else if (elemKey === 'water') {
+        // 💧 ÁGUA: Serpente em dupla hélice parabólica + gêiser vertical em alta pressão + ondas concêntricas
+        const curve = new THREE.CatmullRomCurve3([
+          pStart,
+          new THREE.Vector3(pStart.x + 1.2, 3.2, pStart.z - 0.7),
+          new THREE.Vector3(pStart.x + 2.5, 3.6, pStart.z + 0.7),
+          new THREE.Vector3(pTarget.x - 1.2, 2.4, pTarget.z - 0.4),
+          pTarget
+        ]);
+        const tubeGeo = new THREE.TubeGeometry(curve, 28, 0.45, 8, false);
+        const tubeMat = new THREE.MeshStandardMaterial({
+          color: 0x0ea5e9,
+          roughness: 0.1,
+          metalness: 0.85,
+          transparent: true,
+          opacity: 0.88
+        });
+        const tubeMesh = new THREE.Mesh(tubeGeo, tubeMat);
+        effectGroup.add(tubeMesh);
+
+        // Gêiser vertical de água em erupção
+        const geyserGeo = new THREE.CylinderGeometry(0.4, 1.8, 6.0, 14, 1, true);
+        const geyserMat = new THREE.MeshBasicMaterial({
+          color: 0x38bdf8,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.85
+        });
+        const geyserMesh = new THREE.Mesh(geyserGeo, geyserMat);
+        geyserMesh.position.set(pTarget.x, 3.0, pTarget.z);
+        effectGroup.add(geyserMesh);
+
+        // Ondas concêntricas no piso
+        const rip1Geo = new THREE.RingGeometry(1.2, 1.7, 24);
+        const rip1Mat = new THREE.MeshBasicMaterial({ color: 0x0284c7, side: THREE.DoubleSide });
+        const rippleRing1 = new THREE.Mesh(rip1Geo, rip1Mat);
+        rippleRing1.rotation.x = Math.PI / 2;
+        rippleRing1.position.set(pTarget.x, 0.05, pTarget.z);
+        effectGroup.add(rippleRing1);
+
+        const rip2Geo = new THREE.RingGeometry(1.8, 2.3, 24);
+        const rip2Mat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
+        const rippleRing2 = new THREE.Mesh(rip2Geo, rip2Mat);
+        rippleRing2.rotation.x = Math.PI / 2;
+        rippleRing2.position.set(pTarget.x, 0.06, pTarget.z);
+        effectGroup.add(rippleRing2);
+
+        effectsGroup.add(effectGroup);
+        activeEffect = { type: 'water', group: effectGroup, time: 0, maxTime: 0.8, tubeMesh, geyserMesh, rippleRing1, rippleRing2 };
+
+      } else if (elemKey === 'earth') {
+        // 🌍 TERRA: Fissura tectônica no solo + 5 monólitos facetados irrompendo + blocos de escombros
+        const fissureGeo = new THREE.BoxGeometry(5.2, 0.08, 0.7);
+        const fissureMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.95 });
+        const fissureMesh = new THREE.Mesh(fissureGeo, fissureMat);
+        fissureMesh.position.set((pStart.x + pTarget.x) / 2, 0.04, pStart.z);
+        effectGroup.add(fissureMesh);
+
+        const spikes = [];
+        const spikeCount = 5;
+        for (let i = 0; i < spikeCount; i++) {
+          const sHeight = 1.8 + i * 0.45;
+          const rGeo = new THREE.ConeGeometry(0.55 + i * 0.08, sHeight, 5); // 5 faces = bloco rochoso facetado
+          const rMat = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.9, metalness: 0.1 });
+          const spike = new THREE.Mesh(rGeo, rMat);
+          const px = pStart.x + 0.85 + i * 0.95;
+          const pz = pStart.z + (i % 2 === 0 ? 0.25 : -0.25);
+          spike.position.set(px, sHeight / 2, pz);
+          spike.castShadow = true;
+          effectGroup.add(spike);
+          spikes.push(spike);
+        }
+
+        // Blocos de escombros de impacto no alvo
+        for (let j = 0; j < 6; j++) {
+          const bGeo = new THREE.BoxGeometry(0.35, 0.35, 0.35);
+          const bMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+          const boulder = new THREE.Mesh(bGeo, bMat);
+          boulder.position.set(pTarget.x + (Math.random() - 0.5) * 1.6, 0.2, pTarget.z + (Math.random() - 0.5) * 1.6);
+          boulder.rotation.set(Math.random(), Math.random(), Math.random());
+          effectGroup.add(boulder);
+        }
+
+        effectsGroup.add(effectGroup);
+        activeEffect = { type: 'earth', group: effectGroup, time: 0, maxTime: 0.8, spikes, fissureMesh };
+
+      } else if (elemKey === 'wind') {
+        // 🌪️ VENTO: Cone de furacão translúcido giratório + foices duplas de vácuo + onda de choque
+        const vortexGeo = new THREE.CylinderGeometry(2.6, 0.5, 6.0, 16, 2, true);
+        const vortexMat = new THREE.MeshBasicMaterial({
+          color: 0x10b981,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.75
+        });
+        const vortexMesh = new THREE.Mesh(vortexGeo, vortexMat);
+        vortexMesh.position.set(pTarget.x, 3.0, pTarget.z);
+        effectGroup.add(vortexMesh);
+
+        // Duas foices de vácuo ortogonais
+        const scytheGeo = new THREE.TorusGeometry(1.6, 0.15, 6, 18, Math.PI);
+        const scytheMat = new THREE.MeshBasicMaterial({
+          color: 0x34d399,
+          transparent: true,
+          opacity: 0.95
+        });
+        const scythe1 = new THREE.Mesh(scytheGeo, scytheMat);
+        scythe1.position.copy(pTarget);
+        scythe1.rotation.x = Math.PI / 2;
+        effectGroup.add(scythe1);
+
+        const scythe2 = new THREE.Mesh(scytheGeo, scytheMat);
+        scythe2.position.copy(pTarget);
+        scythe2.rotation.y = Math.PI / 2;
+        effectGroup.add(scythe2);
+
+        // Anel de pressão atmosférica expansivo
+        const wRingGeo = new THREE.RingGeometry(1.4, 2.2, 24);
+        const wRingMat = new THREE.MeshBasicMaterial({ color: 0x059669, side: THREE.DoubleSide });
+        const windRing = new THREE.Mesh(wRingGeo, wRingMat);
+        windRing.rotation.x = Math.PI / 2;
+        windRing.position.set(pTarget.x, 0.05, pTarget.z);
+        effectGroup.add(windRing);
+
+        effectsGroup.add(effectGroup);
+        activeEffect = { type: 'wind', group: effectGroup, time: 0, maxTime: 0.8, vortexMesh, scythe1, scythe2, windRing };
+
+      } else if (elemKey === 'light') {
+        // ☀️ LUZ: Pilar divino vertical maciço de 35m + duplo glifo sagrado circular
+        const beamGeo = new THREE.CylinderGeometry(0.85, 0.85, 35, 16);
+        const beamMat = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.95
+        });
+        const coreBeam = new THREE.Mesh(beamGeo, beamMat);
+        coreBeam.position.set(pTarget.x, 17.5, pTarget.z);
+        effectGroup.add(coreBeam);
+
+        const auraGeo = new THREE.CylinderGeometry(1.7, 1.7, 35, 16);
+        const auraMat = new THREE.MeshBasicMaterial({
+          color: 0xfbbf24,
+          transparent: true,
+          opacity: 0.45
+        });
+        const auraBeam = new THREE.Mesh(auraGeo, auraMat);
+        auraBeam.position.set(pTarget.x, 17.5, pTarget.z);
+        effectGroup.add(auraBeam);
+
+        // Duplo anel com símbolos de invocação solar
+        const g1Geo = new THREE.RingGeometry(1.2, 1.6, 24);
+        const g1Mat = new THREE.MeshBasicMaterial({ color: 0xfacc15, side: THREE.DoubleSide });
+        const glyphRing1 = new THREE.Mesh(g1Geo, g1Mat);
+        glyphRing1.rotation.x = Math.PI / 2;
+        glyphRing1.position.set(pTarget.x, 0.06, pTarget.z);
+        effectGroup.add(glyphRing1);
+
+        const g2Geo = new THREE.RingGeometry(2.0, 2.4, 24);
+        const g2Mat = new THREE.MeshBasicMaterial({ color: 0xd97706, side: THREE.DoubleSide });
+        const glyphRing2 = new THREE.Mesh(g2Geo, g2Mat);
+        glyphRing2.rotation.x = Math.PI / 2;
+        glyphRing2.position.set(pTarget.x, 0.05, pTarget.z);
+        effectGroup.add(glyphRing2);
+
+        effectsGroup.add(effectGroup);
+        activeEffect = { type: 'light', group: effectGroup, time: 0, maxTime: 0.8, coreBeam, auraBeam, glyphRing1, glyphRing2 };
+
+      } else if (elemKey === 'dark') {
+        // 🌑 TREVAS: Singularidade gravitacional (buraco negro) + disco de acreção violeta + garras abissais
+        const holeGeo = new THREE.SphereGeometry(1.25, 20, 20);
+        const holeMat = new THREE.MeshBasicMaterial({ color: 0x020005 });
+        const singularityMesh = new THREE.Mesh(holeGeo, holeMat);
+        singularityMesh.position.set(pTarget.x, 1.4, pTarget.z);
+        effectGroup.add(singularityMesh);
+
+        // Disco de acreção inclinado em órbita
+        const diskGeo = new THREE.RingGeometry(1.5, 3.0, 32);
+        const diskMat = new THREE.MeshBasicMaterial({
+          color: 0xc084fc,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.9
+        });
+        const accretionDisk = new THREE.Mesh(diskGeo, diskMat);
+        accretionDisk.rotation.x = Math.PI / 2 - 0.45; // Inclinado a 35°
+        accretionDisk.position.set(pTarget.x, 1.4, pTarget.z);
+        effectGroup.add(accretionDisk);
+
+        // Garras de sombra erguendo-se do solo
+        const claws = [];
+        for (let k = 0; k < 4; k++) {
+          const clawGeo = new THREE.ConeGeometry(0.3, 1.8, 4);
+          const clawMat = new THREE.MeshStandardMaterial({ color: 0x3b0764, roughness: 0.4 });
+          const claw = new THREE.Mesh(clawGeo, clawMat);
+          const ang = (k * Math.PI) / 2;
+          claw.position.set(pTarget.x + Math.cos(ang) * 1.4, 0.9, pTarget.z + Math.sin(ang) * 1.4);
+          claw.rotation.z = Math.cos(ang) * 0.4;
+          claw.rotation.x = Math.sin(ang) * 0.4;
+          effectGroup.add(claw);
+          claws.push(claw);
+        }
+
+        effectsGroup.add(effectGroup);
+        activeEffect = { type: 'dark', group: effectGroup, time: 0, maxTime: 0.8, singularityMesh, accretionDisk, claws };
+      }
+    }
+
+    function setStyle(styleKey) {
+      currentStyle = styleKey;
+      const cfg = STYLES[styleKey];
+
+      document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`btnOpt${styleKey}`).classList.add('active');
+
+      scene.background.setHex(cfg.bg);
+      scene.fog.color.setHex(cfg.bg);
+
+      buildBoardSlab(cfg);
+      buildGridLines(cfg);
+      buildPillars(cfg);
+      buildObstacles(cfg);
+
+      for (const pl of torchLights) {
+        pl.color.setHex(cfg.torchColor);
+      }
+
+      document.getElementById('optTitle').textContent = `${styleKey} — ${cfg.name}`;
+      document.getElementById('optDesc').textContent = cfg.desc;
+
+      const fContainer = document.getElementById('optFeatures');
+      fContainer.innerHTML = '';
+      for (const [k, v] of cfg.features) {
+        const div = document.createElement('div');
+        div.className = 'feature-item';
+        div.innerHTML = `<b>${k}:</b> <span>${v}</span>`;
+        fContainer.appendChild(div);
+      }
+
+      setCameraPreset('all');
+    }
+
+    function setCameraPreset(preset) {
+      document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
+
+      if (preset === 'all') {
+        document.getElementById('camAll').classList.add('active');
+        controls.target.set(CENTER_X, 0, CENTER_Z);
+        persCamera.position.set(CENTER_X, 26, CENTER_Z + 36);
+      } else if (preset === 'ally') {
+        document.getElementById('camAlly').classList.add('active');
+        controls.target.set(3 * TILE_SIZE, 0, 8.5 * TILE_SIZE);
+        persCamera.position.set(3 * TILE_SIZE, 14, 8.5 * TILE_SIZE + 18);
+      } else if (preset === 'center') {
+        document.getElementById('camCenter').classList.add('active');
+        controls.target.set(CENTER_X, 0, 8.5 * TILE_SIZE);
+        persCamera.position.set(CENTER_X, 15, 8.5 * TILE_SIZE + 20);
+      } else if (preset === 'enemy') {
+        document.getElementById('camEnemy').classList.add('active');
+        controls.target.set(28 * TILE_SIZE, 0, 8.5 * TILE_SIZE);
+        persCamera.position.set(28 * TILE_SIZE, 14, 8.5 * TILE_SIZE + 18);
+      }
+      controls.update();
+    }
+
+    function toggleMovePreview() {
+      showMovementRange = !showMovementRange;
+      document.getElementById('btnMovePreview').classList.toggle('active', showMovementRange);
+      updateMoveRange();
+    }
+
+    function toggle2D() {
+      is2DMode = !is2DMode;
+      document.getElementById('btn2D').classList.toggle('active', is2DMode);
+      document.getElementById('label2D').textContent = is2DMode ? '2D (Top-Down)' : '3D';
+      activeCamera = is2DMode ? orthoCamera : persCamera;
+      controls.enabled = !is2DMode;
+    }
+
+    function resetCamera() {
+      setCameraPreset('all');
+    }
+
+    window.addEventListener('resize', () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const asp = w / h;
+
+      persCamera.aspect = asp;
+      persCamera.updateProjectionMatrix();
+
+      orthoCamera.left = -orthoSize * asp;
+      orthoCamera.right = orthoSize * asp;
+      orthoCamera.top = orthoSize;
+      orthoCamera.bottom = -orthoSize;
+      orthoCamera.updateProjectionMatrix();
+
+      renderer.setSize(w, h);
+    });
+
+    window.addEventListener('keydown', e => {
+      if (e.key === '1') setStyle('A');
+      else if (e.key === '2') setStyle('B');
+      else if (e.key === '3') setStyle('C');
+      else if (e.key.toLowerCase() === 'v') toggle2D();
+      else if (e.key.toLowerCase() === 'r') resetCamera();
+      else if (e.key.toLowerCase() === 'm') toggleMovePreview();
+      else if (e.key === ' ') { e.preventDefault(); triggerElementalAttack(currentElement); }
+    });
+
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = clock.getDelta();
+
+      if (!is2DMode) controls.update();
+
+      if (activeEffect) {
+        activeEffect.time += dt;
+        const p = Math.min(1, activeEffect.time / activeEffect.maxTime);
+
+        if (activeEffect.type === 'fire') {
+          activeEffect.coneMesh.scale.set(1 + Math.sin(p * 20) * 0.1, 1, 1 + Math.sin(p * 20) * 0.1);
+          activeEffect.craterRing.scale.setScalar(1 + p * 0.9);
+          for (const em of activeEffect.embers) {
+            em.position.y += 2.8 * dt;
+            em.rotation.x += 4 * dt;
+          }
+        } else if (activeEffect.type === 'water') {
+          activeEffect.geyserMesh.rotation.y += 8 * dt;
+          activeEffect.rippleRing1.scale.setScalar(1 + p * 1.4);
+          activeEffect.rippleRing2.scale.setScalar(1 + p * 2.0);
+        } else if (activeEffect.type === 'earth') {
+          // Os espigões de pedra permanecem firmes e imponentes no chão
+        } else if (activeEffect.type === 'wind') {
+          activeEffect.vortexMesh.rotation.y += 16 * dt;
+          activeEffect.scythe1.rotation.z += 14 * dt;
+          activeEffect.scythe2.rotation.y += 14 * dt;
+          activeEffect.windRing.scale.setScalar(1 + p * 0.8);
+        } else if (activeEffect.type === 'light') {
+          activeEffect.glyphRing1.rotation.z += 5 * dt;
+          activeEffect.glyphRing2.rotation.z -= 4 * dt;
+          activeEffect.auraBeam.scale.x = 1 + Math.sin(p * 15) * 0.15;
+          activeEffect.auraBeam.scale.z = 1 + Math.sin(p * 15) * 0.15;
+        } else if (activeEffect.type === 'dark') {
+          activeEffect.accretionDisk.rotation.z += 10 * dt;
+          activeEffect.singularityMesh.scale.setScalar(1 + Math.sin(p * 12) * 0.08);
+        }
+
+        if (activeEffect.time >= activeEffect.maxTime) {
+          effectsGroup.remove(activeEffect.group);
+          activeEffect = null;
+        }
+      }
+
+      renderer.render(scene, activeCamera);
+    }
+    animate();
+
+    window.MIVisualEnv = {
+      setStyle,
+      setCameraPreset,
+      toggle2D,
+      toggleMovePreview,
+      triggerElementalAttack,
+      resetCamera,
+      getState: () => ({
+        style: currentStyle,
+        element: currentElement,
+        is2D: is2DMode,
+        camPos: persCamera.position,
+        target: controls.target
+      })
+    };
+  </script>
+</body>
+</html>

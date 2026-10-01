@@ -1,6 +1,7 @@
 export const SIMULATION_HZ = 20 as const;
 export const STEP_MS = 50 as const;
-export const CORE_SCHEMA_VERSION = 1 as const;
+export const CORE_SCHEMA_VERSION = 16 as const;
+export const SYSTEM_ISSUER = "system" as const;
 
 export const STEP_PIPELINE = [
   "receive_commands",

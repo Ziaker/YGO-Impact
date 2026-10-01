@@ -4,18 +4,21 @@ Esta pasta concentra o GDD e documentos normativos do Monster Impact.
 
 ## GDD atual
 
-O GDD-base do primeiro protótipo é a versão **0.43**, com 25/25 fases concluídas e nenhuma pendência P0 ativa.
+O GDD-base mais recente do primeiro protótipo é a versão **0.43**, com 25/25 fases concluídas e nenhuma pendência P0 ativa.
 
-A revisão 0.43 registra como decisão normativa que **commits necessários para executar tarefas solicitadas pelo autor estão permanentemente autorizados no projeto YGO Impact e não exigem nova confirmação**. Essa autorização permanente não inclui automaticamente push, Pull Request, merge, publicação, release ou deploy.
-
-`GDD_SOURCE.md` fixa o nome, a versão e o SHA-256 do arquivo canônico efetivamente revisado. O binário `.docx` revisado ainda precisa ser incorporado ao Git preservando exatamente seus bytes e hash.
+`GDD_SOURCE.md` fixa o nome, a versão e o SHA-256 do arquivo canônico fornecido pelo autor e efetivamente lido. A cópia exata mais recente está versionada em `sources/Monster_Impact_GDD_v0.43.docx`. A versão v0.42 permanece preservada como histórico em `sources/Monster_Impact_GDD_v0.42.docx`.
 
 ## Decisões versionadas
 
-- `ADR-001-core-runtime.md`: decisão arquitetural do runtime/núcleo.
+- `GDD_SOURCE.md`: identidade verificável, localização e hash do GDD canônico.
+- `sources/Monster_Impact_GDD_v0.43.docx`: GDD canônico v0.43 completo, preservado byte a byte.
+- `sources/Monster_Impact_GDD_v0.42.docx`: GDD histórico v0.42, preservado byte a byte.
+- `sources/PROMPT_MESTRE.txt`: prompt mestre completo fornecido pelo autor.
+- `ADR-001-core-runtime.md`: decisão sobre TypeScript como linguagem principal, runtime do núcleo, uso auxiliar de Python e separação da apresentação.
 - `DEC-001-initial-card-pool.md`: política automática atual do pool inicial, com **136 cartas** (106 monstros, 20 Magias e 10 Armadilhas), quatro RACE ativas e cotas específicas.
-- `DEC-002-pre-2005-library-expansion.md`: expansão adicional da biblioteca de cartas, incluindo a exceção Psychic aprovada pelo autor.
-- `ROADMAP.md`: estado técnico e ordem das próximas entregas.
+- `DEC-002-base-visibility.md`: decisão autoral de VIS da base em quadrado de raio 5, usada também para validar a primeira Invocação Normal.
+- `DEC-003-double-negative-combat.md`: resolução de ATK contra DEF quando ambos os atributos comparados são negativos.
+- `ROADMAP.md`: estado real do repositório e ordem recomendada de evolução.
 
 ### Estado do snapshot de seleção
 

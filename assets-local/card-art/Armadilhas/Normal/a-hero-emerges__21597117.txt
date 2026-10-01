@@ -1,0 +1,13 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: A Hero Emerges
+ID: 21597117
+Categoria: Armadilha
+Tipo da API: Trap Card
+Subtipo: Normal
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+When an opponent's monster declares an attack: Your opponent chooses 1 random card from your hand, then if it is a monster that can be Special Summoned, Special Summon it. Otherwise, send it to the Graveyard.

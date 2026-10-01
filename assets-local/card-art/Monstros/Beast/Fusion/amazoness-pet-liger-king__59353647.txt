@@ -1,0 +1,16 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Amazoness Pet Liger King
+ID: 59353647
+Categoria: Monstro
+Tipo da API: Fusion Monster
+RACE: Beast
+Nível: 9
+Tipo Monster Impact: Fusion
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+1 Level 5 or higher "Amazoness" monster + 1 "Amazoness" monster
+Your opponent's monsters cannot attack any monsters, except this one. You can target 1 "Amazoness" card you control and 1 "Amazoness" Warrior monster in your GY; destroy that card on the field, and if you do, Special Summon that other monster from the GY. This card cannot attack the turn this effect is activated. You can only use this effect of "Amazoness Pet Liger King" once per turn.

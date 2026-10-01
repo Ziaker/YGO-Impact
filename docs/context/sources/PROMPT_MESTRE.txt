@@ -1,0 +1,1397 @@
+Você está trabalhando no projeto YGO Impact, também chamado Monster Impact. Trata-se de um fangame pessoal e não comercial de Yu-Gi-Oh! que adapta cartas oficiais para um sistema próprio de combate tático 2D top-down, com leitura espacial inspirada em Fire Emblem de GBA.
+
+Seu trabalho deve respeitar rigorosamente o Game Design Document, as decisões registradas no repositório e as instruções do autor. Este texto define como você deve compreender, implementar, testar, documentar e evoluir o projeto.
+
+IDENTIDADE DO PROJETO
+
+Nome do repositório:
+
+YGO-Impact
+
+Repositório oficial:
+
+https://github.com/Ziaker/YGO-Impact
+
+Nome de trabalho do jogo:
+
+Monster Impact
+
+Natureza do projeto:
+
+- Fangame pessoal.
+- Não comercial.
+- Focado inicialmente em jogo single-player contra IA.
+- Construído de maneira iterativa e orientada por protótipos.
+- Disponível em uma versão jogável pelo GitHub Pages.
+- Projetado para permitir partidas entre jogador e IA, IA contra IA e campanhas automatizadas de testes.
+- Baseado em cartas oficiais de Yu-Gi-Oh!, mas com efeitos e funcionamento adaptados ao sistema tático próprio.
+- Não deve reproduzir automaticamente as regras oficiais de Yu-Gi-Oh!.
+- Não utiliza Life Points tradicionais.
+- A principal condição de vitória é fazer o oponente receber cinco impactos válidos na base.
+- O Duelista não aparece fisicamente no mapa.
+- Cada jogador pode controlar até cinco monstros simultaneamente no mapa.
+
+IDIOMA E COMUNICAÇÃO
+
+Comunique-se com o autor em português brasileiro.
+
+Código, identificadores, nomes de arquivos e nomes de módulos podem ser escritos em inglês quando isso melhorar a consistência técnica.
+
+Não seja excessivamente formal.
+
+Seja direto, técnico e preciso.
+
+Comece relatórios pelo resultado obtido, não por uma longa descrição do processo.
+
+Não repita perguntas já respondidas no GDD, em documentos de contexto, no código, em testes ou em decisões anteriores.
+
+Quando encontrar uma contradição:
+
+1. Identifique as duas regras conflitantes.
+2. Informe onde cada uma aparece.
+3. Explique o efeito prático do conflito.
+4. Recomende a interpretação mais compatível com as decisões mais recentes e específicas.
+5. Não altere silenciosamente o comportamento.
+6. Solicite decisão do autor somente quando a escolha mudar materialmente o jogo.
+
+FONTE DE VERDADE
+
+O repositório é a fonte oficial de:
+
+- código;
+- documentação;
+- GDD;
+- regras;
+- decisões técnicas;
+- protótipos;
+- testes;
+- telemetria;
+- replays;
+- automações;
+- histórico de alterações.
+
+O GDD mais recente localizado em docs/context é a fonte primária de verdade para gameplay e escopo.
+
+Antes de implementar ou modificar qualquer regra:
+
+1. Localize o GDD mais recente.
+2. Leia integralmente as seções relevantes.
+3. Procure termos relacionados em todo o documento.
+4. Consulte documentos complementares em docs/context.
+5. Verifique testes existentes.
+6. Verifique decisões arquiteturais.
+7. Verifique se já existe um protótipo aprovado em docs/prototypes.
+8. Somente depois altere o comportamento.
+
+A ordem de prioridade é:
+
+1. Instrução explícita atual do autor.
+2. Correções expressas mais recentes do autor.
+3. Regras de precedência do GDD.
+4. Seções específicas do GDD.
+5. Regras gerais do GDD.
+6. Decisões arquiteturais versionadas.
+7. Testes de regressão aprovados.
+8. Implementação existente.
+9. Suposições técnicas convencionais.
+
+A implementação existente não prevalece sobre o GDD quando estiver incorreta.
+
+Testes antigos também podem estar errados. Se um teste contradizer uma decisão mais recente, explique o conflito e atualize o teste junto com a implementação.
+
+Não use conhecimento das regras oficiais de Yu-Gi-Oh! para preencher lacunas automaticamente. Monster Impact é um sistema próprio.
+
+Não invente regras, custos, limites ou interações apenas porque seriam comuns em outros jogos.
+
+ESTADO DO GDD
+
+O GDD-base do primeiro protótipo possui 25 de 25 fases concluídas.
+
+Não existem fases obrigatórias restantes.
+
+Conteúdo adicional, balanceamento, criação de cartas, produção de assets e implementação não devem ser apresentados como lacunas do GDD-base.
+
+Uma nova rodada de perguntas só deve ser iniciada quando o autor abrir deliberadamente uma expansão de escopo.
+
+Quando isso acontecer:
+
+- use levas de 30 perguntas;
+- use alternativas A, B, C e D;
+- reserve D para resposta própria do autor;
+- não faça perguntas redundantes;
+- forneça exemplos quando forem necessários para compreender interações;
+- fundamente as alternativas;
+- informe a fase atual;
+- informe quantas fases faltam;
+- registre as respostas no GDD antes da próxima leva.
+
+ESTRUTURA DO REPOSITÓRIO
+
+Adote ou evolua a seguinte estrutura, ajustando nomes apenas quando houver justificativa técnica:
+
+- docs/context
+  - GDD.
+  - Glossário.
+  - Decisões de regras.
+  - Decisões arquiteturais.
+  - Contratos de dados.
+  - Documentos de contexto.
+  - Roadmaps técnicos.
+- docs/prototypes
+  - Experimentos visuais.
+  - Comparações entre opções.
+  - Capturas.
+  - Resultados de testes.
+  - Critérios de aprovação.
+  - Histórico das decisões.
+- prototypes
+  - Protótipos executáveis.
+  - Experimentos HTML e TypeScript.
+  - Simulações isoladas.
+  - Testes de interface.
+- src
+  - Núcleo autoritativo.
+  - Interface.
+  - Renderização.
+  - Conteúdo.
+  - IA.
+  - Telemetria.
+  - Infraestrutura.
+- tests
+  - Testes unitários.
+  - Testes de integração.
+  - Testes de propriedades.
+  - Testes determinísticos.
+  - Regressões.
+  - Replays.
+  - Self-play.
+  - Testes diferenciais.
+  - Testes de conteúdo.
+- scripts
+  - Download de artes.
+  - Validação de conteúdo.
+  - Geração de builds.
+  - Conversores.
+  - Ferramentas de QA.
+- assets-local
+  - Artes baixadas.
+  - Arquivos locais volumosos.
+  - Recursos que não devem entrar automaticamente no Git.
+- public ou diretório equivalente
+  - Arquivos utilizados pela build web.
+- .github/workflows
+  - Validação.
+  - Testes.
+  - Build.
+  - GitHub Pages.
+  - Campanhas automatizadas.
+- reports ou artifacts
+  - Relatórios temporários de testes.
+  - Evidências de falhas.
+  - Cobertura.
+  - Pacotes de reprodução.
+
+Não crie diretórios vazios sem utilidade imediata, exceto quando forem necessários para documentar a arquitetura inicial.
+
+Crie um .gitignore antes de gerar dependências, builds, caches, logs, replays volumosos ou artes locais.
+
+Não envie node_modules, caches, builds temporárias, arquivos .part, resultados massivos de self-play ou dados locais desnecessários ao repositório.
+
+AUTORIZAÇÃO E SEGURANÇA
+
+Não execute ações destrutivas sem autorização explícita.
+
+Não apague trabalho do autor.
+
+Não sobrescreva alterações não relacionadas.
+
+Não use comandos equivalentes a reset destrutivo para limpar o repositório.
+
+Não faça commit, push, merge, publicação, abertura de pull request, criação de release, alteração de GitHub Pages ou mudança de configurações externas sem autorização explícita.
+
+Uma solicitação para implementar código não autoriza automaticamente publicar o resultado.
+
+Uma solicitação para revisar não autoriza modificar.
+
+Uma solicitação para diagnosticar não autoriza corrigir, salvo quando o pedido incluir claramente a correção.
+
+Antes de editar:
+
+1. Inspecione o estado do Git.
+2. Verifique arquivos modificados.
+3. Leia instruções locais.
+4. Preserve mudanças existentes.
+5. Identifique o escopo da tarefa.
+6. Identifique os consumidores afetados.
+7. Identifique os testes relevantes.
+
+Depois de editar:
+
+1. Execute testes adequados.
+2. Execute validações de conteúdo.
+3. Execute a build quando aplicável.
+4. Confirme que não foram criados arquivos indesejados.
+5. Revise o diff.
+6. Informe alterações e limitações.
+7. Não declare sucesso sem evidência proporcional ao risco.
+
+ARQUITETURA FUNDAMENTAL
+
+O jogo deve possuir um único núcleo autoritativo de regras.
+
+O núcleo autoritativo é responsável por:
+
+- estado da partida;
+- validação de comandos;
+- custos;
+- movimentação;
+- ocupação;
+- combate;
+- Correntes;
+- Cross Chains;
+- efeitos IMEDIATOS;
+- fases;
+- timers lógicos;
+- zonas;
+- cartas;
+- aleatoriedade;
+- condições de vitória;
+- eventos;
+- hashes;
+- snapshots;
+- invariantes.
+
+Interface, animação, renderização, áudio, IA e telemetria não podem alterar diretamente o estado autoritativo.
+
+Esses sistemas podem:
+
+- receber snapshots somente para leitura;
+- enviar comandos pela interface pública;
+- observar eventos;
+- apresentar resultados;
+- solicitar ações válidas;
+- produzir análises sem modificar a verdade da partida.
+
+Evite compartilhar referências mutáveis do estado autoritativo.
+
+Use estruturas imutáveis, cópias controladas, serialização ou APIs de leitura.
+
+Não permita que componentes visuais decidam resultados de regras.
+
+Não permita que animações bloqueiem ou alterem a lógica.
+
+Não permita que a taxa de quadros determine dano, movimento, custos, timers ou prioridade.
+
+GAME LOOP
+
+A simulação autoritativa opera em passos fixos de 20 Hz.
+
+Cada passo equivale a 50 milissegundos de tempo lógico.
+
+A renderização pode operar em frequência diferente.
+
+A apresentação visual pode interpolar entre estados confirmados, mas não pode produzir estados intermediários autoritativos.
+
+A ordem geral de cada passo lógico deve respeitar o GDD e incluir, conforme aplicável:
+
+1. Receber comandos.
+2. Atribuir identificação e sequência.
+3. Ordenar comandos deterministicamente.
+4. Validar condições.
+5. Confirmar custos.
+6. Aplicar mutações atômicas.
+7. Emitir eventos.
+8. Coletar gatilhos.
+9. Resolver Correntes ou Cross Chains.
+10. Aplicar regras obrigatórias de estado.
+11. Atualizar timers.
+12. Verificar condições de vitória ou encerramento.
+13. Emitir telemetria.
+14. Calcular hash do estado confirmado.
+15. Produzir snapshot somente para leitura.
+
+A validação e o pagamento de uma ação formam uma operação transacional.
+
+Uma ação não deve ser parcialmente confirmada.
+
+Se uma ação falhar antes da confirmação, não aplique mutações parciais.
+
+Se uma ação for confirmada e posteriormente NEGADA ou FALHAR durante a resolução, siga exatamente as regras de reembolso ou ausência de reembolso do GDD.
+
+DETERMINISMO
+
+Para os mesmos:
+
+- dados;
+- Decks;
+- seed;
+- comandos;
+- ordem de entrada;
+- configurações;
+- versão das regras;
+
+o motor deve produzir os mesmos:
+
+- estados;
+- eventos;
+- custos;
+- alvos;
+- resultados;
+- hashes;
+- vencedores.
+
+Use números inteiros ou ponto fixo para lógica autoritativa.
+
+Restrinja ponto flutuante a:
+
+- renderização;
+- interpolação;
+- animação;
+- partículas;
+- efeitos puramente visuais.
+
+Aleatoriedade deve usar geradores controlados por seed.
+
+Fluxos aleatórios independentes devem ser separados quando necessário, evitando que uma chamada visual ou não relacionada altere o resultado da partida.
+
+Registre o fluxo aleatório responsável por cada decisão relevante.
+
+Pathfinding deve possuir desempate estável e documentado.
+
+Iterações sobre coleções não podem depender de ordem não garantida.
+
+Identificadores devem ser estáveis.
+
+Serialização usada para hash deve possuir ordenação canônica.
+
+REGRAS CRÍTICAS DE CORRENTES
+
+Esta é uma área sensível e não deve ser reinterpretada.
+
+UMA CORRENTE SOMENTE É ABERTA QUANDO A ATIVAÇÃO ENVOLVE PELO MENOS UM ALVO INIMIGO.
+
+A existência de custo, efeito, movimento, carta, habilidade, Reação ou animação não é suficiente para abrir Corrente.
+
+Ativações voltadas apenas para:
+
+- o próprio usuário;
+- o próprio monstro;
+- aliados;
+- cartas aliadas;
+- espaços aliados;
+- recursos próprios;
+
+não abrem Corrente isoladamente.
+
+Uma Reação defensiva ou protetora voltada ao próprio usuário ou aliado pode integrar uma Corrente inimiga que a provocou quando as regras permitirem, mas não abre uma nova Corrente isoladamente.
+
+Movimento defensivo sem alvo inimigo pode integrar uma Corrente já aberta quando responder à interação, mas não abre Corrente sozinho.
+
+Setar uma Armadilha:
+
+- não abre Corrente;
+- não integra Corrente;
+- não paga o custo de ativação;
+- apenas posiciona a carta conforme as regras de set.
+
+O custo da Armadilha é pago quando ela é ativada.
+
+Não acrescente Correntes automaticamente a toda ação.
+
+Não use a presença de um inimigo próximo como substituto para alvo inimigo.
+
+Efeitos em área que atingem inimigos abrem Corrente de acordo com o GDD.
+
+Efeitos mistos que incluem alvo inimigo seguem as regras de Corrente.
+
+Quando apenas um bloco aparentemente vazio é selecionado e uma unidade oculta é atingida incidentalmente, a unidade não foi alvo da ativação. Respeite a exceção definida no GDD.
+
+Correntes normais usam resolução LIFO.
+
+Elementos devem ser revalidados individualmente.
+
+NEGAR um elemento não cancela automaticamente respostas independentes.
+
+Invalidar um alvo não invalida automaticamente todos os outros.
+
+CROSS CHAINS
+
+Cross Chains representam novas interações hostis surgidas durante a resolução de uma Corrente.
+
+Ao abrir uma Cross Chain:
+
+1. Preserve o ponto de continuação.
+2. Registre o contexto causal.
+3. Resolva a nova interação.
+4. Aplique verificações obrigatórias de estado.
+5. Revalide o elemento suspenso.
+6. Continue somente se ainda for possível.
+
+Respeite o limite de adições definido no GDD.
+
+Não confunda profundidade de Corrente normal com limite de Cross Chain.
+
+EFEITOS IMEDIATOS
+
+IMEDIATO e IMEDIATAMENTE são palavras reservadas.
+
+Um efeito IMEDIATO:
+
+- é acionado e resolvido ao mesmo tempo;
+- não abre Corrente;
+- não entra na pilha;
+- não espera nova prioridade;
+- não gera efeitos adicionais a partir do resultado;
+- não armazena gatilhos suprimidos para execução posterior.
+
+Efeitos IMEDIATOS ainda respeitam regras obrigatórias de estado, como:
+
+- morte;
+- remoção de unidade com zero HP;
+- ocupação legal;
+- limites;
+- integridade das zonas;
+- condição de vitória.
+
+Não use IMEDIATO como sinônimo de animação rápida.
+
+A apresentação visual pode possuir animação, mas a lógica resolve atomicamente.
+
+FASES E RECURSOS
+
+O turno possui as fases definidas pelo GDD, incluindo:
+
+- Compra;
+- Apoio;
+- Decisão;
+- Ação;
+- Final.
+
+O primeiro turno constitui uma exceção de preparação e começa na Fase de Decisão depois da mão inicial, sem Compra nem Apoio.
+
+Não existe necessariamente um jogador ativo exclusivo durante todo o turno.
+
+Comandos simultâneos usam ordem interna determinística.
+
+O Token de Prioridade somente deve atuar onde uma regra o invocar.
+
+Cada jogador possui orçamento fixo de oito recursos distribuídos entre Ações e Reações de acordo com as regras do GDD.
+
+A distribuição pode ser secreta quando determinado.
+
+A conversão entre Ações e Reações deve seguir os momentos e limites formalizados.
+
+Recursos não carregam automaticamente entre turnos.
+
+Custos são pagos no momento correto da ativação, não durante preparação ou set, salvo texto expresso.
+
+MOVIMENTO E MAPA
+
+O primeiro mapa possui 31 por 17 blocos.
+
+A base ocupa um bloco físico.
+
+A base é sólida e não pode ser ocupada por monstros.
+
+Existe no máximo um monstro por bloco.
+
+Aliados podem ser atravessados de acordo com as regras do GDD.
+
+Inimigos bloqueiam passagem, salvo efeitos ou Keywords expressos.
+
+Distância e alcance-base usam métrica ortogonal.
+
+Movimento diagonal exige Keyword ou efeito que o permita.
+
+LEAPER X permite movimento diagonal conforme seu texto consolidado.
+
+Movimento consome SPD, não Ação, salvo quando outra regra ou efeito declarar custo adicional.
+
+Movimento pode ser fracionado.
+
+Movimento usado como Reação consome a Reação e o SPD exigido.
+
+Movimento por efeito não consome SPD por padrão.
+
+Mova verifica caminho.
+
+Teleporte ignora caminho, mas exige destino legal.
+
+Movimento forçado aplica terreno salvo supressão expressa por IMEDIATO ou outra regra específica.
+
+Terreno pode levar SPD a valor negativo.
+
+Unidade com SPD negativo não inicia novo movimento, mas continua podendo realizar ações permitidas.
+
+Oito segundos de ociosidade para regeneração de SPD correspondem a 160 passos lógicos em 20 Hz.
+
+A câmera e a renderização não podem mudar a ocupação lógica.
+
+FOG OF WAR E VISIBILIDADE
+
+A VIS dos aliados é compartilhada conforme o GDD.
+
+A geografia fixa do mapa permanece conhecida.
+
+Unidades ocultas podem deixar marcador de última posição conhecida.
+
+A interface não pode revelar:
+
+- posição atual não conhecida;
+- identidade oculta;
+- região de Armadilha secreta;
+- distribuição secreta de recursos;
+- carta oculta;
+- decisão privada da IA.
+
+Logs destinados a cada jogador devem respeitar a informação legalmente conhecida naquele momento.
+
+Uma revelação posterior não altera retroativamente o que o jogador sabia.
+
+IA competitiva deve receber uma visão filtrada pelas mesmas regras de informação disponíveis ao jogador.
+
+COMBATE E VITÓRIA
+
+Não existem Life Points tradicionais.
+
+A condição central é receber cinco impactos válidos na base.
+
+Apenas Ataques Básicos válidos contam para os impactos, conforme o GDD.
+
+Um impacto pode contar mesmo quando o dano resultante for zero, se a regra assim determinar.
+
+Ataques à distância podem alcançar a base quando alcance e linha forem válidos.
+
+Depois do impacto, o atacante é lançado para uma zona aleatória distante conforme as regras registradas.
+
+O quinto impacto encerra a partida imediatamente.
+
+Empates e impactos simultâneos seguem os desempates formalizados.
+
+ATK, DEF, VIS e SPD podem ficar negativos.
+
+HP e MP possuem piso zero.
+
+ATK ou DEF negativo aumenta o dano recebido quando a unidade estiver na posição de batalha correspondente.
+
+Dano e perda de HP são conceitos diferentes.
+
+Destruir, enviar ao Cemitério, Tributar e descartar são operações diferentes.
+
+Negar ativação e negar efeito também são operações diferentes.
+
+Mortes simultâneas devem ser preservadas quando determinadas pelo mesmo evento.
+
+Unidades com zero HP deixam o mapa no momento definido pelas verificações obrigatórias de estado.
+
+DECKS E ZONAS
+
+Deck de Monstros:
+
+- mínimo de 20 cartas;
+- máximo de 30 cartas;
+- pelo menos oito Monstros Normais.
+
+Deck de Magias e Armadilhas:
+
+- mínimo de 15 cartas;
+- máximo de 30 cartas.
+
+Extra Deck:
+
+- opcional;
+- mínimo de zero;
+- máximo de dez cartas.
+
+Limite universal:
+
+- até três cópias por nome.
+
+O primeiro protótipo não possui Side Deck.
+
+Não existe limite universal de mão, salvo decisão posterior.
+
+Deck Out de qualquer Deck relevante causa derrota conforme as regras.
+
+Deck Out simultâneo causa empate.
+
+Uma compra insuficiente provoca derrota antes de mover parcialmente as cartas.
+
+Uma busca sem resultado apenas falha, salvo texto específico.
+
+Cada carta deve existir em exatamente uma zona válida.
+
+Zonas oficiais incluem:
+
+- Deck de Monstros;
+- Deck de Magias e Armadilhas;
+- Extra Deck;
+- mão;
+- Cemitério;
+- mapa;
+- espaços de Armadilha;
+- vínculos de Equipamento;
+- Zona de Resolução;
+- outras zonas expressamente definidas.
+
+Cemitérios são públicos.
+
+A quantidade de cartas dos Decks é pública.
+
+Da mão adversária, apenas a quantidade total é visível, salvo efeito que revele informação adicional.
+
+INVOCÂNCIAS DO PROTÓTIPO
+
+O primeiro protótipo inclui:
+
+- Invocação Normal;
+- Invocação por Tributo;
+- Ritual;
+- Fusion.
+
+Não inclui:
+
+- Synchro;
+- Xyz;
+- Pendulum;
+- Link.
+
+Ritual e Fusion ficam no Extra Deck conforme a decisão consolidada do projeto.
+
+Invocações Especiais não possuem custo universal de Ação.
+
+Custos específicos são definidos por cartas, efeitos e regras correspondentes.
+
+Ritual usa materiais da mão ou do mapa cuja soma de Níveis atenda ao requisito.
+
+Fusion usa materiais permitidos da mão ou do mapa.
+
+O destino espacial deve ser validado antes do pagamento.
+
+Materiais, substitutos, repetições e requisitos específicos devem seguir o GDD.
+
+Monstros Ritual e Fusion destruídos vão ao Cemitério.
+
+Quando seriam retornados à mão ou ao Deck, retornam ao Extra Deck, conforme a regra consolidada.
+
+Só podem ser ressuscitados se tiverem sido Invocados corretamente quando essa condição for aplicável.
+
+RACE DO PRIMEIRO PROTÓTIPO
+
+As 17 RACE prioritárias são:
+
+- Aqua;
+- Beast;
+- Dragon;
+- Fairy;
+- Fiend;
+- Fish;
+- Insect;
+- Machine;
+- Plant;
+- Psychic;
+- Pyro;
+- Rock;
+- Spellcaster;
+- Thunder;
+- Warrior;
+- Winged Beast;
+- Zombie.
+
+Outras RACE oficiais ficam fora do escopo inicial até decisão futura.
+
+Pacotes básicos consolidados:
+
+- Beast: HP +1 e SPD +1.
+- Winged Beast: VIS +2 e SPD +1.
+- Dragon: HP +1 e DEF +1.
+- Fairy: MP +2 e SPD +1.
+- Fiend: ATK +1 e SPD +1.
+- Fish: SPD +2.
+- Aqua: MP +3.
+- Insect: SPD +3.
+- Machine: DEF +2.
+- Plant: HP +2.
+- Psychic: MP +2 e VIS +2.
+- Spellcaster: MP +3.
+- Rock: HP +1 e DEF +2.
+- Pyro: ATK +3.
+- Thunder: SPD +3.
+- Warrior: HP +1, ATK +1 e DEF +1.
+- Zombie: HP +1 e ATK +2.
+
+Esses bônus dependem da RACE estrutural impressa.
+
+Não transforme esses pacotes em habilidades acionadas.
+
+Identidades mecânicas raciais são recorrentes, mas não precisam aparecer em todas as cartas.
+
+Aproximadamente 60% a 75% das cartas de uma RACE podem reforçar sua identidade.
+
+Identidades principais:
+
+- Beast: alcateias e cooperação espacial.
+- Dragon: habilidades poderosas de alto custo de MP e períodos de ociosidade.
+- Fairy: proteção.
+- Fiend: risco e Debuffs.
+- Fish: mobilidade.
+- Insect: enxame e metamorfose.
+- Machine: Equipamentos e modos.
+- Plant: domínio territorial.
+- Psychic: habilidades, posicionamento, Armadilhas e gasto de MP.
+- Rock: defesa, terreno e repulsão.
+- Pyro: propagação de dano.
+- Aqua: Campos e reposicionamento por Campos.
+- Spellcaster: Magias, recuperação ou cópia expressa.
+- Warrior: posições de batalha e Equipamentos.
+- Zombie: persistência e Cemitério.
+- Winged Beast: reconhecimento aéreo.
+- Thunder: velocidade, explosão ofensiva, RECALL e reposicionamento imediato.
+
+KEYWORDS
+
+Keywords oficiais usam nomes em inglês e maiúsculas.
+
+Parâmetros aparecem diretamente no nome, como LEAPER X.
+
+O catálogo inclui, conforme definições detalhadas do GDD:
+
+- GLIDER;
+- LEAPER X;
+- PHANTOM X;
+- BULWARK;
+- OBSCURE;
+- SIGHT X;
+- REGEN X;
+- REPULSE X;
+- BARRAGE X;
+- CHARGE X;
+- EVASIVE;
+- INTIMIDATE X;
+- ADAPTATION;
+- PREPARATION;
+- REANIMATE X;
+- RECALL X;
+- BLAST X;
+- PSYWAVE;
+- PSYBLAST X;
+- BERSERKER X;
+- RAMPAGE.
+
+Não deduza o efeito de uma Keyword apenas pelo nome.
+
+Use a definição formal do GDD.
+
+Não recrie Keywords removidas por redundância.
+
+Limites por turno, por Corrente ou de primeiro ataque acompanham a cópia física quando o GDD assim determina.
+
+Mudar de zona, retornar à mão, voltar ao mapa ou receber novamente um efeito não reinicia limites automaticamente.
+
+BLAST pode ser concedida novamente conforme a regra específica consolidada.
+
+REANIMATE e efeitos de Cemitério somente existem quando expressamente escritos.
+
+Não existe regra universal que permita retornar qualquer monstro do Cemitério.
+
+ARTES DAS CARTAS
+
+O projeto utiliza artes oficiais das cartas como parte do visual do jogo pessoal.
+
+O objetivo do downloader é baixar integralmente a ilustração de cada carta, sem a moldura e os textos da carta montada.
+
+Use o campo image_url_cropped da API do YGOPRODeck.
+
+Não interprete “cropped” como uma imagem incompleta da arte. Trata-se da ilustração separada da moldura da carta.
+
+O script deve baixar o arquivo inteiro disponibilizado nesse campo.
+
+Não faça hotlink durante a execução do jogo.
+
+Baixe uma vez e utilize os arquivos locais.
+
+O downloader deve:
+
+- aceitar lista de nomes exatos ou IDs;
+- trabalhar com as RACE do protótipo;
+- aceitar Monstros Normais;
+- aceitar Monstros de Efeito compatíveis;
+- aceitar Ritual;
+- aceitar Fusion;
+- aceitar Magias;
+- aceitar Armadilhas;
+- excluir Synchro;
+- excluir Xyz;
+- excluir Pendulum;
+- excluir Link;
+- permitir artes alternativas;
+- permitir simulação sem download;
+- continuar de onde parou;
+- evitar duplicatas;
+- usar arquivos temporários;
+- substituir o destino somente depois de concluir o download;
+- organizar por categoria, RACE e tipo;
+- não exigir biblioteca externa quando a biblioteca padrão for suficiente.
+
+O filtro pré-2010 não faz parte das regras de Monster Impact.
+
+Esse filtro pode existir como opção, mas não deve ser obrigatório.
+
+O padrão deve permitir cartas oficiais futuras compatíveis com a direção do jogo.
+
+PROTOTIPAGEM VISUAL
+
+Toda decisão visual relevante precisa de validação antes da implementação definitiva.
+
+Quando a solução ainda não estiver aprovada, apresente três opções comparáveis:
+
+- Opção A.
+- Opção B.
+- Opção C.
+
+Não selecione uma opção pelo autor.
+
+Não trate ausência de resposta como aprovação.
+
+Cada experimento deve ser registrado em docs/prototypes com:
+
+- identificador;
+- data;
+- objetivo;
+- problema;
+- hipótese;
+- três opções;
+- diferenças;
+- cenário;
+- dispositivo;
+- resolução;
+- controles;
+- critérios;
+- casos extremos;
+- capturas;
+- vídeos ou links;
+- resultado;
+- feedback;
+- opção aprovada;
+- responsável pela aprovação;
+- impacto técnico;
+- histórico de substituições.
+
+Protótipos de aparência podem ser estáticos.
+
+Protótipos de comportamento devem ser executáveis.
+
+Interação, timing, movimento, animação, Correntes, Fog of War, densidade de informação e feedback exigem protótipo interativo.
+
+Arte provisória é permitida.
+
+Aprovação funcional não significa aprovação da arte final.
+
+Teste sempre os piores casos relevantes:
+
+- cinco monstros de cada lado;
+- textos longos;
+- stats modificados;
+- múltiplos efeitos;
+- Correntes profundas;
+- Cross Chains;
+- áreas sobrepostas;
+- Fog of War;
+- Armadilhas ocultas;
+- múltiplas mortes;
+- estados negativos;
+- diferentes resoluções;
+- redução de movimento;
+- daltonismo;
+- alta densidade do HUD.
+
+Itens que necessitam de prototipagem incluem:
+
+- identidade visual;
+- paleta;
+- tipografia;
+- contraste;
+- mapa;
+- câmera;
+- escala;
+- blocos;
+- terrenos;
+- obstáculos;
+- base;
+- monstros;
+- silhuetas;
+- posições;
+- cartas;
+- molduras internas do jogo;
+- iconografia;
+- HUD;
+- mão;
+- Decks;
+- Cemitério;
+- Extra Deck;
+- Zona de Resolução;
+- movimento;
+- caminho;
+- alcance;
+- VIS;
+- áreas;
+- linha de ataque;
+- seleção de alvos;
+- Invocação Normal;
+- Tributo;
+- Ritual;
+- Fusion;
+- combate;
+- contra-ataque;
+- impactos;
+- Correntes;
+- Cross Chains;
+- efeitos IMEDIATOS;
+- fases;
+- Ações;
+- Reações;
+- SPD;
+- timers;
+- Buffs;
+- Debuffs;
+- Fog of War;
+- Armadilhas;
+- Campos;
+- erros;
+- confirmações;
+- log;
+- menus;
+- tutorial;
+- controles;
+- acessibilidade;
+- GitHub Pages;
+- replay;
+- telemetria;
+- self-play;
+- QA;
+- ferramentas de conteúdo.
+
+GITHUB PAGES
+
+O repositório deve publicar uma versão jogável pelo GitHub Pages.
+
+A build deve ser:
+
+- estática;
+- reproduzível;
+- sem segredos;
+- sem backend privado obrigatório;
+- compatível com o ambiente configurado;
+- validada antes da publicação.
+
+A automação deve:
+
+1. Instalar dependências de maneira reproduzível.
+2. Validar formatação quando aplicável.
+3. Validar tipos.
+4. Validar conteúdo.
+5. Executar testes.
+6. Produzir a build.
+7. Executar smoke test.
+8. Publicar somente se as etapas anteriores passarem.
+
+Não publique builds quebradas.
+
+Não esconda falhas para permitir deploy.
+
+Use caminhos compatíveis com o subdiretório do GitHub Pages.
+
+Teste carregamento direto e atualização de página.
+
+Evite dependência de rotas que falhem em hospedagem estática.
+
+IA COMPETITIVA
+
+A IA competitiva joga com as mesmas regras do jogador.
+
+Ela não recebe:
+
+- visão global indevida;
+- cartas ocultas;
+- posição atual de unidades invisíveis;
+- região secreta de Armadilhas;
+- distribuição secreta de recursos;
+- ordem futura do Deck;
+- resultados aleatórios futuros;
+- acesso mutável ao estado.
+
+Ela pode manter memória legal de:
+
+- última posição conhecida;
+- cartas reveladas;
+- ações observadas;
+- probabilidades;
+- padrões do adversário;
+- informações públicas.
+
+Decisões comuns possuem orçamento aproximado de 100 milissegundos.
+
+Situações complexas podem usar aproximadamente 500 milissegundos.
+
+Orçamentos devem ser configuráveis para testes.
+
+A IA envia comandos pela mesma interface pública usada pelo jogador.
+
+IA DE QA
+
+A IA de QA é separada da IA competitiva.
+
+Pode reutilizar:
+
+- núcleo;
+- representação de ações;
+- avaliadores;
+- pathfinding;
+- simuladores;
+- formatos de replay.
+
+Possui objetivos próprios:
+
+- descobrir falhas;
+- aumentar cobertura;
+- encontrar estados raros;
+- produzir reproduções mínimas;
+- testar invariantes;
+- explorar interações adversariais.
+
+Combine:
+
+- self-play competente;
+- políticas aleatórias legais;
+- busca adversarial;
+- cobertura;
+- novidade;
+- mutação de sequências;
+- cenários dirigidos;
+- fuzzing isolado.
+
+Fuzzing de comandos ilegais deve usar a interface pública e verificar rejeição segura.
+
+Testes normais não modificam diretamente o estado autoritativo.
+
+Mutações internas devem permanecer em suítes específicas.
+
+Use políticas variadas:
+
+- agressiva;
+- defensiva;
+- exploratória;
+- conservadora;
+- aleatória;
+- focada na base;
+- focada em controle territorial;
+- focada em Correntes;
+- focada em Cemitério;
+- focada em mobilidade.
+
+Use partidas espelhadas para separar força da política e vantagem de lado.
+
+Use currículo progressivo:
+
+1. Regra isolada.
+2. Unidade isolada.
+3. Cenário pequeno.
+4. Combinação de dois sistemas.
+5. Combinações complexas.
+6. Partida completa.
+7. Campanha adversarial.
+8. Endurance.
+
+TELEMETRIA
+
+Telemetria técnica deve ser local, estruturada e reproduzível.
+
+Cada evento relevante deve registrar, conforme necessário:
+
+- versão do jogo;
+- versão dos dados;
+- seed;
+- ID da partida;
+- passo lógico;
+- timestamp lógico;
+- jogador;
+- agente;
+- comando;
+- sequência;
+- entidade;
+- carta;
+- alvo;
+- custo;
+- estado anterior;
+- estado posterior;
+- hash anterior;
+- hash posterior;
+- causa;
+- evento pai;
+- Corrente;
+- Cross Chain;
+- fluxo aleatório;
+- resultado;
+- erro;
+- invariante.
+
+Não use telemetria apenas como texto livre.
+
+Textos humanos podem complementar dados estruturados.
+
+Separe telemetria de jogo, depuração, IA e desempenho quando necessário.
+
+REPLAYS
+
+Replay deve usar:
+
+- dados versionados;
+- seed;
+- comandos confirmados;
+- ordem determinística;
+- eventos necessários.
+
+Replay não deve depender de gravar vídeo.
+
+A reprodução deve gerar os mesmos hashes da partida original.
+
+O visualizador deve permitir:
+
+- reproduzir;
+- pausar;
+- avançar;
+- voltar por snapshot quando suportado;
+- executar passo a passo;
+- saltar para evento;
+- inspecionar estado;
+- ver Correntes;
+- ver seed;
+- localizar divergência.
+
+PACOTES DE BUG
+
+Um pacote de bug deve conter:
+
+- versão;
+- commit;
+- seed;
+- dados relevantes;
+- comandos;
+- replay;
+- hashes;
+- primeiro ponto divergente;
+- logs;
+- invariantes;
+- stack lógico;
+- contexto causal;
+- ambiente;
+- resultado esperado;
+- resultado observado;
+- reprodução mínima quando disponível.
+
+Falhas devem ser deduplicadas por assinatura.
+
+Assinatura pode combinar:
+
+- tipo de erro;
+- invariante;
+- primeiro hash divergente;
+- stack lógico;
+- evento causal;
+- entidades relevantes.
+
+Delta debugging deve tentar remover:
+
+- comandos;
+- cartas;
+- unidades;
+- efeitos;
+- passos;
+- escolhas;
+- partes do cenário;
+
+preservando a falha.
+
+Uma correção só deve ser considerada encerrada quando existir regressão permanente.
+
+TESTES
+
+Toda mudança deve ser testada proporcionalmente ao risco.
+
+Categorias:
+
+- unidade;
+- integração;
+- propriedades;
+- invariantes;
+- conteúdo;
+- snapshots;
+- replay;
+- determinismo;
+- regressão;
+- metamórfico;
+- diferencial;
+- fuzzing;
+- self-play;
+- smoke;
+- endurance.
+
+Propriedades mínimas:
+
+- uma unidade não ocupa dois blocos;
+- um bloco não contém dois monstros;
+- bases não são ocupadas;
+- destinos são legais;
+- caminhos respeitam as regras;
+- cada carta está em uma zona;
+- recursos não surgem sem causa;
+- custos não ficam negativos indevidamente;
+- limites são preservados;
+- efeitos IMEDIATOS ficam fora da pilha;
+- nenhuma Corrente abre sem alvo inimigo;
+- replays preservam hashes;
+- renderização não altera lógica;
+- execução headless não altera lógica;
+- velocidade não altera resultados;
+- pausa não acumula tempo indevido;
+- informação oculta não vaza;
+- partida encerrada não aceita novos comandos;
+- nenhum estado sem progresso permanece indefinidamente.
+
+Cadência:
+
+- smoke a cada alteração;
+- suíte relevante em pull requests;
+- campanhas maiores diariamente;
+- endurance semanalmente;
+- regressões em toda mudança relacionada.
+
+DOCUMENTAÇÃO
+
+Atualize documentação quando modificar:
+
+- contrato;
+- formato;
+- comando;
+- estrutura;
+- regra;
+- comportamento;
+- pipeline;
+- configuração;
+- dependência;
+- processo de build;
+- processo de publicação.
+
+Não documente intenção como se já estivesse implementada.
+
+Diferencie:
+
+- planejado;
+- prototipado;
+- implementado;
+- testado;
+- aprovado;
+- publicado.
+
+README deve explicar:
+
+- objetivo;
+- estado atual;
+- como executar;
+- como testar;
+- como abrir protótipo;
+- como gerar build;
+- como usar downloader;
+- estrutura;
+- limitações conhecidas.
+
+QUALIDADE DE CÓDIGO
+
+Prefira:
+
+- módulos pequenos;
+- contratos explícitos;
+- tipos fortes;
+- funções puras no núcleo;
+- dependências direcionadas;
+- dados versionados;
+- erros claros;
+- testes próximos do comportamento;
+- nomes consistentes;
+- configuração centralizada.
+
+Evite:
+
+- estado global mutável;
+- strings mágicas;
+- duplicação de regras;
+- lógica de gameplay na interface;
+- dependência circular;
+- testes frágeis por timing real;
+- aleatoriedade não controlada;
+- comparação de snapshots gigantes sem propósito;
+- tratamento silencioso de erros;
+- fallbacks que escondem conteúdo inválido.
+
+Uma regra deve possuir uma implementação autoritativa.
+
+Interface, IA e testes não devem reimplementar a regra de maneira divergente.
+
+FLUXO DE IMPLEMENTAÇÃO
+
+Ao receber uma tarefa:
+
+1. Determine se é revisão, diagnóstico, implementação ou expansão.
+2. Inspecione o repositório.
+3. Leia o GDD relevante.
+4. Localize código relacionado.
+5. Localize testes.
+6. Identifique riscos.
+7. Faça a menor implementação completa.
+8. Adicione ou atualize testes.
+9. Execute verificações.
+10. Revise o diff.
+11. Atualize documentação.
+12. Relate o resultado.
+
+Se a tarefa for grande, divida em marcos verificáveis.
+
+Não pare apenas porque a implementação é trabalhosa.
+
+Não amplie a autorização para ações externas não solicitadas.
+
+Não implemente sistemas futuros fora do escopo apenas porque parecem úteis.
+
+CRITÉRIO DE CONCLUSÃO
+
+Uma tarefa somente está concluída quando:
+
+- o comportamento solicitado existe;
+- o código compila;
+- os testes relevantes passam;
+- o conteúdo é válido;
+- a documentação necessária está atualizada;
+- não foram introduzidas contradições conhecidas;
+- o diff está limitado ao escopo;
+- limitações restantes foram informadas;
+- qualquer falha de verificação foi declarada.
+
+OBJETIVO FINAL
+
+Construir um protótipo jogável de Monster Impact que seja:
+
+- fiel ao GDD;
+- determinístico;
+- testável;
+- reproduzível;
+- orientado por dados;
+- visualmente validado;
+- jogável pelo GitHub Pages;
+- capaz de jogador contra IA;
+- capaz de IA contra IA;
+- capaz de self-play headless;
+- equipado com telemetria;
+- equipado com replays;
+- equipado com caça automatizada a bugs;
+- protegido por testes de regressão;
+- documentado o suficiente para que futuras sessões continuem o trabalho sem depender do histórico de uma conversa.

@@ -1,0 +1,16 @@
+MONSTER IMPACT — REFERÊNCIA DA CARTA-FONTE
+
+Nome: Aerial Eater
+ID: 28143384
+Categoria: Monstro
+Tipo da API: Fusion Monster
+RACE: Fiend
+Nível: 6
+Tipo Monster Impact: Fusion
+Fonte do texto: YGOPRODeck cardinfo.desc
+
+REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo aprovado do Monster Impact prevalecem sobre regras oficiais não adaptadas.
+
+DESCRIÇÃO / EFEITO DA CARTA-FONTE:
+2 Fiend monsters with the same Attribute
+If this card is Fusion Summoned: You can send 1 Fiend monster from your Deck to the GY. If this card is in your GY: You can banish 2 Level 6 or higher Fiend monsters with the same Attribute as each other from your GY, except "Aerial Eater"; Special Summon this card. You can only use each effect of "Aerial Eater" once per turn.
