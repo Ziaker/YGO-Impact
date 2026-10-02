@@ -105,24 +105,23 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 - Contratos: **Definidos no GDD**.
 - Documentos técnicos específicos como `TELEMETRY_SCHEMA.md` e `AI_INTERFACE.md`: **Ainda não versionados**.
 - Replay mínimo e telemetria mínima: **Implementados e testados**.
-- IA adversária de jogo: **Pendente**.
+- IA adversária de jogo: **Implementada e testada no core (`src/core/ai.ts`)**.
 - IA de QA / campanhas de teste: **Pendente**.
 
 ## Ordem recomendada das próximas entregas (Foco Exclusivo no Jogo Funcional)
 
 1. **Marco 1 — Invocações Especiais no Core (Fusão e Integração de Ritual):**
-   - Implementar Invocação Fusão (`src/core/fusion.ts`) orientada a dados (procedimentos de Fusão, materiais da mão/campo, envio ao Cemitério, Extra Deck).
-   - Integrar os procedimentos canônicos de Ritual e Fusão ao catálogo autoritativo (`content.ts`), à fila de comandos (`engine.ts`) e aos hashes de replay.
+   - **CONCLUÍDO E TESTADO (`df98872`):** Invocação Fusão (`src/core/fusion.ts`) e Invocação Ritual (`src/core/ritual.ts`) orientadas a dados e integradas ao catálogo (`content.ts`), comandos (`engine.ts`) e hashes de replay.
 2. **Marco 2 — Terreno e Movimento Contínuo com Custo Real de SPD:**
-   - Implementar modificadores de terreno (plano, difícil, intransponível, efeitos de campo) e custo de SPD autoritativo por passo.
+   - **CONCLUÍDO E TESTADO (`405d79f`):** Tipos de terreno (plano, difícil, intransponível), custos de SPD, travessia com GLIDER e regras de SPD negativo (`src/core/terrain.ts`).
 3. **Marco 3 — Ativação e Resolução de Magias e Armadilhas em Corrente:**
-   - Implementar efeitos concretos do primeiro conjunto (Equip, Continuous, Quick-Play, Counter Traps) e integração completa com a pilha de Correntes (`chain.ts`).
+   - **CONCLUÍDO E TESTADO (`71c6db6`):** Equipamentos (máx 3, transferência por 1 Ação), slots de armadilha (3 velados, custo 0 de set), destruição preventiva, ativação em Corrente de Magias/Armadilhas e envio atômico ao Cemitério (`src/core/spells-traps.ts`, `src/core/engine.ts`).
 4. **Marco 4 — Ciclo Completo de Partida Headless (Game Loop Fechado):**
-   - Desenvolver harness de execução autônoma que simula partidas completas do início (compra inicial) ao término (5 impactos ou Deck Out), garantindo 100% de reprodução determinística de hashes.
-5. **Marco 5 — IA Adversária Inicial:**
-   - Implementar primeira versão da IA de jogo atuando estritamente pela fila pública de comandos e operando sob Fog of War com informação justa.
+   - **CONCLUÍDO E TESTADO (`cec78f5`):** Harness autônomo com suporte a políticas táticas (`createTacticalPolicy`), loop de partida fechada (5 impactos ou Deck Out) e verificação de replay 100% determinística (`scripts/run_headless_simulation.mjs`, `tests/core/headless.test.mjs`).
+5. **Marco 5 — IA Adversária Inicial (Heurística e Decisão sob Fog of War):**
+   - **CONCLUÍDO E TESTADO (`src/core/ai.ts`, `tests/core/ai.test.mjs`):** IA oficial operando sob Fog of War com informação justa (`createAIObservation`), avaliador heurístico configurável (`createHeuristicAI`, `createAggressiveAI`, `createDefensiveAI`, `createTacticalAI`), simulações de partidas completas e 100% de replay verificado.
 6. **Marco 6 — Conexão Web e Build Jogável:**
-   - Conectar o núcleo headless compilado à interface web para permitir partidas humano contra IA no GitHub Pages (quando autorizado).
+   - Conectar o núcleo headless compilado à interface web para permitir partidas humano contra IA no navegador.
 
 ## Bloqueios explícitos
 
@@ -131,8 +130,7 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 - Não reinterpretar a câmera 3D de VIS-002 como altura ou facing de gameplay.
 - Não permitir que orientação, câmera, zoom, pan ou foco alterem estado/hash autoritativo.
 - Não completar regras ausentes usando Yu-Gi-Oh! oficial.
-- Não tratar o estado atual do núcleo como jogo completo: sistemas fundamentais (terreno, efeitos de cartas, IA, game loop fechado) permanecem pendentes.
 - Não tratar o pathfinding local de VIS-002 como implementação final.
 - Não podar a biblioteca física de artes com base em `selection.json`.
 - Não publicar GitHub Pages sem validação e autorização explícita do autor.
-- Não executar commit/push sem autorização expressa do autor.
+- Diretriz de Versionamento: Autor instruiu formalmente em 2026-10-02 ("ignora essa bobagem apartir de agora, sempre commita") a realizar commit e push automáticos para `origin/main` após testes bem-sucedidos.

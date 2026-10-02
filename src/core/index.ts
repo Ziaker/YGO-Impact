@@ -38,6 +38,7 @@ export * from "./reanimate.ts";
 export * from "./terrain.ts";
 export * from "./fusion.ts";
 export * from "./spells-traps.ts";
+export * from "./ai.ts";
 export type * from "./types.ts";
 
 

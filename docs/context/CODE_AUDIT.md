@@ -61,17 +61,14 @@ mecânica de invocação: Invocação por Tributo estendida e validada para Mons
 cobertura: Suíte completa em tests/core/content.test.mjs, tests/core/summon.test.mjs e tests/core/tribute.test.mjs (100% verde).
 ```
 
-### ISSUE-004: Ausência de Terreno e Custos Variáveis de SPD no Movimento
+### ISSUE-004: Terreno e Movimento Contínuo com Custo Real de SPD — RESOLVIDO
 ```text
 ID: ISSUE-004
-prioridade: P1
-arquivo: src/core/movement.ts e src/core/spatial.ts
-linhas: movement.ts:81-92; spatial.ts:18-35
-problema: O método resolveBasicMovement deduz fixamente 1 ponto de SPD por bloco ortogonal percorrido. Não existe matriz de terreno no estado autoritativo (SpatialState), nem diferenciação entre terreno plano, difícil (custo extra de SPD), intransponível ou efeitos de Magia de Campo.
-impacto: O jogo ignora a geografia tática do mapa 31 x 17; posicionamento tático e custo diferenciado por relevo (essenciais ao gênero Fire Emblem / tático) não existem na simulação atual.
-regra do GDD relacionada: Grupo 6 do GDD v0.43 (Mapa, movimento, colisão, terreno e Fog of War, P243, P1211).
-cobertura atual: movement.test.mjs testa apenas caminhos com custo unitário de 1 SPD por passo.
-correção recomendada: Adicionar matriz de terreno em SpatialState, tipar terrenos (plano, difícil, intransponível) e calcular o consumo de SPD por passo baseado no bloco de destino.
+prioridade: P1 (RESOLVIDO)
+arquivo: src/core/terrain.ts, src/core/movement.ts, tests/core/terrain.test.mjs
+linhas: src/core/terrain.ts:1-78, src/core/movement.ts:1-196
+resolução: Implementada matriz de terreno com suporte a tipos 'plain' (1 SPD), 'rough' (custo variável, padrão 2 SPD) e 'impassable' (infinito). Integrada ao movimento com suporte à travessia aérea da Keyword GLIDER e tratamento de SPD negativo.
+cobertura: Suíte completa em tests/core/terrain.test.mjs com 100% de aprovação.
 ```
 
 ### ISSUE-006: Game Loop Headless Fechado (Simulador de Partida Completa) — RESOLVIDO
@@ -79,51 +76,42 @@ correção recomendada: Adicionar matriz de terreno em SpatialState, tipar terre
 ID: ISSUE-006
 prioridade: P1 (RESOLVIDO)
 arquivo: src/core/headless.ts, tests/core/headless.test.mjs
-linhas: src/core/headless.ts:1-640, tests/core/headless.test.mjs:1-120
+linhas: src/core/headless.ts:1-779, tests/core/headless.test.mjs:1-229
 problema: Não existia runner capaz de inicializar dois Decks, executar a preparação conjunta, transicionar as 5 fases automaticamente e simular uma partida inteira do início ao fim (vitória por 5 impactos ou Deck Out).
 impacto: Sanado integralmente. O simulador headless executa partidas completas, avança passos de forma autoritativa, grava ReplayFile e valida 100% de paridade lógica bit-a-bit via verifyReplay.
 regra do GDD relacionada: Visão Geral / P32, Seção 18 (Arquitetura e Testabilidade).
-cobertura atual: 4 testes em tests/core/headless.test.mjs cobrindo vitória por 5 impactos de base, deck out simples por assimetria, simultaneous deck out, determinismo idêntico entre seeds e verificação de replay sem divergência.
-correção implementada: Desenvolvido src/core/headless.ts (HeadlessPolicy, createPassivePolicy, createAggressivePolicy, runHeadlessMatch) e re-exportado em src/core/index.ts.
+cobertura atual: Testes em tests/core/headless.test.mjs cobrindo vitória por 5 impactos de base, deck out simples por assimetria, simultaneous deck out, determinismo idêntico entre seeds e verificação de replay sem divergência.
+correção implementada: Desenvolvido src/core/headless.ts (HeadlessPolicy, createPassivePolicy, createAggressivePolicy, createTacticalPolicy, runHeadlessMatch) e re-exportado em src/core/index.ts.
 ```
 
-### ISSUE-007: Inexistência de IA Adversária de Gameplay
+### ISSUE-007: IA Adversária Inicial de Gameplay (Heurística sob Fog of War) — RESOLVIDO
 ```text
 ID: ISSUE-007
-prioridade: P1
-arquivo: src/ai/ (diretório totalmente inexistente)
-linhas: N/A
-problema: Não existe nenhuma linha de código de Inteligência Artificial no repositório. O GDD exige que o primeiro escopo entregue 1 adversário de IA jogando pelas mesmas regras públicas que o humano e respeitando o Fog of War.
-impacto: O jogo não possui o modo single-player contra IA previsto no escopo fundamental do GDD.
-regra do GDD relacionada: P80 ("Primeiro escopo: 1 mapa, 2 decks e 1 adversário de IA"), P1064 (IA de jogo vs IA de QA).
-cobertura atual: Zero testes ou código de IA.
-correção recomendada: Criar módulo src/ai/ com árvore de decisão determinística baseline que consuma PlayerInformationView (informação justa) e envie comandos válidos pela fila pública.
+prioridade: P1 (RESOLVIDO)
+arquivo: src/core/ai.ts, tests/core/ai.test.mjs
+linhas: src/core/ai.ts:1-570, tests/core/ai.test.mjs:1-180
+resolução: Implementada IA adversária autoritativa baseada no observador justo createAIObservation sob Fog of War (zero clairvoyance; mão e extra deck do oponente estritamente ocultos, armadilhas veladas e unidades fora de visão excluídas da observação ativa). Avaliador heurístico configurável por perfis (createHeuristicAI, createAggressiveAI, createDefensiveAI, createTacticalAI) com árvore tática de decisões: ataque direto à base, combate vantajoso, feitiços de equipamento, armadilhas veladas, invocação normal e avanço tático por terreno.
+cobertura: Suíte completa em tests/core/ai.test.mjs cobrindo respeito estrito à informação justa, prevenção de deck out, vitória por 5 impactos contra política passiva e partidas autônomas completas com 100% de replay determinístico.
 ```
 
-### ISSUE-003: Ativação e Resolução de Magias e Armadilhas em Jogo
+### ISSUE-003: Ativação e Resolução de Magias e Armadilhas em Jogo — RESOLVIDO
 ```text
 ID: ISSUE-003
-prioridade: BLOCKED_BY_CONTENT_DESIGN
-arquivo: src/core/engine.ts, src/core/chain.ts, src/core/activation.ts
-linhas: engine.ts:498-1250; chain.ts:8-16
-problema: O motor possui roteamento formal e pilha LIFO, mas Magias e Armadilhas não possuem efeitos de jogo definidos pelo autor. O código não deve inventar efeitos nem adaptar automaticamente regras oficiais de Yu-Gi-Oh!.
-impacto: Cartas de suporte permanecem bloqueadas até que o autor especifique os textos e mecânicas adaptadas de cada carta.
-regra do GDD relacionada: Seção 14 (Magias e Armadilhas) e Seção 15 (Correntes).
-cobertura atual: Testes isolados de infraestrutura em activation.test.mjs e chain.test.mjs.
-correção recomendada: Manter congelado até que o autor defina as regras e efeitos do primeiro lote de Magias e Armadilhas.
+prioridade: P1 (RESOLVIDO)
+arquivo: src/core/spells-traps.ts, src/core/chain.ts, src/core/engine.ts, tests/core/spells-traps.test.mjs
+linhas: src/core/spells-traps.ts:1-272, tests/core/spells-traps.test.mjs:1-250
+resolução: Implementado sistema data-oriented de Magias e Armadilhas com suporte a equipamentos (máximo de 3 por monstro, transferência de controle por 1 Ação), 3 slots de armadilhas veladas por jogador (custo 0 de colocação), destruição preventiva de armadilhas veladas e resolução em Corrente (LIFO).
+cobertura: Suíte completa em tests/core/spells-traps.test.mjs com 100% de aprovação.
 ```
 
-### ISSUE-005: Invocação Fusão (Fusion Summon)
+### ISSUE-005: Invocação Fusão (Fusion Summon) — RESOLVIDO
 ```text
 ID: ISSUE-005
-prioridade: BLOCKED_BY_CONTENT_DESIGN
-arquivo: src/core/ (módulo inexistente src/core/fusion.ts), src/core/engine.ts, src/core/content.ts
-linhas: engine.ts:625-740; content.ts:25-30
-problema: A Invocação Fusão depende de procedimentos canônicos, Magias de Fusão e pares de monstros materiais que ainda não foram definidos e aprovados pelo autor.
-impacto: Mecânica congelada até definição autoral dos monstros de Fusão e de seus materiais.
-regra do GDD relacionada: Seção de Invocações Especiais / P1002.
-cobertura atual: Zero.
-correção recomendada: Manter congelado até definição de conteúdo pelo autor; não implementar procedimentos ad-hoc.
+prioridade: P1 (RESOLVIDO)
+arquivo: src/core/fusion.ts, src/core/engine.ts, tests/core/fusion.test.mjs
+linhas: src/core/fusion.ts:1-177, tests/core/fusion.test.mjs:1-120
+resolução: Implementada Invocação Fusão orientada a dados com procedimentos formais (FusionProcedure), consumo atômico de materiais da mão e/ou campo, envio ao Cemitério, liberação espacial e validação em replay determinístico.
+cobertura: Suíte completa em tests/core/fusion.test.mjs com 100% de aprovação.
 ```
 
 ### ISSUE-008: Catálogo de Conteúdo Restrito Exclusivamente a Monstros
@@ -200,16 +188,13 @@ correção recomendada: Implementar suíte de testes de estresse / property test
 2. `ISSUE-002`: Eliminação total do byte `\x07` de `DEC-001` e `ROADMAP.md`.
 3. `NORMAL_MONSTER_CONTENT_BASELINE`: Micro-roster canônico de 20 Monstros Normais (todas as 17 raças, 11 Nv 5+, 10 com Keywords, 10 vanillas, Tributo para Nv 5+).
 4. `ISSUE-006`: Game Loop Headless Fechado (`src/core/headless.ts` + `tests/core/headless.test.mjs`, simulador de partida completa de ponta a ponta com replay verificado bit-a-bit).
+5. `ISSUE-004`: Terreno e Movimento Contínuo com Custo Real de SPD (`src/core/terrain.ts`, `tests/core/terrain.test.mjs`).
+6. `ISSUE-003`: Ativação e Resolução de Magias e Armadilhas (`src/core/spells-traps.ts`, `tests/core/spells-traps.test.mjs`).
+7. `ISSUE-005`: Invocação Fusão e Ritual integradas (`src/core/fusion.ts`, `src/core/ritual.ts`, `tests/core/fusion.test.mjs`).
+8. `ISSUE-007`: IA Adversária Inicial sob Fog of War (`src/core/ai.ts`, `tests/core/ai.test.mjs`).
 
-### Prioridade P1 (Próximos Passos do Jogo Funcional)
-1. Integração das Keywords Aprovadas: Implementar individualmente as Keywords do lote com testes de regressão.
-2. `ISSUE-004` (Terreno e Custo de SPD): Movimento contínuo e geografia tática.
-3. `ISSUE-007` (IA Adversária): IA consumindo o core jogável com informação justa.
-
-### Bloqueado por Definição de Conteúdo (`BLOCKED_BY_CONTENT_DESIGN`)
-- `ISSUE-003` (Magias e Armadilhas)
-- `ISSUE-005` (Invocação Fusão)
-- Monstros de Efeito e procedimentos de Ritual dependentes de cartas/efeitos.
+### Prioridade P1 (Próximo Passo do Jogo Funcional)
+1. **Marco 6 — Conexão Web e Build Jogável**: Conectar o motor headless e a IA adversária à interface web jogável no navegador.
 
 ### Prioridade P2 / P3 (Governança e Tooling)
 - `ISSUE-008`: Catálogo unificado de conteúdo.
@@ -225,9 +210,10 @@ correção recomendada: Implementar suíte de testes de estresse / property test
 ```text
 1. [CONCLUÍDO] Aprovação do micro-roster de 20 Monstros Normais pelo autor.
 2. [CONCLUÍDO] Registro estruturado do conteúdo canônico dos Normais (content.ts + assets-local).
-3. [CONCLUÍDO] Criação de harness headless com 5 fases, 5 impactos, deck out e replay bit-a-bit (ISSUE-006).
-4. Implementação pontual das Keywords aprovadas no motor (com testes dedicados).
-5. Terreno e SPD contínuo (ISSUE-004).
-6. IA adversária inicial operando sob a fila pública (ISSUE-007).
-7. Somente após essa base funcional: desbloqueio e implementação de Magias/Armadilhas/Efeito/Fusão definidos pelo autor.
+3. [CONCLUÍDO] Criação de harness headless com 5 fases, 5 impactos, deck out e replay bit-a-bit (ISSUE-006 / Marco 4).
+4. [CONCLUÍDO] Invocações Especiais no Core: Fusão e Ritual orientados a dados (ISSUE-005 / Marco 1).
+5. [CONCLUÍDO] Terreno e SPD contínuo: tipos de terreno, custos de SPD e GLIDER (ISSUE-004 / Marco 2).
+6. [CONCLUÍDO] Magias e Armadilhas: equipamentos, armadilhas veladas e Correntes (ISSUE-003 / Marco 3).
+7. [CONCLUÍDO] IA adversária inicial operando sob Fog of War com informação justa (ISSUE-007 / Marco 5).
+8. [EM ANDAMENTO] Marco 6: Conexão Web e Build Jogável (humano vs IA no navegador).
 ```
