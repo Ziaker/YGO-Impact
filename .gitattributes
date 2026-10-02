@@ -1,0 +1,10 @@
+# Preserve binary integrity of canonical docx files across platforms
+*.docx binary
+
+# Normalize text line endings
+*.txt text
+*.md text
+*.ts text
+*.mjs text
+*.json text
+*.yml text
