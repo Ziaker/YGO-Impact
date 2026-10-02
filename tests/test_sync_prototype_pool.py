@@ -174,5 +174,63 @@ class ExpandedPrototypePoolTests(unittest.TestCase):
         self.assertEqual(sum(module.archetype_name(card) == "Psychic Musician" for card in chosen), 4)
 
 
+    def test_build_selection_document_marks_art_status_and_pending_crops(self):
+        pool = build_pool()
+        # Mark one card as requiring clean cropped art
+        pool[0]["_monster_impact_image_requires_crop"] = True
+        selected = module.select_prototype_pool(pool)
+        document = module.build_selection_document(selected)
+        
+        crop_card_row = next(r for r in document["cards"] if r["id"] == pool[0]["id"])
+        self.assertEqual(crop_card_row["art_status"], "pending-clean-cropped-art")
+        self.assertIsNone(crop_card_row["image_url_cropped"])
+        self.assertIsNotNone(crop_card_row.get("image_source_url"))
+
+        normal_card_row = next(r for r in document["cards"] if r["id"] != pool[0]["id"])
+        self.assertEqual(normal_card_row["art_status"], "ready")
+
+    def test_iter_clean_artworks_skips_cards_requiring_crop(self):
+        clean_card = fake_card(100, "Clean", "Normal Monster", "Beast", 3)
+        crop_card = fake_card(101, "Needs Crop", "Normal Monster", "Psychic", 3)
+        crop_card["_monster_impact_image_requires_crop"] = True
+
+        artworks_clean = list(module.iter_clean_artworks(clean_card, all_artworks=False))
+        self.assertEqual(len(artworks_clean), 1)
+
+        artworks_crop = list(module.iter_clean_artworks(crop_card, all_artworks=False))
+        self.assertEqual(len(artworks_crop), 0)
+
+    def test_fetch_curated_rush_normals_filters_and_tags_cards(self):
+        fake_api_data = [
+            {"id": 901, "name": "Valid Rush", "type": "Normal Monster", "race": "Psychic", "level": 3},
+            {"id": 902, "name": "Invalid Level", "type": "Normal Monster", "race": "Psychic", "level": 7},
+            {"id": 903, "name": "Invalid Race", "type": "Normal Monster", "race": "Beast", "level": 3},
+            {"id": 904, "name": "Invalid Type", "type": "Effect Monster", "race": "Psychic", "level": 4},
+        ]
+        original_request = base._request_json_value
+        try:
+            base._request_json_value = lambda url, timeout, retries: fake_api_data
+            results = module.fetch_curated_rush_normals(timeout=5.0, retries=1)
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]["id"], 901)
+            self.assertEqual(results[0]["_monster_impact_source"], "rushcard")
+            self.assertTrue(results[0]["_monster_impact_image_requires_crop"])
+            self.assertEqual(results[0]["card_images"][0]["image_url_cropped"], "https://images.rushcard.io/images/card/901.jpg")
+        finally:
+            base._request_json_value = original_request
+
+    def test_curated_shim_delegates_to_canonical_module(self):
+        shim_spec = importlib.util.spec_from_file_location("sync_curated_shim_test", SCRIPTS_DIR / "sync_prototype_pool_curated.py")
+        shim = importlib.util.module_from_spec(shim_spec)
+        assert shim_spec and shim_spec.loader
+        shim_spec.loader.exec_module(shim)
+
+        self.assertEqual(shim.RUSHCARD_SEARCH_URL, module.RUSHCARD_SEARCH_URL)
+        self.assertEqual(shim.SUPPLEMENT_SOURCE, module.SUPPLEMENT_SOURCE)
+        self.assertEqual(shim.build_selection_document.__name__, module.build_selection_document.__name__)
+        self.assertEqual(shim.iter_clean_artworks.__name__, module.iter_clean_artworks.__name__)
+        self.assertEqual(shim.fetch_curated_rush_normals.__name__, module.fetch_curated_rush_normals.__name__)
+
+
 if __name__ == "__main__":
     unittest.main()

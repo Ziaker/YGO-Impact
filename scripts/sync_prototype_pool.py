@@ -39,7 +39,11 @@ RITUAL_SPELL_COMPATIBILITY = "generic-any-ritual-monster"
 MONSTER_ARCHETYPE_POLICY = "prefer-no-archetype-max-one-monster-per-named-archetype"
 PSYCHIC_NORMAL_REPEATABLE_ARCHETYPES = frozenset({"Psychic Musician", "Shaman Bandit"})
 NORMAL_SOURCE_POLICY = "ygoprodeck-primary-rushcard-psychic-normal-supplement"
-RUSH_DUEL_URL = f"{base.API_URL}?format=Rush%20Duel"
+RUSHCARD_SEARCH_URL = (
+    "https://mail.rushcard.io/api/search.php?limit=100&race=Psychic"
+    "&type=Normal%20Monster&sort=name"
+)
+SUPPLEMENT_SOURCE = "rushcard"
 
 TOTAL_MONSTER_QUOTAS = {
     race: quota + NORMAL_TARGET_PER_RACE
@@ -79,23 +83,34 @@ def is_normal_slot_candidate(card: dict[str, Any], race: str | None = None) -> b
     )
 
 
+def fetch_curated_rush_normals(*, timeout: float, retries: int) -> list[dict[str, Any]]:
+    payload = base._request_json_value(RUSHCARD_SEARCH_URL, timeout=timeout, retries=retries)
+    if not isinstance(payload, list):
+        raise base.DownloaderError("Resposta inesperada do RushCard: array JSON esperado.")
+    cards: list[dict[str, Any]] = []
+    for raw in payload:
+        if not isinstance(raw, dict):
+            continue
+        card_id = int(raw.get("id", 0))
+        card = dict(raw)
+        card["card_images"] = [{
+            "id": card_id,
+            "image_url_cropped": f"https://images.rushcard.io/images/card/{card_id}.jpg",
+        }]
+        card["_monster_impact_source"] = SUPPLEMENT_SOURCE
+        card["_monster_impact_image_requires_crop"] = True
+        if is_normal_slot_candidate(card, "Psychic"):
+            cards.append(card)
+    return base.dedupe_cards(cards)
+
+
 def fetch_cards_with_rush_normal_supplement(*, timeout: float, retries: int) -> list[dict[str, Any]]:
     standard_cards = _ORIGINAL_FETCH_ALL_CARDS(timeout=timeout, retries=retries)
-    rush_payload = base._request_json(RUSH_DUEL_URL, timeout=timeout, retries=retries)
-    rush_cards = rush_payload.get("data", [])
-    if not isinstance(rush_cards, list):
-        raise base.DownloaderError("Resposta inesperada do catálogo Rush Duel: campo 'data' inválido.")
+    rush_cards = fetch_curated_rush_normals(timeout=timeout, retries=retries)
+    return base.dedupe_cards([*standard_cards, *rush_cards])
 
-    supplement: list[dict[str, Any]] = []
-    for card in rush_cards:
-        if not isinstance(card, dict) or not is_normal_slot_candidate(card):
-            continue
-        tagged = dict(card)
-        tagged["_monster_impact_source"] = "rush-duel"
-        supplement.append(tagged)
 
-    # O catálogo padrão vem primeiro; Rush só complementa IDs ausentes.
-    return base.dedupe_cards([*standard_cards, *supplement])
+fetch_cards_with_curated_rush_supplement = fetch_cards_with_rush_normal_supplement
 
 
 def _eligible_monster_for_race(card: dict[str, Any], race: str) -> bool:
@@ -335,6 +350,12 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
         card = card_by_id[int(row["id"])]
         row["archetype"] = archetype_name(card)
         row["selection_source"] = str(card.get("_monster_impact_source") or "standard")
+        if card.get("_monster_impact_image_requires_crop"):
+            row["image_source_url"] = row["image_url_cropped"]
+            row["image_url_cropped"] = None
+            row["art_status"] = "pending-clean-cropped-art"
+        else:
+            row["art_status"] = "ready" 
 
     monster_cards = [card for card in cards if card.get("type") not in {"Spell Card", "Trap Card"}]
     normal_cards = [card for card in monster_cards if card.get("type") in base.NORMAL_MONSTER_API_TYPES]
@@ -412,11 +433,22 @@ def build_selection_document(cards: Sequence[dict[str, Any]]) -> dict[str, Any]:
     return document
 
 
+def iter_clean_artworks(card: dict[str, Any], *, all_artworks: bool):
+    if card.get("_monster_impact_image_requires_crop"):
+        return iter(())
+    if not hasattr(base, "_ORIGINAL_ITER_ARTWORKS"):
+        base._ORIGINAL_ITER_ARTWORKS = base.iter_artworks
+    return base._ORIGINAL_ITER_ARTWORKS(card, all_artworks=all_artworks)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     base.TOTAL_MONSTERS = TOTAL_MONSTERS
     base.TOTAL_PROTOTYPE_CARDS = TOTAL_PROTOTYPE_CARDS
     base.fetch_all_cards = fetch_cards_with_rush_normal_supplement
     base.select_prototype_pool = select_prototype_pool
+    if not hasattr(base, "_ORIGINAL_ITER_ARTWORKS"):
+        base._ORIGINAL_ITER_ARTWORKS = base.iter_artworks
+    base.iter_artworks = iter_clean_artworks
     base.build_selection_document = build_selection_document
     return base.main(argv)
 

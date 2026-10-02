@@ -31,6 +31,6 @@ jobs:
 
       - name: Select and download prototype card art
         run: |
-          python scripts/sync_prototype_pool_curated.py \
+          python scripts/sync_prototype_pool.py \
             --prototype-pool \
             --output assets-local/card-art

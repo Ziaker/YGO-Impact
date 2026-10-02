@@ -137,17 +137,14 @@ cobertura atual: Documental.
 correção recomendada: Atualizar o ROADMAP.md formalizando que toda a frente visual está SUSPENSA POR TEMPO INDETERMINADO, registrando VIS-ENV-001 como câmera aprovada e efeitos rejeitados/suspensos, e alinhando as próximas entregas exclusivamente aos marcos do motor. (SANADO LOCALMENTE).
 ```
 
-### ISSUE-010: Scripts Concorrentes com Lógica de Seleção Redundante
+### ISSUE-010: Scripts Concorrentes com Lógica de Seleção Redundante — RESOLVIDO
 ```text
 ID: ISSUE-010
-prioridade: P2
+prioridade: P2 (RESOLVIDO)
 arquivo: scripts/sync_prototype_pool.py e scripts/sync_prototype_pool_curated.py
-linhas: scripts/sync_prototype_pool.py:1-120; scripts/sync_prototype_pool_curated.py:1-150
-problema: O repositório mantém dois scripts concorrentes de sincronização de pool que realizam requisições e montam seleções com lógicas divergentes de catálogo.
-impacto: Risco de derivação e confusão sobre qual script deve ser mantido ou acionado por ferramentas e CI.
-regra do GDD relacionada: Manutenibilidade e integridade de tooling do PROMPT_MESTRE.txt.
-cobertura atual: tests/test_sync_prototype_pool.py testa apenas sync_prototype_pool.py.
-correção recomendada: Consolidar a lógica no script curado oficial e documentar a depreciação ou remoção do script redundante.
+linhas: scripts/sync_prototype_pool.py:1-458; scripts/sync_prototype_pool_curated.py:1-45
+resolução: Lógica de sincronização consolidada no script canônico scripts/sync_prototype_pool.py. O endpoint quebrado do YGOPRODeck (format=Rush Duel) foi substituído pelo catálogo resiliente do RushCard (fetch_curated_rush_normals), unificando também a marcação de pendência de recorte de artes (art_status / pending-clean-cropped-art) e iter_clean_artworks. O script scripts/sync_prototype_pool_curated.py foi transformado em shim/alias retrocompatível que emite DeprecationWarning e delega ao módulo canônico. O workflow .github/workflows/sync-card-art.yml foi atualizado para acionar diretamente scripts/sync_prototype_pool.py.
+cobertura: Testes unitários expandidos em tests/test_sync_prototype_pool.py cobrindo filtragem de candidatos RushCard, marcação de art_status, exclusão de imagens pendentes de recorte e delegação semântica do shim retrocompatível (100% de aprovação).
 ```
 
 ### ISSUE-011: Inexistência de Workflow de Publicação para GitHub Pages
