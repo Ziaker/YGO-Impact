@@ -14,6 +14,8 @@ export interface ReplayGameSetup {
   readonly bases: readonly BasePlacement[];
   readonly monsterDefinitions: readonly MonsterDefinition[];
   readonly ritualProcedures?: readonly import("./ritual.ts").RitualProcedure[];
+  readonly fusionProcedures?: readonly import("./fusion.ts").FusionProcedure[];
+  readonly spellTrapDefinitions?: readonly import("./spells-traps.ts").SpellTrapDefinition[];
 }
 
 export interface ReplayCommand {
@@ -128,6 +130,8 @@ export function createReplayFile(
       : computeContentHash(
           gameSetup.monsterDefinitions,
           gameSetup.ritualProcedures ?? [],
+          gameSetup.fusionProcedures ?? [],
+          gameSetup.spellTrapDefinitions ?? [],
         );
   if (
     gameSetup !== null &&
@@ -156,6 +160,14 @@ export function createReplayFile(
             spellDefinitionId: proc.spellDefinitionId,
             compatibleRitualDefinitionIds: [...proc.compatibleRitualDefinitionIds],
           })),
+          fusionProcedures: (gameSetup.fusionProcedures ?? []).map((proc) => ({
+            spellDefinitionId: proc.spellDefinitionId,
+            fusionDefinitionId: proc.fusionDefinitionId,
+            materialDefinitionIds: [...proc.materialDefinitionIds],
+          })),
+          ...(gameSetup.spellTrapDefinitions && gameSetup.spellTrapDefinitions.length > 0
+            ? { spellTrapDefinitions: gameSetup.spellTrapDefinitions.map((def) => ({ ...def })) }
+            : {}),
         });
 
   return deepFreeze({
@@ -172,6 +184,8 @@ export function createReplayFile(
 export interface RunReplayOptions {
   readonly expectedContentHash?: string;
   readonly ritualProcedures?: readonly import("./ritual.ts").RitualProcedure[];
+  readonly fusionProcedures?: readonly import("./fusion.ts").FusionProcedure[];
+  readonly spellTrapDefinitions?: readonly import("./spells-traps.ts").SpellTrapDefinition[];
   readonly monsterDefinitions?: readonly MonsterDefinition[];
 }
 
@@ -186,12 +200,16 @@ export function runReplay(replay: ReplayFile, options?: RunReplayOptions): Repla
     }
     const monsterDefs = options?.monsterDefinitions ?? replay.gameSetup.monsterDefinitions;
     const ritualProcs = options?.ritualProcedures ?? replay.gameSetup.ritualProcedures ?? [];
+    const fusionProcs = options?.fusionProcedures ?? replay.gameSetup.fusionProcedures ?? [];
+    const spellTrapDefs = options?.spellTrapDefinitions ?? replay.gameSetup.spellTrapDefinitions ?? [];
     engine = createGameEngine(
       replay.seed,
       replay.playerSetup,
       replay.gameSetup.bases,
       monsterDefs,
       ritualProcs,
+      fusionProcs,
+      spellTrapDefs,
     );
 
     const actualContentHash = engine.state.content?.contentHash;

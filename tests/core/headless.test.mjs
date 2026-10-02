@@ -5,6 +5,9 @@ import {
   createAggressivePolicy,
   createDefaultPlayerSetup,
   createPassivePolicy,
+  createTacticalPolicy,
+  CURATED_SPELL_TRAP_DEFINITIONS,
+  PROTOTYPE_NORMAL_MONSTERS,
   runHeadlessMatch,
   verifyReplay,
 } from "../../src/core/index.ts";
@@ -116,3 +119,110 @@ test("headless match: deterministic execution guarantees identical hashes for id
   assert.equal(run1.stepsCompleted, run2.stepsCompleted);
   assert.deepEqual(run1.stepHashes, run2.stepHashes);
 });
+
+test("headless match: tactical policy with Spells and Traps runs full autonomous match and deterministically verifies replay", () => {
+  const p1Setup = {
+    playerId: "tactician",
+    initialMonsterCount: 5,
+    decks: {
+      monsterDeck: PROTOTYPE_NORMAL_MONSTERS.map((def) => ({
+        definitionId: def.definitionId,
+        name: def.name,
+        kind: "normal_monster",
+      })),
+      spellTrapDeck: [
+        ...Array.from({ length: 3 }, () => ({
+          definitionId: "sword-legend",
+          name: "Sword of Legend",
+          kind: "spell",
+        })),
+        ...Array.from({ length: 3 }, () => ({
+          definitionId: "rush-recklessly",
+          name: "Rush Recklessly",
+          kind: "spell",
+        })),
+        ...Array.from({ length: 3 }, () => ({
+          definitionId: "trap-hole",
+          name: "Trap Hole",
+          kind: "trap",
+        })),
+        ...Array.from({ length: 3 }, () => ({
+          definitionId: "magic-jammer",
+          name: "Magic Jammer",
+          kind: "trap",
+        })),
+        ...Array.from({ length: 3 }, () => ({
+          definitionId: "dian-keto",
+          name: "Dian Keto the Cure Maiden",
+          kind: "spell",
+        })),
+      ],
+      extraDeck: [],
+    },
+  };
+
+  const p2Setup = {
+    playerId: "defender",
+    initialMonsterCount: 5,
+    decks: {
+      monsterDeck: PROTOTYPE_NORMAL_MONSTERS.map((def) => ({
+        definitionId: def.definitionId,
+        name: def.name,
+        kind: "normal_monster",
+      })),
+      spellTrapDeck: [
+        ...Array.from({ length: 3 }, () => ({
+          definitionId: "sword-legend",
+          name: "Sword of Legend",
+          kind: "spell",
+        })),
+        ...Array.from({ length: 3 }, () => ({
+          definitionId: "magic-jammer",
+          name: "Magic Jammer",
+          kind: "trap",
+        })),
+        ...Array.from({ length: 3 }, () => ({
+          definitionId: "trap-hole",
+          name: "Trap Hole",
+          kind: "trap",
+        })),
+        ...Array.from({ length: 3 }, () => ({
+          definitionId: "seven-tools",
+          name: "Seven Tools of the Bandit",
+          kind: "trap",
+        })),
+        ...Array.from({ length: 3 }, () => ({
+          definitionId: "rush-recklessly",
+          name: "Rush Recklessly",
+          kind: "spell",
+        })),
+      ],
+      extraDeck: [],
+    },
+  };
+
+  const result = runHeadlessMatch({
+    seed: "headless-tactical-match-seed",
+    players: ["tactician", "defender"],
+    playerSetups: [p1Setup, p2Setup],
+    spellTrapDefinitions: CURATED_SPELL_TRAP_DEFINITIONS,
+    policies: {
+      tactician: createTacticalPolicy("TacticianP1"),
+      defender: createPassivePolicy("PassiveP2"),
+    },
+    maxTurns: 30,
+    maxSteps: 3000,
+    recordReplay: true,
+  });
+
+  assert.equal(result.match.status, "finished");
+  assert.equal(result.winnerPlayerId, "tactician");
+  assert.equal(result.endReason, "base_impacts");
+  assert.ok(result.stepsCompleted > 0);
+  assert.ok(result.replay !== null);
+
+  const verification = verifyReplay(result.replay, result.stepHashes);
+  assert.equal(verification.matches, true, `Replay divergence at step ${verification.firstDivergentStep}`);
+  assert.equal(verification.firstDivergentStep, null);
+});
+

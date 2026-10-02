@@ -16,6 +16,12 @@ import type { PriorityToken } from "./priority.ts";
 import { enqueueCommand } from "./queue.ts";
 import { createReplayFile, type ReplayFile, type ReplayGameSetup } from "./replay.ts";
 import type { RitualProcedure } from "./ritual.ts";
+import type { FusionProcedure } from "./fusion.ts";
+import {
+  findSpellTrapDefinition,
+  MAX_EQUIPMENT_PER_MONSTER,
+  type SpellTrapDefinition,
+} from "./spells-traps.ts";
 import type { PlayerSetupInput } from "./setup.ts";
 import {
   isInBounds,
@@ -60,6 +66,8 @@ export interface HeadlessMatchOptions {
   readonly bases?: readonly [BasePlacement, BasePlacement];
   readonly monsterDefinitions?: readonly MonsterDefinition[];
   readonly ritualProcedures?: readonly RitualProcedure[];
+  readonly fusionProcedures?: readonly FusionProcedure[];
+  readonly spellTrapDefinitions?: readonly SpellTrapDefinition[];
   readonly policies?: Readonly<Record<string, HeadlessPolicy>>;
   readonly maxTurns?: number;
   readonly maxSteps?: number;
@@ -397,6 +405,123 @@ export function createAggressivePolicy(name = "AggressivePolicy"): HeadlessPolic
   };
 }
 
+export function createTacticalPolicy(name = "TacticalPolicy"): HeadlessPolicy {
+  const baseAggressive = createAggressivePolicy(name);
+
+  return {
+    name,
+    chooseDrawMode: (context: HeadlessDecisionContext) => {
+      const cardSetup = context.engine.state.cardSetup;
+      const player = cardSetup?.players.find((p) => p.playerId === context.playerId);
+      if (player !== undefined && player.monsterDeck.length <= 2) {
+        return "two_spell_traps";
+      }
+      return "one_each";
+    },
+    allocateResources: () => ({ actions: 5, reactions: 3 }),
+    respondToChain: (context: HeadlessDecisionContext, window: ChainWindow) => {
+      const playerTraps = context.engine.state.trapSlots?.find((p) => p.playerId === context.playerId);
+      const turnPlayer = context.engine.state.turn.players.find((p) => p.playerId === context.playerId);
+      const remainingReactions = turnPlayer?.remaining?.reactions ?? 0;
+
+      if (playerTraps && remainingReactions >= 1) {
+        const chain = context.engine.state.chainSystem.pendingChains.find((c) => c.chainId === window.chainId);
+        const lastElement = chain && chain.elements.length > 0 ? chain.elements[chain.elements.length - 1] : undefined;
+
+        for (const slot of playerTraps.slots) {
+          if (slot.card !== null) {
+            const trapDef = findSpellTrapDefinition(
+              slot.card.definitionId,
+              context.engine.state.content?.spellTrapDefinitions,
+            );
+            if (trapDef && (trapDef.subtype === "counter" || trapDef.subtype === "reaction")) {
+              return {
+                issuer: context.playerId,
+                kind: "trap.activate",
+                payload: {
+                  slotIndex: slot.slotIndex,
+                  chainId: window.chainId,
+                  ...(lastElement ? { targetElementId: lastElement.elementId } : {}),
+                },
+              };
+            }
+          }
+        }
+      }
+
+      return {
+        issuer: context.playerId,
+        kind: "chain.pass_priority",
+        payload: { chainId: window.chainId },
+      };
+    },
+    takeAction: (context: HeadlessDecisionContext): CommandInput | null => {
+      const turnPlayer = context.engine.state.turn.players.find(
+        (player: PlayerTurnState) => player.playerId === context.playerId,
+      );
+      if (
+        turnPlayer === undefined ||
+        turnPlayer.remaining === null ||
+        turnPlayer.participationEnded
+      ) {
+        return { issuer: context.playerId, kind: "turn.end_participation", payload: {} };
+      }
+
+      const cardSetup = context.engine.state.cardSetup;
+      const playerCardState = cardSetup?.players.find((p) => p.playerId === context.playerId);
+      const ownMonsters = context.engine.state.monsters.filter(
+        (monster: MonsterState) => monster.ownerPlayerId === context.playerId,
+      );
+
+      // 1. If actions >= 1, check if we can equip an Equip Spell from hand
+      if (turnPlayer.remaining.actions >= 1 && playerCardState && ownMonsters.length > 0) {
+        const equipSpell = playerCardState.hand.find((card) => {
+          if (card.kind !== "spell") return false;
+          const def = findSpellTrapDefinition(card.definitionId, context.engine.state.content?.spellTrapDefinitions);
+          return def?.subtype === "equip";
+        });
+        if (equipSpell) {
+          const eligibleMonster = ownMonsters.find(
+            (m) => (m.equippedCards?.length ?? 0) < MAX_EQUIPMENT_PER_MONSTER,
+          );
+          if (eligibleMonster) {
+            return {
+              issuer: context.playerId,
+              kind: "spell.equip",
+              payload: {
+                cardInstanceId: equipSpell.instanceId,
+                targetUnitId: eligibleMonster.unitId,
+              },
+            };
+          }
+        }
+      }
+
+      // 2. Setting a trap costs 0 actions: set trap from hand into free slot
+      if (playerCardState) {
+        const trapCard = playerCardState.hand.find((c) => c.kind === "trap");
+        if (trapCard) {
+          const playerTraps = context.engine.state.trapSlots?.find((p) => p.playerId === context.playerId);
+          const emptySlotIndex = playerTraps ? playerTraps.slots.findIndex((s) => s.card === null) : 0;
+          if (emptySlotIndex >= 0 && emptySlotIndex < 3) {
+            return {
+              issuer: context.playerId,
+              kind: "trap.set",
+              payload: {
+                cardInstanceId: trapCard.instanceId,
+                slotIndex: emptySlotIndex,
+              },
+            };
+          }
+        }
+      }
+
+      // 3. Fallback to aggressive monster actions (attack base, attack monster, move, summon)
+      return baseAggressive.takeAction ? baseAggressive.takeAction(context) : null;
+    },
+  };
+}
+
 export function runHeadlessMatch(options: HeadlessMatchOptions = {}): HeadlessMatchResult {
   const seed = options.seed ?? "headless-match-seed";
   const player1Id = options.players?.[0] ?? "player1";
@@ -410,6 +535,8 @@ export function runHeadlessMatch(options: HeadlessMatchOptions = {}): HeadlessMa
 
   const monsterDefinitions = options.monsterDefinitions ?? PROTOTYPE_NORMAL_MONSTERS;
   const ritualProcedures = options.ritualProcedures ?? [];
+  const fusionProcedures = options.fusionProcedures ?? [];
+  const spellTrapDefinitions = options.spellTrapDefinitions ?? [];
 
   const playerSetups: readonly [PlayerSetupInput, PlayerSetupInput] = options.playerSetups ?? [
     createDefaultPlayerSetup(player1Id, 5),
@@ -428,6 +555,8 @@ export function runHeadlessMatch(options: HeadlessMatchOptions = {}): HeadlessMa
     bases,
     monsterDefinitions,
     ritualProcedures,
+    fusionProcedures,
+    spellTrapDefinitions,
   );
 
   const recordedCommands: (CommandInput & { readonly receivedAtStep: number })[] = [];
@@ -619,6 +748,8 @@ export function runHeadlessMatch(options: HeadlessMatchOptions = {}): HeadlessMa
     bases,
     monsterDefinitions,
     ...(ritualProcedures.length > 0 ? { ritualProcedures } : {}),
+    ...(fusionProcedures.length > 0 ? { fusionProcedures } : {}),
+    ...(spellTrapDefinitions.length > 0 ? { spellTrapDefinitions } : {}),
   };
 
   const recordReplay = options.recordReplay ?? true;
