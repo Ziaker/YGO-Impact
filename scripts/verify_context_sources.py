@@ -38,6 +38,46 @@ EXPECTED_TEXT = {
     ],
 }
 
+# A revisão canônica mais recente é textual e fica em docs/context para preservar
+# o DOCX v0.43 original byte a byte como fonte-base histórica.
+EXPECTED_CONTEXT_TEXT = {
+    "docs/context/GDD_v0.44.md": [
+        # Canônico no repositório Git / Linux (LF)
+        (
+            3_665,
+            "3f72a0520940ccaf390a466d68dd56e28636b63ac9f93a91d40791c65301982f",
+        ),
+        # Checkout Windows (CRLF)
+        (
+            3_731,
+            "c36a8449c7613629f6a24bcc2508145912ddaa800c8525399ed8de8f257ffdca",
+        ),
+    ],
+}
+
+
+def _check_text_file(
+    path: Path,
+    valid_variants: list[tuple[int, str]],
+    failures: list[str],
+) -> None:
+    if not path.is_file():
+        failures.append(f"ausente: {path.relative_to(ROOT)}")
+        return
+
+    data = path.read_bytes()
+    actual_hash = hashlib.sha256(data).hexdigest()
+    match = any(len(data) == size and actual_hash == h for size, h in valid_variants)
+    if not match:
+        expected_desc = " ou ".join(
+            f"(tamanho {size}, sha {expected_hash[:12]}...)"
+            for size, expected_hash in valid_variants
+        )
+        failures.append(
+            f"conteúdo inválido em {path.relative_to(ROOT)}: "
+            f"esperado {expected_desc}, obtido tamanho {len(data)} e sha {actual_hash}"
+        )
+
 
 def main() -> int:
     failures: list[str] = []
@@ -62,20 +102,10 @@ def main() -> int:
             )
 
     for name, valid_variants in EXPECTED_TEXT.items():
-        path = SOURCES / name
-        if not path.is_file():
-            failures.append(f"ausente: {path.relative_to(ROOT)}")
-            continue
+        _check_text_file(SOURCES / name, valid_variants, failures)
 
-        data = path.read_bytes()
-        actual_hash = hashlib.sha256(data).hexdigest()
-        match = any(len(data) == size and actual_hash == h for size, h in valid_variants)
-        if not match:
-            expected_desc = " ou ".join(f"(tamanho {s}, sha {h[:12]}...)" for s, h in valid_variants)
-            failures.append(
-                f"conteúdo inválido em {path.relative_to(ROOT)}: "
-                f"esperado {expected_desc}, obtido tamanho {len(data)} e sha {actual_hash}"
-            )
+    for relative_path, valid_variants in EXPECTED_CONTEXT_TEXT.items():
+        _check_text_file(ROOT / relative_path, valid_variants, failures)
 
     if failures:
         for failure in failures:
