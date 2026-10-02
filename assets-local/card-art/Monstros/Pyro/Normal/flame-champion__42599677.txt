@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 A warrior protected by a flaming shield that nullifies any attack.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: [BERSERKER 2]
+Descrição Monster Impact: A warrior clad in raging fire who fights with relentless burning passion. [BERSERKER 2]
+Stats Base: HP 5 | MP 0 | ATK 8 | DEF 7 | SPD 3 | VIS 3 | Alcance 1
+Bônus Racial (Pyro): ATK +3
+Stats Finais: HP 5 | MP 0 | ATK 11 | DEF 7 | SPD 3 | VIS 3 | Alcance 1
+Regra de Invocação: Tribute Summon (Nível 5+)

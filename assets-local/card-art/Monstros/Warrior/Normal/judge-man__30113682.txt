@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 This club-wielding warrior battles to the end and will never surrender.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: Nenhuma (Vanilla)
+Descrição Monster Impact: This club-wielding warrior relentlessly executes judgment on any offender.
+Stats Base: HP 6 | MP 0 | ATK 12 | DEF 8 | SPD 3 | VIS 4 | Alcance 1
+Bônus Racial (Warrior): HP +1 | ATK +1 | DEF +1
+Stats Finais: HP 7 | MP 0 | ATK 13 | DEF 9 | SPD 3 | VIS 4 | Alcance 1
+Regra de Invocação: Tribute Summon (Nível 5+)

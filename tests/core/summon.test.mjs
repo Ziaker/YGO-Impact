@@ -297,4 +297,14 @@ test("Normal Summon rejects non-Normal cards, illegal destinations, and inconsis
       }),
     /different unit counts/,
   );
+  assert.throws(
+    () =>
+      resolveNormalSummon({
+        ...common,
+        cardState: normalCards,
+        catalog: { definitions: [{ ...definition(), level: 5 }] },
+        cardInstanceId: normalCards.hand[0].instanceId,
+      }),
+    /requires Tribute Summon/,
+  );
 });

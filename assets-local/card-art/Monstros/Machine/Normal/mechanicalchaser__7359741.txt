@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 A hunter that relentlessly pursues its target by order of the Machine King.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: Nenhuma (Vanilla)
+Descrição Monster Impact: A hunter that tracks its targets relentlessly with high-precision mechanics.
+Stats Base: HP 4 | MP 0 | ATK 10 | DEF 4 | SPD 3 | VIS 3 | Alcance 1
+Bônus Racial (Machine): DEF +2
+Stats Finais: HP 4 | MP 0 | ATK 10 | DEF 6 | SPD 3 | VIS 3 | Alcance 1
+Regra de Invocação: Normal Summon (Nível 1–4)

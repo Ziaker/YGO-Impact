@@ -27,6 +27,8 @@ export interface MonsterDefinition {
   readonly printedDef: number;
   readonly printedAttackRange?: number;
   readonly normalHasGrantedMpAbility?: boolean;
+  readonly keywords?: readonly string[];
+  readonly description?: string;
 }
 
 export interface MonsterState {
@@ -49,6 +51,8 @@ export interface MonsterState {
   readonly def: number;
   readonly attackRange: number;
   readonly usedEffectSinceLastSupport: boolean;
+  readonly keywords?: readonly string[];
+  readonly description?: string;
 }
 
 export interface SupportRecoveryResult {
@@ -142,6 +146,10 @@ export function createMonsterState(
     def: definition.printedDef + bonuses.def,
     attackRange,
     usedEffectSinceLastSupport: false,
+    ...(definition.keywords && definition.keywords.length > 0
+      ? { keywords: deepFreeze([...definition.keywords]) }
+      : {}),
+    ...(definition.description !== undefined ? { description: definition.description } : {}),
   }) as MonsterState;
 }
 

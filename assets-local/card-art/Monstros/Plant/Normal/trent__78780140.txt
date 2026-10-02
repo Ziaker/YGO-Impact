@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 A guardian of the woods, this massive tree is believed to be immortal.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: Nenhuma (Vanilla)
+Descrição Monster Impact: A towering tree guardian of the ancient forest, possessing immense vitality.
+Stats Base: HP 5 | MP 0 | ATK 8 | DEF 10 | SPD 1 | VIS 3 | Alcance 1
+Bônus Racial (Plant): HP +2
+Stats Finais: HP 7 | MP 0 | ATK 8 | DEF 10 | SPD 1 | VIS 3 | Alcance 1
+Regra de Invocação: Tribute Summon (Nível 5+)

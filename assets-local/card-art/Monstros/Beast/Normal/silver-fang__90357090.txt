@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 A snow wolf that's beautiful to the eye, but absolutely vicious in battle.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: [CHARGE 1]
+Descrição Monster Impact: A snow wolf that's beautiful to the eye, but a terrible predator in battle. [CHARGE 1]
+Stats Base: HP 3 | MP 0 | ATK 7 | DEF 4 | SPD 3 | VIS 4 | Alcance 1
+Bônus Racial (Beast): HP +1 | SPD +1
+Stats Finais: HP 4 | MP 0 | ATK 7 | DEF 4 | SPD 4 | VIS 4 | Alcance 1
+Regra de Invocação: Normal Summon (Nível 1–4)

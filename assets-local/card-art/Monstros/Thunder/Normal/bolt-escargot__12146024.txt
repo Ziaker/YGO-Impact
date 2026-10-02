@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 ''After rendering an opponent immobile by spitting a sticky goo, this monster closes in for the attack.''
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: Nenhuma (Vanilla)
+Descrição Monster Impact: An aquatic snail that discharges high-voltage electric shocks.
+Stats Base: HP 5 | MP 0 | ATK 7 | DEF 8 | SPD 1 | VIS 3 | Alcance 1
+Bônus Racial (Thunder): SPD +3
+Stats Finais: HP 5 | MP 0 | ATK 7 | DEF 8 | SPD 4 | VIS 3 | Alcance 1
+Regra de Invocação: Tribute Summon (Nível 5+)

@@ -21,4 +21,10 @@ A versão imediatamente anterior (v0.42) permanece preservada como histórico em
 
 Ambas devem permanecer byte a byte idênticas aos arquivos de origem. Os tamanhos e os hashes SHA-256 acima são os critérios de integridade verificados pelo script `scripts/verify_context_sources.py`. Regras específicas devem ser conferidas diretamente no documento; resumos não o substituem.
 
-O prompt mestre completo fornecido pelo autor está preservado separadamente em `docs/context/sources/PROMPT_MESTRE.txt`.
+## Prompt Mestre
+
+O prompt mestre completo fornecido pelo autor está preservado separadamente em `docs/context/sources/PROMPT_MESTRE.txt`:
+- formato canônico em repositório (Linux / CI / LF): **35.829 bytes**, SHA-256: `431f7e0a9bca844698eb676c856ba84a5d1e2ac4c83433d785a37241c050c26b`;
+- formato com conversão de quebra de linha Windows (CRLF): **37.225 bytes**, SHA-256: `011fd2a1d4d4b65a96ec5c265244dfaa5b940785d851455b4ef01172fe101e67`.
+
+Ambas as representações equivalentes de quebra de linha são aceitas pelo verificador `scripts/verify_context_sources.py`, assegurando que o arquivo permaneça íntegro sem sofrer modificações textuais em nenhum ambiente de desenvolvimento ou CI.

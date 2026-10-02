@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 A massive beetle with a tough carapace and a dangerous horn.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: Nenhuma (Vanilla)
+Descrição Monster Impact: A massive beetle with a thick exoskeleton and swift skittering movements.
+Stats Base: HP 5 | MP 0 | ATK 8 | DEF 11 | SPD 1 | VIS 3 | Alcance 1
+Bônus Racial (Insect): SPD +3
+Stats Finais: HP 5 | MP 0 | ATK 8 | DEF 11 | SPD 4 | VIS 3 | Alcance 1
+Regra de Invocação: Tribute Summon (Nível 5+)

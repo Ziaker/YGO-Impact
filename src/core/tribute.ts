@@ -57,8 +57,12 @@ export function createTributeSummonPlan(
   tributeUnitIds: readonly string[],
 ): TributeSummonPlan {
   if (playerId.trim().length === 0) throw new TributeInvariantError("playerId must not be empty.");
-  if (target.type !== "effect") {
-    throw new TributeInvariantError("Only an Effect Monster uses the prototype Tribute Summon rule.");
+  const requiresTribute =
+    target.type === "effect" || (target.type === "normal" && target.level >= 5);
+  if (!requiresTribute) {
+    throw new TributeInvariantError(
+      "Only an Effect Monster or Level 5+ Normal Monster uses the prototype Tribute Summon rule.",
+    );
   }
   if (tributeUnitIds.length === 0) {
     throw new TributeInvariantError("A Tribute Summon requires at least one Normal Monster.");
@@ -206,15 +210,20 @@ export function resolveTributeSummon(request: TributeSummonRequest): TributeSumm
   if (card === undefined) {
     throw new TributeInvariantError(`Card ${request.cardInstanceId} is not in the hand.`);
   }
-  if (card.kind !== "effect_monster") {
-    throw new TributeInvariantError("Only an Effect Monster can use Tribute Summon.");
-  }
   const definition = request.catalog.definitions.find(
     (entry) => entry.definitionId === card.definitionId,
   );
-  if (definition === undefined || definition.type !== "effect" || definition.name !== card.name) {
+  if (definition === undefined || definition.name !== card.name) {
     throw new TributeInvariantError(
-      `Effect Monster ${card.definitionId} does not have a matching catalog definition.`,
+      `Monster ${card.definitionId} does not have a matching catalog definition.`,
+    );
+  }
+  const isEligible =
+    (card.kind === "effect_monster" && definition.type === "effect") ||
+    (card.kind === "normal_monster" && definition.type === "normal" && definition.level >= 5);
+  if (!isEligible) {
+    throw new TributeInvariantError(
+      "Only an Effect Monster or Level 5+ Normal Monster can use Tribute Summon.",
     );
   }
 

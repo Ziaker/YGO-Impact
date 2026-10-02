@@ -204,6 +204,11 @@ export function resolveNormalSummon(request: NormalSummonRequest): NormalSummonR
       `Normal Monster ${card.definitionId} does not have a matching catalog definition.`,
     );
   }
+  if (definition.level >= 5) {
+    throw new SummonInvariantError(
+      `Level ${definition.level} Normal Monster ${card.name} requires Tribute Summon and cannot be Normal Summoned directly.`,
+    );
+  }
 
   const legalDestinations = findNormalSummonDestinations(
     request.spatial,

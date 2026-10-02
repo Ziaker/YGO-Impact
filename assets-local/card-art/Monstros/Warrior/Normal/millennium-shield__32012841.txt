@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 A famous shield said to belong to an ancient Egyptian Pharaoh. Legends tell of its power to block any strong attack.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: Nenhuma (Vanilla)
+Descrição Monster Impact: A legendary shield said to hold tremendous power and withstand almost any blow.
+Stats Base: HP 5 | MP 0 | ATK 1 | DEF 16 | SPD 2 | VIS 3 | Alcance 1
+Bônus Racial (Warrior): HP +1 | ATK +1 | DEF +1
+Stats Finais: HP 6 | MP 0 | ATK 2 | DEF 17 | SPD 2 | VIS 3 | Alcance 1
+Regra de Invocação: Tribute Summon (Nível 5+)

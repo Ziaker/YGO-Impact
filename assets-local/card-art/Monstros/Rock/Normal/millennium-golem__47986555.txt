@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 For nearly a millennium, this golem has served as guardian of an ancient treasure trove.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: Nenhuma (Vanilla)
+Descrição Monster Impact: An ancient golem that has guarded treasures for nearly a millennium.
+Stats Base: HP 6 | MP 0 | ATK 11 | DEF 12 | SPD 2 | VIS 3 | Alcance 1
+Bônus Racial (Rock): HP +1 | DEF +2
+Stats Finais: HP 7 | MP 0 | ATK 11 | DEF 14 | SPD 2 | VIS 3 | Alcance 1
+Regra de Invocação: Tribute Summon (Nível 5+)

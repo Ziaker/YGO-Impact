@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 With hair shaped like a crown and a body encased in bluish white flames, this bird is a formidable sight.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: [GLIDER]
+Descrição Monster Impact: With hair that blazes like a crown, this bird soars across the sky. [GLIDER]
+Stats Base: HP 4 | MP 0 | ATK 8 | DEF 6 | SPD 3 | VIS 4 | Alcance 1
+Bônus Racial (Winged Beast): VIS +2 | SPD +1
+Stats Finais: HP 4 | MP 0 | ATK 8 | DEF 6 | SPD 4 | VIS 6 | Alcance 1
+Regra de Invocação: Normal Summon (Nível 1–4)

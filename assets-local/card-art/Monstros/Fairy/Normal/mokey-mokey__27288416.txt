@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 An outcast angel. Nobody knows what he is thinking at all. Sometimes he gets mad and that is dreadful.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: [OBSCURE]
+Descrição Monster Impact: An outcast angel. Nobody knows what he is thinking every day. Sometimes he gets mad, and that is a sight to behold. [OBSCURE]
+Stats Base: HP 1 | MP 0 | ATK 1 | DEF 1 | SPD 1 | VIS 3 | Alcance 1
+Bônus Racial (Fairy): MP +2 | SPD +1
+Stats Finais: HP 1 | MP 2 | ATK 1 | DEF 1 | SPD 2 | VIS 3 | Alcance 1
+Regra de Invocação: Normal Summon (Nível 1–4)

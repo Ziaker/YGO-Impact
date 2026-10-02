@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 A feared salmon, master of the Sea of Darkness. Its roe is the best delicacy in the World of Darkness.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: [REPULSE 1]
+Descrição Monster Impact: A feared salmon, master of the Sea of Darkness. Its roe is the best delicacy in the World of Darkness. [REPULSE 1]
+Stats Base: HP 5 | MP 0 | ATK 14 | DEF 5 | SPD 2 | VIS 3 | Alcance 1
+Bônus Racial (Fish): SPD +2
+Stats Finais: HP 5 | MP 0 | ATK 14 | DEF 5 | SPD 4 | VIS 3 | Alcance 1
+Regra de Invocação: Tribute Summon (Nível 5+)

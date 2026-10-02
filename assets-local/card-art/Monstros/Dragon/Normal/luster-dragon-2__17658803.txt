@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 This dragon feeds on emerald. Enchanted by this monster even when attacked, few people live to tell of its beauty.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: [INTIMIDATE 1]
+Descrição Monster Impact: A dragon that glistens emerald green. Its immense presence and hard ruby breath intimidate foes. [INTIMIDATE 1]
+Stats Base: HP 6 | MP 0 | ATK 15 | DEF 9 | SPD 3 | VIS 4 | Alcance 1
+Bônus Racial (Dragon): HP +1 | DEF +1
+Stats Finais: HP 7 | MP 0 | ATK 15 | DEF 10 | SPD 3 | VIS 4 | Alcance 1
+Regra de Invocação: Tribute Summon (Nível 5+)

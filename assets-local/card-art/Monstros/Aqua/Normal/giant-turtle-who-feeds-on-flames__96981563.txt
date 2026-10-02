@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 A crimson-shelled tortoise that feeds on flames.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: Nenhuma (Vanilla)
+Descrição Monster Impact: A giant tortoise that consumes fire, boasting heavy shell protection.
+Stats Base: HP 5 | MP 0 | ATK 7 | DEF 10 | SPD 1 | VIS 3 | Alcance 1
+Bônus Racial (Aqua): MP +3
+Stats Finais: HP 5 | MP 3 | ATK 7 | DEF 10 | SPD 1 | VIS 3 | Alcance 1
+Regra de Invocação: Tribute Summon (Nível 5+)

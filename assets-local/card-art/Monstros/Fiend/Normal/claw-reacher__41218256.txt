@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 Stretching arms and razor-sharp claws make this monster a formidable opponent.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: [BLAST 1]
+Descrição Monster Impact: Stretches its arms to tear opponents to shreds. [BLAST 1]
+Stats Base: HP 3 | MP 0 | ATK 5 | DEF 4 | SPD 2 | VIS 3 | Alcance 1
+Bônus Racial (Fiend): ATK +1 | SPD +1
+Stats Finais: HP 3 | MP 0 | ATK 6 | DEF 4 | SPD 3 | VIS 3 | Alcance 1
+Regra de Invocação: Normal Summon (Nível 1–4)

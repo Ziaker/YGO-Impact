@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 A very beautiful dragon covered with sapphire. It does not like fights, but has incredibly high attack power.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: [BULWARK, REGEN 1]
+Descrição Monster Impact: A very beautiful dragon covered with sapphire. It does not like fights, but has incredibly high attack power. [BULWARK] [REGEN 1]
+Stats Base: HP 4 | MP 0 | ATK 11 | DEF 8 | SPD 2 | VIS 4 | Alcance 1
+Bônus Racial (Dragon): HP +1 | DEF +1
+Stats Finais: HP 5 | MP 0 | ATK 11 | DEF 9 | SPD 2 | VIS 4 | Alcance 1
+Regra de Invocação: Normal Summon (Nível 1–4)

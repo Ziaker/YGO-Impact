@@ -272,3 +272,83 @@ test("multi-tribute releases multiple tiles and controller explicitly chooses wh
     /not a released Tribute tile/,
   );
 });
+
+test("Level 5+ Normal Monsters use Tribute Summon rules while Level 1-4 Normals are rejected", () => {
+  const t1 = unit("t1", "p1", 4, { x: 2, y: 7 });
+  const t2 = unit("t2", "p1", 4, { x: 2, y: 9 });
+  const monsters = [t1, t2];
+  const spatial = state(monsters);
+
+  const level5NormalDef = definition("n5", 5, "normal");
+  const level4NormalDef = definition("n4", 4, "normal");
+
+  // Plan succeeds for Level 5 Normal
+  const plan = createTributeSummonPlan(monsters, spatial, "p1", level5NormalDef, ["t1", "t2"]);
+  assert.equal(plan.totalTributeLevels, 8);
+  assert.deepEqual(plan.tributeUnitIds, ["t1", "t2"]);
+
+  // Plan rejects Level 4 Normal
+  assert.throws(
+    () => createTributeSummonPlan(monsters, spatial, "p1", level4NormalDef, ["t1", "t2"]),
+    /Only an Effect Monster or Level 5\+ Normal Monster/,
+  );
+
+  // resolveTributeSummon succeeds for Level 5 Normal card
+  const n5Card = {
+    instanceId: "p1:card:n5",
+    definitionId: "n5",
+    name: "n5",
+    kind: "normal_monster",
+  };
+  const cardState = {
+    playerId: "p1",
+    monsterDeck: [],
+    spellTrapDeck: [],
+    extraDeck: [],
+    hand: [n5Card],
+    graveyard: [],
+    randomAudit: [],
+  };
+
+  const result = resolveTributeSummon({
+    cardState,
+    catalog: { definitions: [level5NormalDef] },
+    monsters,
+    spatial,
+    playerId: "p1",
+    cardInstanceId: n5Card.instanceId,
+    unitId: "summoned:n5",
+    tributeUnitIds: ["t1", "t2"],
+    destination: { x: 2, y: 7 },
+    battlePosition: "defense",
+  });
+
+  assert.equal(result.summonedMonster.level, 5);
+  assert.equal(result.summonedMonster.type, "normal");
+  assert.equal(result.cardState.graveyard.length, 2);
+  assert.equal(result.cardState.hand.length, 0);
+
+  // resolveTributeSummon rejects Level 4 Normal card
+  const n4Card = {
+    instanceId: "p1:card:n4",
+    definitionId: "n4",
+    name: "n4",
+    kind: "normal_monster",
+  };
+  assert.throws(
+    () =>
+      resolveTributeSummon({
+        cardState: { ...cardState, hand: [n4Card] },
+        catalog: { definitions: [level4NormalDef] },
+        monsters,
+        spatial,
+        playerId: "p1",
+        cardInstanceId: n4Card.instanceId,
+        unitId: "summoned:n4",
+        tributeUnitIds: ["t1", "t2"],
+        destination: { x: 2, y: 7 },
+        battlePosition: "defense",
+      }),
+    /Only an Effect Monster or Level 5\+ Normal Monster/,
+  );
+});

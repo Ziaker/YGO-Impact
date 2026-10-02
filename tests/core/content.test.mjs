@@ -5,6 +5,9 @@ import {
   computeContentHash,
   ContentInvariantError,
   createMonsterCatalog,
+  createMonsterState,
+  PRIORITY_RACES,
+  PROTOTYPE_NORMAL_MONSTERS,
   validateMonsterCatalog,
 } from "../../src/core/index.ts";
 
@@ -122,3 +125,94 @@ test("catalog computes canonical contentHash incorporating definitions and ritua
   const reversedCatalogA = createMonsterCatalog([...defs].reverse(), deckList, procsA);
   assert.equal(reversedCatalogA.contentHash, catalogA.contentHash);
 });
+
+test("PROTOTYPE_NORMAL_MONSTERS defines 20 balanced monsters covering all 17 priority races with exact 3-layer stats and keywords", () => {
+  assert.equal(PROTOTYPE_NORMAL_MONSTERS.length, 20);
+
+  const ids = new Set();
+  const names = new Set();
+  const racesRepresented = new Set();
+
+  let keywordCount = 0;
+  let twoKeywordCount = 0;
+  let vanillaCount = 0;
+  let highLevelCount = 0;
+
+  for (const def of PROTOTYPE_NORMAL_MONSTERS) {
+    assert.equal(ids.has(def.definitionId), false, `Duplicate ID: ${def.definitionId}`);
+    ids.add(def.definitionId);
+    assert.equal(names.has(def.name), false, `Duplicate Name: ${def.name}`);
+    names.add(def.name);
+
+    for (const r of def.races) {
+      racesRepresented.add(r);
+    }
+
+    if (def.level >= 5) highLevelCount++;
+
+    const kws = def.keywords ?? [];
+    if (kws.length === 0) {
+      vanillaCount++;
+    } else if (kws.length === 1) {
+      keywordCount++;
+    } else if (kws.length === 2) {
+      keywordCount++;
+      twoKeywordCount++;
+    } else {
+      assert.fail(`Unexpected keyword count: ${kws.length}`);
+    }
+
+    // Instantiation verification
+    const state = createMonsterState(def, "u1", "c1", "p1", { x: 5, y: 5 }, "attack");
+    assert.equal(state.level, def.level);
+    assert.equal(state.type, "normal");
+  }
+
+  assert.equal(racesRepresented.size, 17);
+  for (const race of PRIORITY_RACES) {
+    assert.equal(racesRepresented.has(race), true, `Missing race: ${race}`);
+  }
+
+  assert.equal(vanillaCount, 10);
+  assert.equal(keywordCount, 10);
+  assert.equal(twoKeywordCount, 2);
+  assert.equal(highLevelCount, 11);
+
+  // Exact 3-layer calculated stats verification
+  const expectedStats = {
+    "32274490": { hp: 2, mp: 0, atk: 4, def: 1, spd: 2, vis: 3, range: 1 },
+    "27288416": { hp: 1, mp: 2, atk: 1, def: 1, spd: 2, vis: 3, range: 1 },
+    "90357090": { hp: 4, mp: 0, atk: 7, def: 4, spd: 4, vis: 4, range: 1 },
+    "41218256": { hp: 3, mp: 0, atk: 6, def: 4, spd: 3, vis: 3, range: 1 },
+    "22916281": { hp: 3, mp: 2, atk: 9, def: 1, spd: 3, vis: 6, range: 1 },
+    "69140098": { hp: 4, mp: 3, atk: 11, def: 5, spd: 3, vis: 4, range: 1 },
+    "11091375": { hp: 5, mp: 0, atk: 11, def: 9, spd: 2, vis: 4, range: 1 },
+    "7359741": { hp: 4, mp: 0, atk: 10, def: 6, spd: 3, vis: 3, range: 1 },
+    "41396436": { hp: 4, mp: 0, atk: 8, def: 6, spd: 4, vis: 6, range: 1 },
+    "67284908": { hp: 6, mp: 0, atk: 0, def: 18, spd: 1, vis: 2, range: 1 },
+    "32012841": { hp: 6, mp: 0, atk: 2, def: 17, spd: 2, vis: 3, range: 1 },
+    "17658803": { hp: 7, mp: 0, atk: 15, def: 10, spd: 3, vis: 4, range: 1 },
+    "78060096": { hp: 5, mp: 0, atk: 14, def: 5, spd: 4, vis: 3, range: 1 },
+    "96981563": { hp: 5, mp: 3, atk: 7, def: 10, spd: 1, vis: 3, range: 1 },
+    "52584282": { hp: 5, mp: 0, atk: 8, def: 11, spd: 4, vis: 3, range: 1 },
+    "78780140": { hp: 7, mp: 0, atk: 8, def: 10, spd: 1, vis: 3, range: 1 },
+    "42599677": { hp: 5, mp: 0, atk: 11, def: 7, spd: 3, vis: 3, range: 1 },
+    "12146024": { hp: 5, mp: 0, atk: 7, def: 8, spd: 4, vis: 3, range: 1 },
+    "30113682": { hp: 7, mp: 0, atk: 13, def: 9, spd: 3, vis: 4, range: 1 },
+    "47986555": { hp: 7, mp: 0, atk: 11, def: 14, spd: 2, vis: 3, range: 1 },
+  };
+
+  for (const def of PROTOTYPE_NORMAL_MONSTERS) {
+    const s = createMonsterState(def, "u1", "c1", "p1", { x: 5, y: 5 }, "attack");
+    const exp = expectedStats[def.definitionId];
+    assert.ok(exp, `No expected stats for ${def.definitionId}`);
+    assert.equal(s.hp.maximum, exp.hp, `${def.name} HP expected ${exp.hp}, got ${s.hp.maximum}`);
+    assert.equal(s.mp.maximum, exp.mp, `${def.name} MP expected ${exp.mp}, got ${s.mp.maximum}`);
+    assert.equal(s.atk, exp.atk, `${def.name} ATK expected ${exp.atk}, got ${s.atk}`);
+    assert.equal(s.def, exp.def, `${def.name} DEF expected ${exp.def}, got ${s.def}`);
+    assert.equal(s.spd.maximum, exp.spd, `${def.name} SPD expected ${exp.spd}, got ${s.spd.maximum}`);
+    assert.equal(s.vis, exp.vis, `${def.name} VIS expected ${exp.vis}, got ${s.vis}`);
+    assert.equal(s.attackRange, exp.range, `${def.name} Range expected ${exp.range}, got ${s.attackRange}`);
+  }
+});
+

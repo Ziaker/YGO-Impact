@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 A skeletal ghost that isn't strong but can mean trouble in large numbers.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: [REANIMATE 1]
+Descrição Monster Impact: A skeletal ghost that isn't strong but can mean trouble in large numbers. [REANIMATE 1]
+Stats Base: HP 1 | MP 0 | ATK 2 | DEF 1 | SPD 2 | VIS 3 | Alcance 1
+Bônus Racial (Zombie): HP +1 | ATK +2
+Stats Finais: HP 2 | MP 0 | ATK 4 | DEF 1 | SPD 2 | VIS 3 | Alcance 1
+Regra de Invocação: Normal Summon (Nível 1–4)

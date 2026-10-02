@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 Inspired by the World Hero legends he heard as a boy, this crusader adds a piece to his armor from every Mekkstrosity he destroys. He has set out on a quest from Fairy Lee to recover the Seven World Legacies and save their world.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: [SIGHT 2, PSYBLAST 1]
+Descrição Monster Impact: Inspired by the legends of the World Legacy, this young fighter adds armor parts to himself every day. [SIGHT 2] [PSYBLAST 1]
+Stats Base: HP 3 | MP 0 | ATK 9 | DEF 1 | SPD 3 | VIS 4 | Alcance 1
+Bônus Racial (Psychic): MP +2 | VIS +2
+Stats Finais: HP 3 | MP 2 | ATK 9 | DEF 1 | SPD 3 | VIS 6 | Alcance 1
+Regra de Invocação: Normal Summon (Nível 1–4)

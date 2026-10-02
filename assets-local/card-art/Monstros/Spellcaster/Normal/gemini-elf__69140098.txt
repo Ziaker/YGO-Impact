@@ -13,3 +13,11 @@ REFERÊNCIA SOMENTE: os dados abaixo vêm da carta-fonte. O GDD e o conteúdo ap
 
 DESCRIÇÃO / EFEITO DA CARTA-FONTE:
 Elf twins that alternate their attacks.
+
+--- MONSTER IMPACT — ADAPTAÇÃO PROTÓTIPO CANÔNICA ---
+Keywords: Nenhuma (Vanilla)
+Descrição Monster Impact: Elf twins that alternate their attacks in perfect harmony.
+Stats Base: HP 4 | MP 0 | ATK 11 | DEF 5 | SPD 3 | VIS 4 | Alcance 1
+Bônus Racial (Spellcaster): MP +3
+Stats Finais: HP 4 | MP 3 | ATK 11 | DEF 5 | SPD 3 | VIS 4 | Alcance 1
+Regra de Invocação: Normal Summon (Nível 1–4)
