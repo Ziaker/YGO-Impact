@@ -414,19 +414,78 @@ export class WebGameSession {
     return this.executeCommand(this._player1Id, "turn.allocate_resources", { actions, reactions });
   }
 
+  public findAnchorForDestination(
+    destination: Position,
+    preferredAnchorUnitId: string | null = null,
+  ): string | null {
+    const spatial = this._engine.state.spatial;
+    if (spatial === null) return null;
+    const ownUnits = spatial.units.filter((u) => u.playerId === this._player1Id);
+    if (ownUnits.length === 0) return null;
+
+    if (preferredAnchorUnitId !== null && ownUnits.some((u) => u.unitId === preferredAnchorUnitId)) {
+      const preferredTiles = this._queryAnchorDestinations(preferredAnchorUnitId);
+      if (preferredTiles.some((p) => p.x === destination.x && p.y === destination.y)) {
+        return preferredAnchorUnitId;
+      }
+    }
+
+    for (const unit of ownUnits) {
+      const unitTiles = this._queryAnchorDestinations(unit.unitId);
+      if (unitTiles.some((p) => p.x === destination.x && p.y === destination.y)) {
+        return unit.unitId;
+      }
+    }
+    return null;
+  }
+
+  private _queryAnchorDestinations(anchorUnitId: string | null): readonly Position[] {
+    const spatial = this._engine.state.spatial;
+    if (spatial === null) return [];
+    try {
+      const destinations = findNormalSummonDestinations(
+        spatial,
+        this._player1Id,
+        anchorUnitId,
+        this.getHumanVisibleTiles(),
+      );
+      return destinations.positions;
+    } catch {
+      return [];
+    }
+  }
+
   public summonHumanMonster(
     cardInstanceId: string,
     destination: Position,
     anchorUnitId: string | null = null,
     battlePosition: MonsterBattlePosition = "attack",
   ): boolean {
-    const unitCount = this._engine.state.monsters.filter((m) => m.ownerPlayerId === this._player1Id).length + 1;
-    const unitId = `${this._player1Id}:unit:${unitCount}`;
+    const spatial = this._engine.state.spatial;
+    const ownUnits = spatial ? spatial.units.filter((m) => m.playerId === this._player1Id) : [];
+    let effectiveAnchor = anchorUnitId;
+    if (ownUnits.length > 0) {
+      if (effectiveAnchor === null || !ownUnits.some((u) => u.unitId === effectiveAnchor)) {
+        effectiveAnchor = this.findAnchorForDestination(destination, anchorUnitId);
+      }
+    } else {
+      effectiveAnchor = null;
+    }
+
+    // Generate unique unitId that never collides with any existing or historic unit
+    let candidateIndex = 1;
+    let unitId = `${this._player1Id}:unit:${candidateIndex}`;
+    const allExistingUnitIds = new Set(this._engine.state.monsters.map((m) => m.unitId));
+    while (allExistingUnitIds.has(unitId)) {
+      candidateIndex += 1;
+      unitId = `${this._player1Id}:unit:${candidateIndex}`;
+    }
+
     return this.executeCommand(this._player1Id, "summon.normal", {
       cardInstanceId,
       unitId,
       destination: destination as unknown as JsonValue,
-      anchorUnitId,
+      anchorUnitId: effectiveAnchor,
       battlePosition,
     });
   }
@@ -617,17 +676,30 @@ export class WebGameSession {
   public getLegalSummonTiles(anchorUnitId: string | null = null): readonly Position[] {
     const spatial = this._engine.state.spatial;
     if (spatial === null) return [];
-    try {
-      const destinations = findNormalSummonDestinations(
-        spatial,
-        this._player1Id,
-        anchorUnitId,
-        this.getHumanVisibleTiles(),
-      );
-      return destinations.positions;
-    } catch {
-      return [];
+    const ownUnits = spatial.units.filter((u) => u.playerId === this._player1Id);
+    if (ownUnits.length === 0) {
+      return this._queryAnchorDestinations(null);
     }
+
+    // If an explicit anchor is selected and valid, query it directly
+    if (anchorUnitId !== null && ownUnits.some((u) => u.unitId === anchorUnitId)) {
+      return this._queryAnchorDestinations(anchorUnitId);
+    }
+
+    // If no specific anchor is picked, return the union of legal destinations across ALL own units
+    const allPositions: Position[] = [];
+    const seen = new Set<string>();
+    for (const unit of ownUnits) {
+      const positions = this._queryAnchorDestinations(unit.unitId);
+      for (const pos of positions) {
+        const key = positionKey(pos);
+        if (!seen.has(key)) {
+          seen.add(key);
+          allPositions.push(pos);
+        }
+      }
+    }
+    return deepFreeze(allPositions);
   }
 
   public exportReplay(): ReplayFile {

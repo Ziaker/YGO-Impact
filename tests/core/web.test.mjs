@@ -52,10 +52,35 @@ test("WebGameSession: initializes match and executes human vs AI turns determini
   assert.equal(summonSuccess, true);
 
   // Verify unit placed on map
-  const humanMonsters = session.getHumanMonsters();
+  let humanMonsters = session.getHumanMonsters();
   assert.equal(humanMonsters.length, 1);
   assert.equal(humanMonsters[0]?.position.x, dest.x);
   assert.equal(humanMonsters[0]?.position.y, dest.y);
+
+  // Step 3b: Test summoning a SECOND monster in the same game session (multi-summon bug regression)
+  const secondMonster = session.getHumanPlayerCardState()?.hand.find((c) => {
+    if (c.kind !== "normal_monster") return false;
+    const def = session.getCardDefinition(c.definitionId);
+    return def !== null && def.level <= 4;
+  });
+  if (secondMonster !== undefined) {
+    // Calling getLegalSummonTiles without anchor should return the union around own units
+    const legalTiles2 = session.getLegalSummonTiles();
+    assert.ok(legalTiles2.length > 0, "Second summon must produce legal destinations around existing monster");
+
+    const dest2 = legalTiles2[0];
+    assert.ok(dest2 !== undefined);
+    const summon2Success = session.summonHumanMonster(
+      secondMonster.instanceId,
+      dest2,
+      null, // Auto-resolves anchor
+      "attack",
+    );
+    assert.equal(summon2Success, true, "Second summon must succeed with auto-resolved anchor");
+
+    humanMonsters = session.getHumanMonsters();
+    assert.equal(humanMonsters.length, 2, "Player should now control 2 monsters on the map");
+  }
 
   // Step 4: Setting a trap from hand (costs 0 actions!)
   const trapCard = cardState.hand.find((c) => c.kind === "trap");

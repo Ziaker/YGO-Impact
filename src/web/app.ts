@@ -193,11 +193,23 @@ class WebGameApp {
       const cardState = this.session.getHumanPlayerCardState();
       const card = cardState?.hand.find((c) => c.instanceId === this.selectedCardInstanceId);
       if (card && card.kind === "normal_monster") {
+        // If clicking on an allied monster, toggle/set it as explicit anchor
+        const alliedMonster = this.session.getHumanMonsters().find(
+          (m) => m.position.x === tileX && m.position.y === tileY,
+        );
+        if (alliedMonster) {
+          this.selectedUnitId = alliedMonster.unitId;
+          this.syncUI();
+          return;
+        }
+
         const legalDestinations = this.session.getLegalSummonTiles(this.selectedUnitId);
         const isLegal = legalDestinations.some((p) => p.x === tileX && p.y === tileY);
         if (isLegal) {
-          this.session.summonHumanMonster(card.instanceId, clickedPos, this.selectedUnitId, "attack");
+          const resolvedAnchor = this.session.findAnchorForDestination(clickedPos, this.selectedUnitId);
+          this.session.summonHumanMonster(card.instanceId, clickedPos, resolvedAnchor, "attack");
           this.selectedCardInstanceId = null;
+          this.selectedUnitId = null;
           this.syncUI();
           return;
         }
@@ -551,7 +563,11 @@ class WebGameApp {
           this.selectedCardInstanceId = null;
         } else {
           this.selectedCardInstanceId = card.instanceId;
-          this.selectedUnitId = null;
+          // Keep selectedUnitId if it's an allied monster anchor
+          const isAlliedUnit = this.session.getHumanMonsters().some((m) => m.unitId === this.selectedUnitId);
+          if (!isAlliedUnit) {
+            this.selectedUnitId = null;
+          }
         }
         this.syncUI();
       });
