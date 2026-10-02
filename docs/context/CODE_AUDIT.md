@@ -114,17 +114,14 @@ resolução: Implementada Invocação Fusão orientada a dados com procedimentos
 cobertura: Suíte completa em tests/core/fusion.test.mjs com 100% de aprovação.
 ```
 
-### ISSUE-008: Catálogo de Conteúdo Restrito Exclusivamente a Monstros
+### ISSUE-008: Catálogo Unificado de Conteúdo (ContentCatalog) — RESOLVIDO
 ```text
 ID: ISSUE-008
-prioridade: P2
+prioridade: P2 (RESOLVIDO)
 arquivo: src/core/content.ts
-linhas: 25-30
-problema: A interface MonsterCatalog valida e cataloga apenas MonsterDefinition. Não existem tipos nem estruturas de dados para Magias (SpellDefinition) ou Armadilhas (TrapDefinition). Os procedimentos de Ritual (ritualProcedures) foram adicionados como propriedade opcional ad-hoc, em vez de integrar um catálogo unificado de conteúdo.
-impacto: O catálogo canônico do motor não valida o conjunto completo de 88 (ou 40) cartas do protótipo, limitando a validação apenas ao Deck de Monstros.
-regra do GDD relacionada: P77 (Meta inicial de 88 cartas com Monstros, Magias e Armadilhas), P1176 (Versionamento e hash canônico de conteúdo).
-cobertura atual: content.test.mjs valida apenas definições de monstro e compatibilidade com DeckConfiguration.
-correção recomendada: Evoluir MonsterCatalog para ContentCatalog unificado quando o conteúdo de feitiços/armadilhas for liberado pelo autor.
+linhas: 25-35
+resolução: MonsterCatalog evoluído para unificar MonsterDefinition, SpellTrapDefinition, RitualProcedure e FusionProcedure, exportando o alias ContentCatalog. O contentHash canônico cobre todas as definições e procedimentos em conjunto.
+cobertura: Testado em tests/core/content.test.mjs e tests/core/replay.test.mjs com validação de compatibilidade e contentHash determinístico.
 ```
 
 ### ISSUE-009: Desalinhamento da Documentação de Protótipos Visuais em ROADMAP.md
@@ -166,17 +163,14 @@ cobertura atual: Inexistente.
 correção recomendada: Desenvolver .github/workflows/deploy-pages.yml quando o marco de integração da build web jogável for aprovado pelo autor.
 ```
 
-### ISSUE-012: Ausência de Testes de Fuzzing e Invariantes de Longa Duração
+### ISSUE-012: Ausência de Testes de Fuzzing e Invariantes de Longa Duração — RESOLVIDO
 ```text
 ID: ISSUE-012
-prioridade: P3
-arquivo: tests/core/
-linhas: N/A
-problema: Todas as 239 asserções de teste em tests/core/ cobrem microcenários determinísticos curtos (1 a 10 passos). Não existem testes de estresse pseudoaleatório (fuzzing) rodando 1.000 a 10.000 passos para assegurar conservação estrita de cartas, invariantes espaciais e ausência de vazamento de estado.
-impacto: Casos de borda de concorrência ou mutações sutis em sequências complexas podem passar despercebidos pelos testes pontuais.
-regra do GDD relacionada: Seção 18 (Arquitetura, Simulação e Testabilidade).
-cobertura atual: 0 testes de fuzzing.
-correção recomendada: Implementar suíte de testes de estresse / property testing com sequências aleatórias auditáveis por seed em tests/core/fuzz.test.mjs.
+prioridade: P3 (RESOLVIDO)
+arquivo: tests/core/fuzz.test.mjs
+linhas: 1-225
+resolução: Suíte de fuzzing e property-based testing implementada. Cobre conservação estrita de cartas (20 monstros + 15 magias/armadilhas = 35 cartas mantidas atômicas e invariantes ao longo de toda a simulação), integridade espacial (31x17, zero colisão em célula compartilhada, proibição de base e limite de 5 unidades), clamp e limites de HP/SPD, verificação de replay 100% determinístico e fuzzing de comandos malformados/adversariais (com rejeição graciosa e preservação do estado).
+cobertura: Suíte completa em tests/core/fuzz.test.mjs com 100% de aprovação.
 ```
 
 ---
@@ -193,13 +187,13 @@ correção recomendada: Implementar suíte de testes de estresse / property test
 7. `ISSUE-005`: Invocação Fusão e Ritual integradas (`src/core/fusion.ts`, `src/core/ritual.ts`, `tests/core/fusion.test.mjs`).
 8. `ISSUE-007`: IA Adversária Inicial sob Fog of War (`src/core/ai.ts`, `tests/core/ai.test.mjs`).
 9. `MARCO_006`: Conexão Web e Build Jogável (`index.html`, `src/web/client.ts`, `src/web/app.ts`, `tests/core/web.test.mjs`).
+10. `ISSUE-008`: Catálogo unificado de conteúdo (`ContentCatalog` em `src/core/content.ts`).
+11. `ISSUE-012`: Fuzzing e endurance tests (`tests/core/fuzz.test.mjs`).
 
 ### Prioridade P2 / P3 (Governança e Tooling)
-- `ISSUE-008`: Catálogo unificado de conteúdo.
 - `ISSUE-009`: Alinhamento documental de protótipos em `ROADMAP.md` (Sanado localmente).
 - `ISSUE-010`: Consolidação de scripts de pool.
 - `ISSUE-011`: Pipeline de GitHub Pages (aguardando confirmação do autor).
-- `ISSUE-012`: Fuzzing e endurance tests.
 
 ---
 
@@ -214,4 +208,5 @@ correção recomendada: Implementar suíte de testes de estresse / property test
 6. [CONCLUÍDO] Magias e Armadilhas: equipamentos, armadilhas veladas e Correntes (ISSUE-003 / Marco 3).
 7. [CONCLUÍDO] IA adversária inicial operando sob Fog of War com informação justa (ISSUE-007 / Marco 5).
 8. [CONCLUÍDO] Marco 6: Conexão Web e Build Jogável (humano vs IA no navegador com Fog of War e replay determinístico).
+9. [CONCLUÍDO] Fuzzing adversarial e invariantes de longa duração (ISSUE-012).
 ```

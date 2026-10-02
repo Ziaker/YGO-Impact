@@ -32,6 +32,8 @@ export interface MonsterCatalog {
   readonly spellTrapDefinitions?: readonly SpellTrapDefinition[];
 }
 
+export type ContentCatalog = MonsterCatalog;
+
 export class ContentInvariantError extends Error {
   override readonly name = "ContentInvariantError";
   readonly violations: readonly ContentViolation[];
