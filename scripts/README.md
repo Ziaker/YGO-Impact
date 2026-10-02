@@ -8,6 +8,31 @@ python scripts/verify_context_sources.py
 
 Confere tamanho e SHA-256 do GDD v0.42 e do prompt mestre preservados em `docs/context/sources/`. A CI executa essa validação para impedir remoção, truncamento ou alteração silenciosa dessas fontes.
 
+## Launcher local do jogo
+
+Para iniciar o cliente web tático no ambiente local com abertura automática no navegador:
+
+```bash
+# Via script Python multiplataforma
+python scripts/launch_game.py
+
+# Via npm
+npm start
+
+# No Windows (prompt ou duplo-clique no Explorer)
+launch.bat
+# ou no PowerShell
+.\launch.ps1
+```
+
+O launcher verifica se o bundle TypeScript (`dist/web/app.js`) foi compilado (executando `npm run build` se necessário), aloca uma porta HTTP disponível (padrão `8080` ou próxima) e abre o navegador padrão automaticamente no tabuleiro jogável.
+
+Opções disponíveis:
+- `--port <número>`: fixa uma porta específica em vez de busca dinâmica;
+- `--no-browser`: inicia o servidor HTTP sem abrir o navegador;
+- `--build`: força recompilação do TypeScript antes de iniciar;
+- `--build-only`: apenas compila os fontes e encerra sem abrir servidor.
+
 ## Downloader de artes
 
 `scripts/baixar_artes.py` contém o downloader genérico de artes `image_url_cropped` do YGOPRODeck usando somente a biblioteca padrão do Python.

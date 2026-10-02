@@ -20,7 +20,7 @@ jobs:
           python-version: "3.12"
 
       - name: Compile Python tools
-        run: python -m py_compile scripts/baixar_artes.py scripts/sync_prototype_pool.py scripts/sync_prototype_pool_curated.py scripts/verify_context_sources.py
+        run: python -m py_compile scripts/launch_game.py scripts/baixar_artes.py scripts/sync_prototype_pool.py scripts/sync_prototype_pool_curated.py scripts/verify_context_sources.py
 
       - name: Verify canonical project sources
         run: python scripts/verify_context_sources.py
