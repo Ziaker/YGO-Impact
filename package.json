@@ -10,7 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "build": "tsc -p tsconfig.json",
     "test:core": "node --experimental-strip-types --test tests/core/*.test.mjs",
-    "test": "npm run typecheck && npm run test:core"
+    "test": "npm run typecheck && npm run test:core",
+    "serve": "python -m http.server 8080"
   },
   "devDependencies": {
     "typescript": "7.0.2"

@@ -183,7 +183,7 @@ correção recomendada: Implementar suíte de testes de estresse / property test
 
 ## 3. Matriz de Priorização Real Reclassificada
 
-### Prioridade P0 (Integridade e Baseline) — CORRIGIDOS
+### Prioridade P0 / P1 (Entregas do Jogo Funcional) — CONCLUÍDOS
 1. `ISSUE-001`: Correção definitiva de `verify_context_sources.py` e `.gitattributes` para CI verde cross-platform.
 2. `ISSUE-002`: Eliminação total do byte `\x07` de `DEC-001` e `ROADMAP.md`.
 3. `NORMAL_MONSTER_CONTENT_BASELINE`: Micro-roster canônico de 20 Monstros Normais (todas as 17 raças, 11 Nv 5+, 10 com Keywords, 10 vanillas, Tributo para Nv 5+).
@@ -192,15 +192,13 @@ correção recomendada: Implementar suíte de testes de estresse / property test
 6. `ISSUE-003`: Ativação e Resolução de Magias e Armadilhas (`src/core/spells-traps.ts`, `tests/core/spells-traps.test.mjs`).
 7. `ISSUE-005`: Invocação Fusão e Ritual integradas (`src/core/fusion.ts`, `src/core/ritual.ts`, `tests/core/fusion.test.mjs`).
 8. `ISSUE-007`: IA Adversária Inicial sob Fog of War (`src/core/ai.ts`, `tests/core/ai.test.mjs`).
-
-### Prioridade P1 (Próximo Passo do Jogo Funcional)
-1. **Marco 6 — Conexão Web e Build Jogável**: Conectar o motor headless e a IA adversária à interface web jogável no navegador.
+9. `MARCO_006`: Conexão Web e Build Jogável (`index.html`, `src/web/client.ts`, `src/web/app.ts`, `tests/core/web.test.mjs`).
 
 ### Prioridade P2 / P3 (Governança e Tooling)
 - `ISSUE-008`: Catálogo unificado de conteúdo.
 - `ISSUE-009`: Alinhamento documental de protótipos em `ROADMAP.md` (Sanado localmente).
 - `ISSUE-010`: Consolidação de scripts de pool.
-- `ISSUE-011`: Pipeline de GitHub Pages.
+- `ISSUE-011`: Pipeline de GitHub Pages (aguardando confirmação do autor).
 - `ISSUE-012`: Fuzzing e endurance tests.
 
 ---
@@ -215,5 +213,5 @@ correção recomendada: Implementar suíte de testes de estresse / property test
 5. [CONCLUÍDO] Terreno e SPD contínuo: tipos de terreno, custos de SPD e GLIDER (ISSUE-004 / Marco 2).
 6. [CONCLUÍDO] Magias e Armadilhas: equipamentos, armadilhas veladas e Correntes (ISSUE-003 / Marco 3).
 7. [CONCLUÍDO] IA adversária inicial operando sob Fog of War com informação justa (ISSUE-007 / Marco 5).
-8. [EM ANDAMENTO] Marco 6: Conexão Web e Build Jogável (humano vs IA no navegador).
+8. [CONCLUÍDO] Marco 6: Conexão Web e Build Jogável (humano vs IA no navegador com Fog of War e replay determinístico).
 ```

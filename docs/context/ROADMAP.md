@@ -97,8 +97,8 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 
 ### Web e publicação
 
-- Build jogável integrada: **Pendente**.
-- GitHub Pages: **Pendente / workflow não existente**.
+- Build jogável integrada: **Implementada e testada (`index.html`, `src/web/client.ts`, `src/web/app.ts`, `tests/core/web.test.mjs`)**.
+- GitHub Pages: **Pendente / aguardando confirmação explícita do autor**.
 
 ### IA, replay e telemetria
 
@@ -121,7 +121,7 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 5. **Marco 5 — IA Adversária Inicial (Heurística e Decisão sob Fog of War):**
    - **CONCLUÍDO E TESTADO (`src/core/ai.ts`, `tests/core/ai.test.mjs`):** IA oficial operando sob Fog of War com informação justa (`createAIObservation`), avaliador heurístico configurável (`createHeuristicAI`, `createAggressiveAI`, `createDefensiveAI`, `createTacticalAI`), simulações de partidas completas e 100% de replay verificado.
 6. **Marco 6 — Conexão Web e Build Jogável:**
-   - Conectar o núcleo headless compilado à interface web para permitir partidas humano contra IA no navegador.
+   - **CONCLUÍDO E TESTADO (`index.html`, `src/web/client.ts`, `src/web/app.ts`, `tests/core/web.test.mjs`):** Sessão de jogo `WebGameSession` conectando o motor autoritativo e a IA adversária sob Fog of War com informação justa. Tabuleiro tático 31×17 em canvas com renderização de terreno, bases e névoa de guerra. HUD interativo com seleção de cartas na mão, 3 slots de armadilha velada, movimentação e ataques autoritativos, modais nativos `<dialog>` para fase de compra e decisão (8 recursos), e exportação com verificação determinística de replays.
 
 ## Bloqueios explícitos
 

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yu-Gi-Oh! Impact — Cliente Web Tático</title>
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-panel: rgba(17, 24, 39, 0.85);
+      --bg-card: rgba(30, 41, 59, 0.9);
+      --border-color: #334155;
+      --border-focus: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --accent-cyan: #38bdf8;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-red: #ef4444;
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Top HUD Header */
+    header {
+      background: var(--bg-panel);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .header-left, .header-center, .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .game-logo {
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-primary { background: #0369a1; color: #e0f2fe; border: 1px solid #38bdf8; }
+    .badge-danger { background: #991b1b; color: #fee2e2; border: 1px solid #f87171; }
+    .badge-phase { background: #1e293b; color: #f59e0b; border: 1px solid #d97706; }
+
+    .resource-counter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .res-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .res-val {
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .res-actions .res-val { color: var(--accent-cyan); }
+    .res-reactions .res-val { color: var(--accent-amber); }
+
+    /* Button styles */
+    .btn {
+      padding: 6px 12px;
+      border-radius: 5px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.15s, transform 0.05s;
+    }
+
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--primary); color: #ffffff; border-color: var(--accent-cyan); }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-warning { background: #b45309; color: #ffffff; border-color: var(--accent-amber); }
+    .btn-warning:hover:not(:disabled) { background: #92400e; }
+    .btn-secondary { background: #334155; color: #cbd5e1; border-color: #475569; }
+    .btn-secondary:hover:not(:disabled) { background: #475569; }
+    .btn-xs { padding: 3px 6px; font-size: 0.7rem; border-radius: 3px; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    select {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+    }
+
+    /* Main Area */
+    main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Canvas Tactical Board */
+    .tactical-viewport {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #070a12;
+      overflow: auto;
+      padding: 10px;
+    }
+
+    #tactical-canvas {
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+      border: 1px solid #1e293b;
+      border-radius: 4px;
+      cursor: crosshair;
+    }
+
+    /* Sidebar */
+    aside {
+      width: 320px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(8px);
+      border-left: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .panel-section {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .inspector-card {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+    }
+
+    .inspector-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .text-primary { color: var(--accent-cyan); }
+    .text-danger { color: var(--accent-red); }
+    .text-success { color: var(--accent-emerald); }
+    .text-muted { color: var(--text-muted); font-size: 0.8rem; font-style: italic; }
+
+    .inspector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+
+    .inspector-keywords {
+      font-size: 0.75rem;
+      color: var(--accent-amber);
+      margin-bottom: 6px;
+    }
+
+    .inspector-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    /* Event Log */
+    .event-log-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .event-log-list {
+      list-style: none;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      padding-right: 4px;
+    }
+
+    .log-item {
+      padding: 4px 6px;
+      border-radius: 3px;
+      background: rgba(15, 23, 42, 0.5);
+      border-left: 3px solid #64748b;
+    }
+
+    .log-summon { border-left-color: var(--accent-emerald); }
+    .log-battle { border-left-color: var(--accent-red); }
+    .log-rejected { border-left-color: #f97316; color: #fdba74; }
+
+    /* Bottom HUD */
+    footer {
+      background: var(--bg-panel);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      height: 170px;
+      flex-shrink: 0;
+    }
+
+    .trap-slots-container {
+      width: 250px;
+      border-right: 1px solid var(--border-color);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .trap-slots-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .trap-slot-item {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px dashed #475569;
+      border-radius: 4px;
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+    }
+
+    .slot-badge {
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .slot-occupied {
+      color: var(--accent-amber);
+      font-weight: 600;
+    }
+
+    .slot-card-name {
+      color: #e2e8f0;
+      font-size: 0.7rem;
+      max-width: 90px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hand-container {
+      flex: 1;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .hand-cards-list {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      flex: 1;
+      align-items: center;
+      padding-bottom: 6px;
+    }
+
+    /* Hand Card */
+    .card-item {
+      width: 140px;
+      height: 125px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .card-item:hover {
+      transform: translateY(-4px);
+      border-color: #64748b;
+    }
+
+    .card-item.selected {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+      transform: translateY(-6px);
+    }
+
+    .card-item.normal_monster { border-top: 3px solid #d97706; }
+    .card-item.spell { border-top: 3px solid #059669; }
+    .card-item.trap { border-top: 3px solid #db2777; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .card-name {
+      font-size: 0.75rem;
+      font-weight: 700;
+      line-height: 1.2;
+      max-height: 2.4em;
+      overflow: hidden;
+    }
+
+    .card-level {
+      color: #fbbf24;
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+
+    .card-badge {
+      font-size: 0.65rem;
+      padding: 1px 4px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .spell-badge { background: #064e3b; color: #a7f3d0; }
+    .trap-badge { background: #831843; color: #fbcfe8; }
+
+    .card-body {
+      font-size: 0.7rem;
+    }
+
+    .card-stats {
+      font-weight: 700;
+      color: #e2e8f0;
+      font-family: monospace;
+    }
+
+    .card-extra {
+      color: var(--text-muted);
+      font-size: 0.65rem;
+    }
+
+    .card-keywords {
+      color: var(--accent-amber);
+      font-size: 0.65rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-cost {
+      font-weight: 600;
+      color: var(--accent-cyan);
+      font-size: 0.65rem;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      max-height: 2.6em;
+      overflow: hidden;
+      line-height: 1.2;
+    }
+
+    /* Modals (Native <dialog>) */
+    dialog {
+      background: #0f172a;
+      color: #f8fafc;
+      border: 1px solid #38bdf8;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      max-width: 450px;
+      margin: auto;
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .modal-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .slider-group {
+      margin-bottom: 14px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent-cyan);
+    }
+  </style>
+</head>
+<body>
+  <!-- Top HUD Header -->
+  <header>
+    <div class="header-left">
+      <span class="game-logo">⚔ YU-GI-OH! IMPACT</span>
+      <span id="hud-turn-number" class="badge badge-phase">Turno 1</span>
+      <span id="hud-phase" class="badge badge-primary">Decisão</span>
+      <span id="hud-priority" class="badge badge-primary">Prioridade: Jogador</span>
+    </div>
+
+    <div class="header-center">
+      <div class="resource-counter res-actions">
+        <span class="res-item">Ações: <span id="count-actions" class="res-val">0</span></span>
+      </div>
+      <div class="resource-counter res-reactions">
+        <span class="res-item">Reações: <span id="count-reactions" class="res-val">0</span></span>
+      </div>
+      <button id="btn-end-turn" class="btn btn-warning" disabled>Finalizar Turno</button>
+      <button id="btn-pass-priority" class="btn btn-primary" style="display: none;">Passar Prioridade</button>
+    </div>
+
+    <div class="header-right">
+      <select id="select-ai-type">
+        <option value="tactical">IA Tática</option>
+        <option value="aggressive">IA Agressiva</option>
+        <option value="defensive">IA Defensiva</option>
+      </select>
+      <button id="btn-restart" class="btn btn-secondary">Reiniciar</button>
+      <button id="btn-export-replay" class="btn btn-primary">Exportar Replay</button>
+    </div>
+  </header>
+
+  <!-- Main Tactical Game Board and Inspector Sidebar -->
+  <main>
+    <div class="tactical-viewport">
+      <canvas id="tactical-canvas"></canvas>
+    </div>
+
+    <aside>
+      <!-- Unit / Card Inspector -->
+      <div class="panel-section">
+        <div class="section-title">
+          <span>Inspetor de Unidade</span>
+          <button id="btn-toggle-position" class="btn btn-xs btn-secondary" style="display: none;">Mudar Posição</button>
+        </div>
+        <div id="inspector-content">
+          <div class="text-muted">Selecione uma unidade no tabuleiro ou uma carta na mão para inspecionar.</div>
+        </div>
+      </div>
+
+      <!-- Real-time Event Log -->
+      <div class="panel-section event-log-container">
+        <div class="section-title">
+          <span>Registro de Eventos</span>
+        </div>
+        <ul id="event-log-list" class="event-log-list"></ul>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Bottom HUD: Trap Slots & Hand Cards -->
+  <footer>
+    <div class="trap-slots-container">
+      <div class="section-title">
+        <span>Zonas de Armadilha (3)</span>
+      </div>
+      <div id="trap-slots-list" class="trap-slots-grid"></div>
+    </div>
+
+    <div class="hand-container">
+      <div class="section-title">
+        <span>Mão do Jogador (Cartas)</span>
+      </div>
+      <div id="hand-cards-list" class="hand-cards-list"></div>
+    </div>
+  </footer>
+
+  <!-- MODALS -->
+
+  <!-- 1. Draw Phase Modal -->
+  <dialog id="modal-draw">
+    <h3 class="modal-title">Fase de Compra</h3>
+    <p class="modal-desc">Selecione a combinação de compras para o início deste turno:</p>
+    <div class="modal-buttons">
+      <button id="btn-draw-2m" class="btn btn-primary">2 Monstros</button>
+      <button id="btn-draw-1m1st" class="btn btn-primary">1 Monstro + 1 Mágica/Armadilha</button>
+      <button id="btn-draw-2st" class="btn btn-primary">2 Mágicas/Armadilhas</button>
+    </div>
+  </dialog>
+
+  <!-- 2. Decision Phase Modal -->
+  <dialog id="modal-decision">
+    <h3 class="modal-title">Fase de Decisão</h3>
+    <p class="modal-desc">Distribua seu orçamento de 8 recursos entre Ações e Reações:</p>
+    <form id="form-decision">
+      <div class="slider-group">
+        <div class="slider-header">
+          <span>Ações (Ataque, Movimento, Invocação):</span>
+          <span id="val-actions" class="text-primary font-bold">5</span>
+        </div>
+        <input type="range" id="slider-actions" min="0" max="8" value="5" step="1">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header">
+          <span>Reações (Correntes, Armadilhas, Respostas):</span>
+          <span id="val-reactions" class="text-primary font-bold">3</span>
+        </div>
+        <input type="range" id="slider-reactions" min="0" max="8" value="3" step="1">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Confirmar Alocação</button>
+    </form>
+  </dialog>
+
+  <!-- 3. Match Finished Modal -->
+  <dialog id="modal-game-over">
+    <h3 id="game-over-title" class="modal-title">Partida Finalizada</h3>
+    <p id="game-over-reason" class="modal-desc"></p>
+    <div class="modal-buttons">
+      <button id="btn-game-over-replay" class="btn btn-primary">Baixar Replay JSON (Determinístico)</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="./dist/web/app.js"></script>
+</body>
+</html>
