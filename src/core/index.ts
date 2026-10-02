@@ -33,4 +33,5 @@ export * from "./vitals.ts";
 export * from "./visibility.ts";
 export * from "./zones.ts";
 export * from "./headless.ts";
+export * from "./keywords.ts";
 export type * from "./types.ts";

@@ -9,6 +9,7 @@ import {
   type PrototypeMonsterType,
   type VitalPool,
 } from "./vitals.ts";
+import { getKeywordParameter } from "./keywords.ts";
 
 export const MONSTER_ELEMENTS = ["fire", "earth", "water", "wind", "light", "dark"] as const;
 export type MonsterElement = (typeof MONSTER_ELEMENTS)[number];
@@ -180,7 +181,8 @@ export function changeMonsterBattlePosition(
 }
 
 export function recoverMonsterAtSupport(monster: MonsterState): SupportRecoveryResult {
-  const hp = recoverVital(monster.hp, 1);
+  const regenBonus = getKeywordParameter(monster, "REGEN") ?? 0;
+  const hp = recoverVital(monster.hp, 1 + regenBonus);
   const mp = recoverVital(monster.mp, monster.usedEffectSinceLastSupport ? 1 : 2);
   const spd = recoverVital(monster.spd, monster.spd.maximum);
   return deepFreeze({
