@@ -346,14 +346,14 @@ export function createAggressivePolicy(name = "AggressivePolicy"): HeadlessPolic
               ownMonsters.length === 0
                 ? null
                 : [...ownMonsters].sort((a, b) => {
-                    if (enemyBase === undefined) return 0;
+                    if (enemyBase === undefined) return a.unitId.localeCompare(b.unitId);
                     const distA =
                       Math.abs(a.position.x - enemyBase.position.x) +
                       Math.abs(a.position.y - enemyBase.position.y);
                     const distB =
                       Math.abs(b.position.x - enemyBase.position.x) +
                       Math.abs(b.position.y - enemyBase.position.y);
-                    return distA - distB;
+                    return distA - distB || a.unitId.localeCompare(b.unitId);
                   })[0];
             const anchorUnitId = anchorUnit ? anchorUnit.unitId : null;
 
@@ -367,14 +367,14 @@ export function createAggressivePolicy(name = "AggressivePolicy"): HeadlessPolic
               if (destinations.positions.length > 0) {
                 // Pick destination closest to enemy base
                 const sorted = [...destinations.positions].sort((left, right) => {
-                  if (enemyBase === undefined) return 0;
+                  if (enemyBase === undefined) return left.y - right.y || left.x - right.x;
                   const distLeft =
                     Math.abs(left.x - enemyBase.position.x) +
                     Math.abs(left.y - enemyBase.position.y);
                   const distRight =
                     Math.abs(right.x - enemyBase.position.x) +
                     Math.abs(right.y - enemyBase.position.y);
-                  return distLeft - distRight;
+                  return distLeft - distRight || left.y - right.y || left.x - right.x;
                 });
                 const destination = sorted[0];
                 if (destination !== undefined) {

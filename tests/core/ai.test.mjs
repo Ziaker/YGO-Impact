@@ -210,3 +210,185 @@ test("AI vs AI: Tactical AI vs Tactical AI with Equip Spells and Traps maintains
   assert.equal(verification.matches, true, `Replay divergence at step ${verification.firstDivergentStep}`);
   assert.equal(verification.firstDivergentStep, null);
 });
+
+test("Heuristic AI: sets trap from hand when remaining actions are 0 before ending participation", () => {
+  const ai = createTacticalAI("TacticalAI");
+
+  const p1Setup = createDefaultPlayerSetup("p1", 5);
+  const p2Setup = createDefaultPlayerSetup("p2", 5);
+  const bases = [
+    { playerId: "p1", position: { x: 0, y: 8 } },
+    { playerId: "p2", position: { x: 30, y: 8 } },
+  ];
+
+  const engine = createGameEngine(
+    "trap-cost-zero-test",
+    [p1Setup, p2Setup],
+    bases,
+    PROTOTYPE_NORMAL_MONSTERS,
+  );
+
+  // Mock decision context where p1 has 0 actions remaining and 2 reactions remaining
+  const context = {
+    playerId: "p1",
+    opponentPlayerId: "p2",
+    turn: {
+      turnNumber: 1,
+      phase: "action",
+      players: [
+        {
+          playerId: "p1",
+          participationEnded: false,
+          remaining: { actions: 0, reactions: 2 },
+        },
+        {
+          playerId: "p2",
+          participationEnded: false,
+          remaining: { actions: 4, reactions: 4 },
+        },
+      ],
+    },
+    priorityToken: { holderPlayerId: "p1" },
+    engine: {
+      ...engine,
+      state: {
+        ...engine.state,
+        turn: {
+          ...engine.state.turn,
+          phase: "action",
+          players: [
+            {
+              playerId: "p1",
+              participationEnded: false,
+              remaining: { actions: 0, reactions: 2 },
+            },
+          ],
+        },
+        // Ensure p1 hand has a trap card
+        cardSetup: {
+          ...engine.state.cardSetup,
+          players: engine.state.cardSetup.players.map((p) =>
+            p.playerId === "p1"
+              ? {
+                  ...p,
+                  hand: [{ instanceId: "test-trap-inst", definitionId: "trap:test", kind: "trap" }],
+                }
+              : p,
+          ),
+        },
+      },
+    },
+  };
+
+  const action = ai.takeAction(context);
+  assert.ok(action !== null);
+  assert.equal(action.kind, "trap.set");
+  assert.equal(action.issuer, "p1");
+  assert.equal(action.payload.cardInstanceId, "test-trap-inst");
+  assert.equal(action.payload.slotIndex, 0);
+});
+
+test("Heuristic AI: collision-proof unit generation ensures unique unitIds even with pre-existing unit id", () => {
+  const ai = createAggressiveAI("AggroCollisionTest");
+
+  const p1Setup = createDefaultPlayerSetup("p1", 5);
+  const p2Setup = createDefaultPlayerSetup("p2", 5);
+  const bases = [
+    { playerId: "p1", position: { x: 0, y: 8 } },
+    { playerId: "p2", position: { x: 30, y: 8 } },
+  ];
+
+  const engine = createGameEngine(
+    "collision-test-seed",
+    [p1Setup, p2Setup],
+    bases,
+    PROTOTYPE_NORMAL_MONSTERS,
+  );
+
+  // Pre-seed an allied unit on map with unitId "p1:unit:1"
+  const preExistingUnit = {
+    unitId: "p1:unit:1",
+    cardInstanceId: "card-inst-pre",
+    ownerPlayerId: "p1",
+    definitionId: "normal:beast-frightfur",
+    name: "Pre Existing Unit",
+    level: 3,
+    type: "normal",
+    structuralElements: ["dark"],
+    structuralRaces: ["fiend"],
+    position: { x: 1, y: 8 },
+    battlePosition: "attack",
+    hp: { current: 3, maximum: 3 },
+    mp: { current: 0, maximum: 0 },
+    spd: { current: 3, maximum: 3 },
+    vis: 3,
+    atk: 12,
+    def: 8,
+    attackRange: 1,
+    usedEffectSinceLastSupport: false,
+  };
+
+  const context = {
+    playerId: "p1",
+    opponentPlayerId: "p2",
+    turn: {
+      turnNumber: 1,
+      phase: "action",
+      players: [
+        {
+          playerId: "p1",
+          participationEnded: false,
+          remaining: { actions: 2, reactions: 2 },
+        },
+      ],
+    },
+    priorityToken: { holderPlayerId: "p1" },
+    engine: {
+      ...engine,
+      state: {
+        ...engine.state,
+        turn: {
+          ...engine.state.turn,
+          phase: "action",
+          players: [
+            {
+              playerId: "p1",
+              participationEnded: false,
+              remaining: { actions: 2, reactions: 2 },
+            },
+          ],
+        },
+        spatial: {
+          ...engine.state.spatial,
+          units: [{ unitId: "p1:unit:1", playerId: "p1", position: { x: 1, y: 8 } }],
+        },
+        monsters: [preExistingUnit],
+        cardSetup: {
+          ...engine.state.cardSetup,
+          players: engine.state.cardSetup.players.map((p) =>
+            p.playerId === "p1"
+              ? {
+                  ...p,
+                  hand: [
+                    {
+                      instanceId: "summonable-inst",
+                      definitionId: "normal:luster-dragon",
+                      kind: "normal_monster",
+                    },
+                  ],
+                }
+              : p,
+          ),
+        },
+      },
+    },
+  };
+
+  const action = ai.takeAction(context);
+  assert.ok(action !== null);
+  if (action.kind === "summon.normal") {
+    // Must NOT be p1:unit:1 because p1:unit:1 is already taken!
+    assert.notEqual(action.payload.unitId, "p1:unit:1");
+    assert.equal(action.payload.unitId, "p1:unit:2");
+  }
+});

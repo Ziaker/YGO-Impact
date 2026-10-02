@@ -2,6 +2,7 @@ import { createBasicAttackPlan } from "./attack.ts";
 import { createBaseAttackPlan } from "./base-attack.ts";
 import type { ChainWindow } from "./chain.ts";
 import type { MonsterDefinition, MonsterState } from "./monster.ts";
+import { hasKeyword } from "./keywords.ts";
 import { resolveBasicMovement } from "./movement.ts";
 import type { CardInstance, DrawMode, PlayerCardState } from "./draw.ts";
 import { createMatchCardView, type PlayerCardView } from "./information.ts";
@@ -397,18 +398,22 @@ export function createHeuristicAI(
       if (
         turnPlayer === undefined ||
         turnPlayer.remaining === null ||
-        turnPlayer.remaining.actions === 0 ||
         turnPlayer.participationEnded
       ) {
         return { issuer: context.playerId, kind: "turn.end_participation", payload: {} };
       }
 
+      const actionsRemaining = turnPlayer.remaining.actions;
       const observation = createAIObservation(context.engine.state, context.playerId);
       const spatial = observation.spatial;
       const candidates: ScoredCandidateAction[] = [];
 
-      // 1. CANDIDATE: Direct Base Attack (highest strategic priority)
-      if (observation.opponent.base !== undefined && observation.opponent.baseIsVisible) {
+      // 1. CANDIDATE: Direct Base Attack (requires actions >= 1)
+      if (
+        actionsRemaining >= 1 &&
+        observation.opponent.base !== undefined &&
+        observation.opponent.baseIsVisible
+      ) {
         for (const monster of observation.self.monsters) {
           if (monster.battlePosition === "attack") {
             try {
@@ -438,8 +443,8 @@ export function createHeuristicAI(
         }
       }
 
-      // 2. CANDIDATE: Combat Attack on Visible Enemy
-      if (observation.opponent.visibleMonsters.length > 0) {
+      // 2. CANDIDATE: Combat Attack on Visible Enemy (requires actions >= 1)
+      if (actionsRemaining >= 1 && observation.opponent.visibleMonsters.length > 0) {
         for (const monster of observation.self.monsters) {
           if (monster.battlePosition === "attack") {
             for (const enemy of observation.opponent.visibleMonsters) {
@@ -498,7 +503,7 @@ export function createHeuristicAI(
         }
       }
 
-      // 3. CANDIDATE: Equip Spell from Hand
+      // 3. CANDIDATE: Equip Spell from Hand (requires actions >= 1)
       const visibleHand = observation.self.cardView.visibleHand ?? [];
       const equipSpell = visibleHand.find((card) => {
         if (card.kind !== "spell") return false;
@@ -509,13 +514,15 @@ export function createHeuristicAI(
         return def?.subtype === "equip";
       });
 
-      if (equipSpell !== undefined && observation.self.monsters.length > 0) {
+      if (actionsRemaining >= 1 && equipSpell !== undefined && observation.self.monsters.length > 0) {
         const eligibleMonsters = observation.self.monsters.filter(
           (m) => (m.equippedCards?.length ?? 0) < MAX_EQUIPMENT_PER_MONSTER,
         );
         if (eligibleMonsters.length > 0) {
-          // Sort by highest ATK then proximity to enemy base
-          const sorted = [...eligibleMonsters].sort((a, b) => b.atk - a.atk);
+          // Sort by highest ATK then deterministic unitId tie-breaker
+          const sorted = [...eligibleMonsters].sort(
+            (a, b) => b.atk - a.atk || a.unitId.localeCompare(b.unitId),
+          );
           const targetUnit = sorted[0];
           if (targetUnit !== undefined) {
             candidates.push({
@@ -554,8 +561,8 @@ export function createHeuristicAI(
         }
       }
 
-      // 5. CANDIDATE: Normal Summon from Hand (if map capacity < 5)
-      if (observation.self.monsters.length < 5) {
+      // 5. CANDIDATE: Normal Summon from Hand (requires actions >= 1 and map capacity < 5)
+      if (actionsRemaining >= 1 && observation.self.monsters.length < 5) {
         const catalog = context.engine.state.content;
         const summonableCard = visibleHand.find((card) => {
           if (card.kind !== "normal_monster") return false;
@@ -569,10 +576,10 @@ export function createHeuristicAI(
             observation.self.monsters.length === 0
               ? null
               : [...observation.self.monsters].sort((a, b) => {
-                  if (enemyBase === undefined) return 0;
+                  if (enemyBase === undefined) return a.unitId.localeCompare(b.unitId);
                   const distA = orthogonalDistance(a.position, enemyBase.position);
                   const distB = orthogonalDistance(b.position, enemyBase.position);
-                  return distA - distB;
+                  return distA - distB || a.unitId.localeCompare(b.unitId);
                 })[0];
           const anchorUnitId = anchorUnit ? anchorUnit.unitId : null;
 
@@ -585,14 +592,18 @@ export function createHeuristicAI(
             );
             if (destinations.positions.length > 0) {
               const sorted = [...destinations.positions].sort((left, right) => {
-                if (enemyBase === undefined) return 0;
+                if (enemyBase === undefined) return left.y - right.y || left.x - right.x;
                 const distLeft = orthogonalDistance(left, enemyBase.position);
                 const distRight = orthogonalDistance(right, enemyBase.position);
-                return distLeft - distRight;
+                return distLeft - distRight || left.y - right.y || left.x - right.x;
               });
               const bestDest = sorted[0];
               if (bestDest !== undefined) {
-                unitCounter += 1;
+                const existingIds = new Set(context.engine.state.monsters.map((m) => m.unitId));
+                do {
+                  unitCounter += 1;
+                } while (existingIds.has(`${context.playerId}:unit:${unitCounter}`));
+
                 candidates.push({
                   command: {
                     issuer: context.playerId,
@@ -620,15 +631,24 @@ export function createHeuristicAI(
       const enemyBase = observation.opponent.base;
       for (const monster of observation.self.monsters) {
         if (monster.spd.current >= 1) {
-          // Determine target position: enemy base, or closest visible enemy, or advance along X
+          // Determine target position: enemy base, or closest visible enemy, or last-known fog enemy
           let targetPos: Position | null = enemyBase ? enemyBase.position : null;
           if (observation.opponent.visibleMonsters.length > 0) {
             const nearestEnemy = [...observation.opponent.visibleMonsters].sort(
               (a, b) =>
                 orthogonalDistance(a.position, monster.position) -
-                orthogonalDistance(b.position, monster.position),
+                orthogonalDistance(b.position, monster.position) ||
+                a.unitId.localeCompare(b.unitId),
             )[0];
             if (nearestEnemy) targetPos = nearestEnemy.position;
+          } else if (observation.opponent.fogEnemies.length > 0) {
+            const nearestFog = [...observation.opponent.fogEnemies].sort(
+              (a, b) =>
+                orthogonalDistance(a.lastKnownPosition, monster.position) -
+                orthogonalDistance(b.lastKnownPosition, monster.position) ||
+                a.unitId.localeCompare(b.unitId),
+            )[0];
+            if (nearestFog) targetPos = nearestFog.lastKnownPosition;
           }
 
           if (targetPos !== null) {
@@ -642,6 +662,9 @@ export function createHeuristicAI(
             if (deltaY !== 0) {
               stepCandidates.push({ x: monster.position.x, y: monster.position.y + deltaY });
             }
+            stepCandidates.sort((a, b) => a.y - b.y || a.x - b.x);
+
+            const isGlider = hasKeyword(monster, "GLIDER");
 
             for (const step of stepCandidates) {
               if (isInBounds(step)) {
@@ -651,6 +674,7 @@ export function createHeuristicAI(
                     monster.unitId,
                     monster.spd.current,
                     [step],
+                    { isGlider },
                   );
                   if (moveResult.traversedPath.length > 0) {
                     const newDist = orthogonalDistance(step, targetPos);
@@ -681,7 +705,9 @@ export function createHeuristicAI(
 
       // 7. Select candidate with highest positive score
       if (candidates.length > 0) {
-        candidates.sort((a, b) => b.score - a.score);
+        candidates.sort(
+          (a, b) => b.score - a.score || a.description.localeCompare(b.description),
+        );
         const best = candidates[0];
         if (best !== undefined && best.score > 0) {
           return best.command;
