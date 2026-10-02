@@ -39,6 +39,7 @@ import type { Position } from "./spatial.ts";
 import { resolveNormalSummon } from "./summon.ts";
 import { resolveTributeSummon } from "./tribute.ts";
 import { resolveRitualSummon, type RitualProcedure } from "./ritual.ts";
+import { resolveFusionSummon, type FusionProcedure } from "./fusion.ts";
 import { calculateSharedVisibility } from "./visibility.ts";
 import type { MonsterDefinition } from "./monster.ts";
 import { changeMonsterBattlePosition, recoverMonstersAtSupport } from "./monster.ts";
@@ -145,6 +146,11 @@ function hashableEngine(engine: Omit<CoreEngine, "stateHash">): JsonValue {
               ritualProcedures: (engine.state.content.ritualProcedures ?? []).map((proc) => ({
                 spellDefinitionId: proc.spellDefinitionId,
                 compatibleRitualDefinitionIds: [...proc.compatibleRitualDefinitionIds],
+              })),
+              fusionProcedures: (engine.state.content.fusionProcedures ?? []).map((proc) => ({
+                spellDefinitionId: proc.spellDefinitionId,
+                fusionDefinitionId: proc.fusionDefinitionId,
+                materialDefinitionIds: [...proc.materialDefinitionIds],
               })),
             },
       spatial:
@@ -281,12 +287,14 @@ export function createGameEngine(
   bases: readonly BasePlacement[],
   monsterDefinitions: readonly MonsterDefinition[],
   ritualProcedures: readonly RitualProcedure[] = [],
+  fusionProcedures: readonly FusionProcedure[] = [],
 ): CoreEngine {
   const engine = createConfiguredEngine(seed, players);
   const content: MonsterCatalog = createMonsterCatalog(
     monsterDefinitions,
     players.map((player) => player.decks),
     ritualProcedures,
+    fusionProcedures,
   );
   const spatial = createInitialSpatialState(
     players.map((player) => player.playerId.trim()),
@@ -764,6 +772,93 @@ function applyCommand(
           playerId: command.issuer,
           ritualMonsterInstanceId: stringPayload(command, "ritualMonsterInstanceId"),
           ritualSpellInstanceId,
+          procedure,
+          materialCardInstanceIds,
+          unitId: stringPayload(command, "unitId"),
+          anchorUnitId: nullableStringPayload(command, "anchorUnitId"),
+          sharedVisibleTiles: calculateSharedVisibility(monsters, spatial, command.issuer),
+          destination: positionPayload(command, "destination"),
+          battlePosition,
+        });
+        cardSetup = deepFreeze({
+          ...cardSetup,
+          players: deepFreeze(
+            cardSetup.players.map((player, index) =>
+              index === playerIndex ? result.cardState : player,
+            ),
+          ),
+        });
+        spatial = result.spatial;
+        monsters = result.monsters;
+        break;
+      }
+      case "summon.fusion": {
+        assertAllowedPayloadKeys(command, [
+          "fusionMonsterInstanceId",
+          "fusionSpellInstanceId",
+          "materialCardInstanceIds",
+          "unitId",
+          "anchorUnitId",
+          "destination",
+          "battlePosition",
+        ]);
+        requireActivePlayer(state, command.issuer);
+        if (chainWindows.length > 0 || chainSystem.pendingChains.length > 0) {
+          throw new TurnInvariantError("A Fusion Summon cannot be declared while a Chain is open or resolving.");
+        }
+        if (cardSetup === null || state.content === null || spatial === null) {
+          throw new TurnInvariantError("Fusion Summon requires configured cards, content, and map.");
+        }
+        const playerIndex = cardSetup.players.findIndex(
+          (player) => player.playerId === command.issuer,
+        );
+        const playerCards = cardSetup.players[playerIndex];
+        if (playerCards === undefined) {
+          throw new TurnInvariantError(`Unknown player ${command.issuer}.`);
+        }
+        const battlePosition = stringPayload(command, "battlePosition");
+        if (battlePosition !== "attack" && battlePosition !== "defense") {
+          throw new TypeError(`Unknown battle position ${battlePosition}.`);
+        }
+        const fusionSpellInstanceId = stringPayload(command, "fusionSpellInstanceId");
+        const spellCard = playerCards.hand.find((card) => card.instanceId === fusionSpellInstanceId);
+        if (spellCard === undefined || spellCard.kind !== "spell") {
+          throw new TurnInvariantError("The selected Fusion Spell is not in the hand.");
+        }
+        const fusionMonsterInstanceId = stringPayload(command, "fusionMonsterInstanceId");
+        const fusionMonsterCard = playerCards.extraDeck.find(
+          (card) => card.instanceId === fusionMonsterInstanceId,
+        );
+        if (fusionMonsterCard === undefined || fusionMonsterCard.kind !== "fusion_monster") {
+          throw new TurnInvariantError("The selected Fusion Monster is not in the Extra Deck.");
+        }
+        const procedure = (state.content.fusionProcedures ?? []).find(
+          (entry) =>
+            entry.spellDefinitionId === spellCard.definitionId &&
+            entry.fusionDefinitionId === fusionMonsterCard.definitionId,
+        );
+        if (procedure === undefined) {
+          throw new TurnInvariantError(
+            `No canonical Fusion Procedure found for spell ${spellCard.definitionId} and monster ${fusionMonsterCard.definitionId}.`,
+          );
+        }
+        const materialCardInstanceIds = stringArrayPayload(command, "materialCardInstanceIds");
+        const mapMaterials = monsters.filter((monster) =>
+          materialCardInstanceIds.includes(monster.cardInstanceId),
+        );
+        for (const mapMonster of mapMaterials) {
+          if (isUnitCommitted(mapMonster.unitId)) {
+            throw new TurnInvariantError(`Monster ${mapMonster.unitId} is committed to an open Chain.`);
+          }
+        }
+        const result = resolveFusionSummon({
+          cardState: playerCards,
+          catalog: state.content,
+          monsters,
+          spatial,
+          playerId: command.issuer,
+          fusionMonsterInstanceId,
+          fusionSpellInstanceId,
           procedure,
           materialCardInstanceIds,
           unitId: stringPayload(command, "unitId"),

@@ -3,6 +3,7 @@ import type { CardKind, DeckConfiguration } from "./deck.ts";
 import { deepFreeze } from "./freeze.ts";
 import { createMonsterState, type MonsterDefinition } from "./monster.ts";
 import type { RitualProcedure } from "./ritual.ts";
+import type { FusionProcedure } from "./fusion.ts";
 
 export type ContentViolationCode =
   | "duplicate_definition"
@@ -26,6 +27,7 @@ export interface MonsterCatalog {
   readonly contentHash: string;
   readonly definitions: readonly MonsterDefinition[];
   readonly ritualProcedures?: readonly RitualProcedure[];
+  readonly fusionProcedures?: readonly FusionProcedure[];
 }
 
 export class ContentInvariantError extends Error {
@@ -157,6 +159,7 @@ export function validateMonsterCatalog(
 export function computeContentHash(
   definitions: readonly MonsterDefinition[],
   ritualProcedures: readonly RitualProcedure[] = [],
+  fusionProcedures: readonly FusionProcedure[] = [],
 ): string {
   const sortedDefinitions = definitions
     .map((definition) => ({
@@ -194,16 +197,40 @@ export function computeContentHash(
           : 0,
     );
 
-  return hashCanonical({
+  const sortedFusionProcedures = fusionProcedures
+    .map((proc) => ({
+      spellDefinitionId: proc.spellDefinitionId,
+      fusionDefinitionId: proc.fusionDefinitionId,
+      materialDefinitionIds: [...proc.materialDefinitionIds].sort(),
+    }))
+    .sort((left, right) =>
+      left.fusionDefinitionId < right.fusionDefinitionId
+        ? -1
+        : left.fusionDefinitionId > right.fusionDefinitionId
+          ? 1
+          : left.spellDefinitionId < right.spellDefinitionId
+            ? -1
+            : left.spellDefinitionId > right.spellDefinitionId
+              ? 1
+              : 0,
+    );
+
+  const hashPayload: Record<string, unknown> = {
     definitions: sortedDefinitions,
     ritualProcedures: sortedProcedures,
-  });
+  };
+  if (sortedFusionProcedures.length > 0) {
+    hashPayload.fusionProcedures = sortedFusionProcedures;
+  }
+
+  return hashCanonical(hashPayload as any);
 }
 
 export function createMonsterCatalog(
   definitions: readonly MonsterDefinition[],
   decks: readonly DeckConfiguration[],
   ritualProcedures: readonly RitualProcedure[] = [],
+  fusionProcedures: readonly FusionProcedure[] = [],
 ): MonsterCatalog {
   const validation = validateMonsterCatalog(definitions, decks);
   if (!validation.valid) throw new ContentInvariantError(validation.violations);
@@ -235,11 +262,31 @@ export function createMonsterCatalog(
           ? 1
           : 0,
     );
-  const contentHash = computeContentHash(copied, copiedProcedures);
+  const copiedFusionProcedures = fusionProcedures
+    .map((proc) =>
+      deepFreeze({
+        spellDefinitionId: proc.spellDefinitionId,
+        fusionDefinitionId: proc.fusionDefinitionId,
+        materialDefinitionIds: deepFreeze([...proc.materialDefinitionIds]),
+      }),
+    )
+    .sort((left, right) =>
+      left.fusionDefinitionId < right.fusionDefinitionId
+        ? -1
+        : left.fusionDefinitionId > right.fusionDefinitionId
+          ? 1
+          : left.spellDefinitionId < right.spellDefinitionId
+            ? -1
+            : left.spellDefinitionId > right.spellDefinitionId
+              ? 1
+              : 0,
+    );
+  const contentHash = computeContentHash(copied, copiedProcedures, copiedFusionProcedures);
   return deepFreeze({
     contentHash,
     definitions: deepFreeze(copied),
     ritualProcedures: deepFreeze(copiedProcedures),
+    fusionProcedures: deepFreeze(copiedFusionProcedures),
   }) as MonsterCatalog;
 }
 
