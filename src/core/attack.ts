@@ -3,6 +3,7 @@ import { deepFreeze } from "./freeze.ts";
 import { hasClearAttackLine, isWithinOrthogonalRange } from "./geometry.ts";
 import type { MonsterState } from "./monster.ts";
 import type { Position, SpatialState } from "./spatial.ts";
+import { calculateEffectiveAttackRange } from "./keywords.ts";
 
 export interface BasicAttackPlan {
   readonly attackerUnitId: string;
@@ -38,7 +39,8 @@ export function createBasicAttackPlan(
       throw new AttackInvariantError(`Unit ${monster.unitId} has inconsistent spatial state.`);
     }
   }
-  if (!isWithinOrthogonalRange(attacker.position, defender.position, attacker.attackRange)) {
+  const attackerRange = calculateEffectiveAttackRange(attacker);
+  if (!isWithinOrthogonalRange(attacker.position, defender.position, attackerRange)) {
     throw new AttackInvariantError("The target is outside the attacker's Basic Attack range.");
   }
   const blockers = [
@@ -50,8 +52,9 @@ export function createBasicAttackPlan(
     throw new AttackInvariantError("The Basic Attack line is blocked.");
   }
 
+  const defenderRange = calculateEffectiveAttackRange(defender);
   const defenderCanReach =
-    isWithinOrthogonalRange(defender.position, attacker.position, defender.attackRange) &&
+    isWithinOrthogonalRange(defender.position, attacker.position, defenderRange) &&
     hasClearAttackLine(defender.position, attacker.position, blockers);
   const counterattackAvailable =
     defender.battlePosition === "attack" &&

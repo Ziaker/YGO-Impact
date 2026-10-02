@@ -17,6 +17,8 @@ import {
   resolveNextChain,
 } from "./chain.ts";
 import { createMonsterCatalog, type MonsterCatalog } from "./content.ts";
+import { hasKeyword } from "./keywords.ts";
+import { resolveReanimate } from "./reanimate.ts";
 import { deepFreeze } from "./freeze.ts";
 import { createPlayerFogKnowledge, updatePlayerFogKnowledge } from "./fog.ts";
 import { drawForTurn, type DrawMode } from "./draw.ts";
@@ -622,6 +624,50 @@ function applyCommand(
         monsters = nextMonsters;
         break;
       }
+      case "monster.reanimate": {
+        requireActivePlayer(state, command.issuer);
+        if (cardSetup === null || state.content === null || spatial === null) {
+          throw new TurnInvariantError("Reanimate requires configured cards, content, and map.");
+        }
+        const playerIndex = cardSetup.players.findIndex(
+          (player) => player.playerId === command.issuer,
+        );
+        const playerCards = cardSetup.players[playerIndex];
+        if (playerCards === undefined) {
+          throw new TurnInvariantError(`Unknown player ${command.issuer}.`);
+        }
+        const battlePosition = stringPayload(command, "battlePosition");
+        if (battlePosition !== "attack" && battlePosition !== "defense") {
+          throw new TypeError(`Unknown battle position ${battlePosition}.`);
+        }
+        const result = resolveReanimate({
+          cardState: playerCards,
+          catalog: state.content,
+          monsters,
+          spatial,
+          playerId: command.issuer,
+          cardInstanceId: stringPayload(command, "cardInstanceId"),
+          unitId: stringPayload(command, "unitId"),
+          anchorUnitId: nullableStringPayload(command, "anchorUnitId"),
+          sharedVisibleTiles: calculateSharedVisibility(monsters, spatial, command.issuer),
+          destination: positionPayload(command, "destination"),
+          battlePosition,
+        });
+        for (let cost = 0; cost < result.actionCost; cost += 1) {
+          turn = confirmResourceUse(turn, command.issuer, "action");
+        }
+        cardSetup = deepFreeze({
+          ...cardSetup,
+          players: deepFreeze(
+            cardSetup.players.map((player, index) =>
+              index === playerIndex ? result.cardState : player,
+            ),
+          ),
+        });
+        spatial = result.spatial;
+        monsters = result.monsters;
+        break;
+      }
       case "summon.tribute": {
         requireActivePlayer(state, command.issuer);
         if (cardSetup === null || state.content === null || spatial === null) {
@@ -857,6 +903,67 @@ function applyCommand(
               ? deepFreeze({ ...attack, defenderChoosesCounterattack: true })
               : attack,
           ),
+        );
+        break;
+      }
+      case "battle.activate_bulwark": {
+        if (spatial === null) {
+          throw new TurnInvariantError("A BULWARK activation requires a configured map.");
+        }
+        const elementId = stringPayload(command, "elementId");
+        const pendingIndex = pendingBasicAttacks.findIndex(
+          (attack) => attack.elementId === elementId,
+        );
+        const pending = pendingBasicAttacks[pendingIndex];
+        if (pending === undefined) {
+          throw new TurnInvariantError(`Unknown pending Basic Attack ${elementId}.`);
+        }
+        const defender = monsters.find((monster) => monster.unitId === pending.defenderUnitId);
+        if (defender === undefined) {
+          throw new TurnInvariantError("Defender must remain on the battlefield.");
+        }
+        if (defender.ownerPlayerId !== command.issuer) {
+          throw new TurnInvariantError(
+            `Player ${command.issuer} does not control defender ${pending.defenderUnitId}.`,
+          );
+        }
+        if (!hasKeyword(defender, "BULWARK")) {
+          throw new TurnInvariantError(`Defender ${defender.unitId} does not possess BULWARK.`);
+        }
+        if (defender.battlePosition !== "attack") {
+          throw new TurnInvariantError(`Defender ${defender.unitId} is not in attack position.`);
+        }
+        const windowIndex = chainWindows.findIndex((window) =>
+          chainSystem.pendingChains.some(
+            (chain) => chain.chainId === window.chainId &&
+              chain.elements.some((element) => element.elementId === elementId),
+          ),
+        );
+        const window = chainWindows[windowIndex];
+        if (window === undefined) {
+          throw new TurnInvariantError(`Basic Attack ${elementId} has no open Chain window.`);
+        }
+        monsters = deepFreeze(
+          monsters.map((monster) =>
+            monster.unitId === defender.unitId
+              ? deepFreeze({ ...monster, battlePosition: "defense" as const })
+              : monster,
+          ),
+        );
+        pendingBasicAttacks = deepFreeze(
+          pendingBasicAttacks.map((attack, index) =>
+            index === pendingIndex
+              ? deepFreeze({ ...attack, defenderChoosesCounterattack: false })
+              : attack,
+          ),
+        );
+        const nextWindow = confirmChainResponse(
+          window,
+          command.issuer,
+          pending.actingPlayerId,
+        );
+        chainWindows = deepFreeze(
+          chainWindows.map((current, index) => (index === windowIndex ? nextWindow : current)),
         );
         break;
       }

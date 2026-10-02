@@ -3,6 +3,13 @@ import { resolveBasicCombat, type BasicCombatResult } from "./combat.ts";
 import type { CardKind } from "./deck.ts";
 import type { CardInstance, PlayerCardState } from "./draw.ts";
 import { deepFreeze } from "./freeze.ts";
+import {
+  calculateEffectiveAtk,
+  calculatePsyblastReduction,
+  calculateRepulseDestination,
+  checkBerserkerTrigger,
+  getKeywordParameter,
+} from "./keywords.ts";
 import type { MonsterState } from "./monster.ts";
 import { createSpatialState, type SpatialState } from "./spatial.ts";
 import { addCardToGraveyard } from "./zones.ts";
@@ -105,22 +112,92 @@ export function resolvePlannedBasicAttack(
     throw new BattleInvariantError("Counterattack mode requires a currently available counterattack.");
   }
 
+  const attackerEffectiveAtk = calculateEffectiveAtk(attacker, monsters);
+  const defenderEffectiveAtk = calculateEffectiveAtk(defender, monsters);
+
   const combat = resolveBasicCombat(
-    { ...attacker, spd: attacker.spd.current },
-    { ...defender, spd: defender.spd.current },
+    { ...attacker, atk: attackerEffectiveAtk, spd: attacker.spd.current },
+    { ...defender, atk: defenderEffectiveAtk, spd: defender.spd.current },
     plan.mode,
   );
+
+  const psyReduction = calculatePsyblastReduction(attacker, combat.damageToDefender);
+  const defenderMp = psyReduction > 0
+    ? { ...defender.mp, current: Math.max(0, defender.mp.current - psyReduction) }
+    : defender.mp;
+
+  const repulseParam = getKeywordParameter(attacker, "REPULSE");
+  let defenderPosition = defender.position;
+  if (repulseParam !== null && repulseParam > 0 && combat.damageToDefender > 0 && combat.defenderHp.current > 0) {
+    defenderPosition = calculateRepulseDestination(
+      attacker.position,
+      defender.position,
+      repulseParam,
+      spatial,
+    );
+  }
+
+  const attackerBerserker = checkBerserkerTrigger(
+    attacker,
+    attacker.hp.current,
+    combat.attackerHp.current,
+  );
+  const defenderBerserker = checkBerserkerTrigger(
+    defender,
+    defender.hp.current,
+    combat.defenderHp.current,
+  );
+
   const updated = monsters.map((monster) => {
-    if (monster.unitId === attacker.unitId) return deepFreeze({ ...monster, hp: combat.attackerHp });
-    if (monster.unitId === defender.unitId) return deepFreeze({ ...monster, hp: combat.defenderHp });
+    if (monster.unitId === attacker.unitId) {
+      let nextAttacker = { ...monster, hp: combat.attackerHp };
+      if (attackerBerserker !== null) {
+        nextAttacker = {
+          ...nextAttacker,
+          atk: nextAttacker.atk + attackerBerserker,
+          spd: {
+            current: nextAttacker.spd.current + attackerBerserker,
+            maximum: nextAttacker.spd.maximum + attackerBerserker,
+          },
+        };
+      }
+      return deepFreeze(nextAttacker);
+    }
+    if (monster.unitId === defender.unitId) {
+      let nextDefender = {
+        ...monster,
+        hp: combat.defenderHp,
+        mp: defenderMp,
+        position: defenderPosition,
+      };
+      if (defenderBerserker !== null) {
+        nextDefender = {
+          ...nextDefender,
+          atk: nextDefender.atk + defenderBerserker,
+          spd: {
+            current: nextDefender.spd.current + defenderBerserker,
+            maximum: nextDefender.spd.maximum + defenderBerserker,
+          },
+        };
+      }
+      return deepFreeze(nextDefender);
+    }
     return monster;
   });
   const destroyed = updated.filter((monster) => monster.hp.current === 0);
   const destroyedIds = new Set(destroyed.map((monster) => monster.unitId));
   const survivors = deepFreeze(updated.filter((monster) => !destroyedIds.has(monster.unitId)));
+  const nextSpatialUnits = spatial.units
+    .filter((unit) => !destroyedIds.has(unit.unitId))
+    .map((unit) => {
+      if (unit.unitId === defender.unitId && (defenderPosition.x !== defender.position.x || defenderPosition.y !== defender.position.y)) {
+        return { ...unit, position: defenderPosition };
+      }
+      return unit;
+    });
   const nextSpatial = createSpatialState(
     spatial.bases,
-    spatial.units.filter((unit) => !destroyedIds.has(unit.unitId)),
+    nextSpatialUnits,
   );
   return deepFreeze({
     monsters: survivors,

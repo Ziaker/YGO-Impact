@@ -69,3 +69,22 @@ export function sendHandCardToGraveyard(
   const removal = removeCardFromHand(state, instanceId);
   return addCardToGraveyard(removal.state, removal.card);
 }
+
+export function removeCardFromGraveyard(
+  state: PlayerCardState,
+  instanceId: string,
+): CardRemovalResult {
+  if (instanceId.trim().length === 0) throw new ZoneInvariantError("instanceId must not be empty.");
+  assertUniquePhysicalCards(state);
+  const index = state.graveyard.findIndex((card) => card.instanceId === instanceId);
+  const card = state.graveyard[index];
+  if (card === undefined) throw new ZoneInvariantError(`Card ${instanceId} is not in the graveyard.`);
+  return deepFreeze({
+    state: deepFreeze({
+      ...state,
+      graveyard: deepFreeze(state.graveyard.filter((_, cardIndex) => cardIndex !== index)),
+    }) as PlayerCardState,
+    card,
+  }) as CardRemovalResult;
+}
+
