@@ -189,7 +189,7 @@ cobertura: Suíte completa em tests/core/fuzz.test.mjs com 100% de aprovação.
 
 ### Prioridade P2 / P3 (Governança e Tooling)
 - `ISSUE-009`: Alinhamento documental de protótipos em `ROADMAP.md` (Sanado localmente).
-- `ISSUE-010`: Consolidação de scripts de pool.
+- `ISSUE-010`: Consolidação de scripts de pool (RESOLVIDO).
 - `ISSUE-011`: Pipeline de GitHub Pages (aguardando confirmação do autor).
 
 ---
@@ -206,4 +206,5 @@ cobertura: Suíte completa em tests/core/fuzz.test.mjs com 100% de aprovação.
 7. [CONCLUÍDO] IA adversária inicial operando sob Fog of War com informação justa (ISSUE-007 / Marco 5).
 8. [CONCLUÍDO] Marco 6: Conexão Web e Build Jogável (humano vs IA no navegador com Fog of War e replay determinístico).
 9. [CONCLUÍDO] Fuzzing adversarial e invariantes de longa duração (ISSUE-012).
+10. [CONCLUÍDO] Consolidação de tooling de sincronização de pool (ISSUE-010).
 ```

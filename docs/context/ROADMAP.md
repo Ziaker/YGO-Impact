@@ -88,12 +88,12 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 
 ### Testes e CI
 
-- Testes Python do downloader e validação de fontes: **Implementados (34/34 passing)**.
-- Testes do núcleo TypeScript e invariantes espaciais: **Implementados (239/239 passing)**.
+- Testes Python do downloader, pool e validação de fontes: **Implementados (38/38 passing)**.
+- Testes do núcleo TypeScript e invariantes espaciais: **Implementados (292/292 passing)**.
 - Typecheck e build do núcleo: **Implementados e passando no CI**.
 - `.github/workflows/ci.yml`: Valida compilação TypeScript, testes unitários e integridade de fontes.
-- `.github/workflows/sync-card-art.yml`: Sincronizador de artes sob demanda (`workflow_dispatch`), sem commit/push automático e sem prune.
-- Determinismo de partida completa, propriedades, fuzzing, self-play, smoke e endurance: **Pendentes**.
+- `.github/workflows/sync-card-art.yml`: Sincronizador de artes sob demanda (`workflow_dispatch`), sem commit/push automático e sem prune, apontando para o script canônico `sync_prototype_pool.py`.
+- Determinismo de partida completa, propriedades, fuzzing, self-play, smoke e endurance: **Implementados (`tests/core/fuzz.test.mjs`, `tests/core/headless.test.mjs`)**.
 
 ### Web e publicação
 
