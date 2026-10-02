@@ -38,6 +38,10 @@ export interface SimulationState {
   readonly pendingBaseAttacks: readonly import("./battle.ts").PendingBaseAttack[];
   readonly pendingReactionMovements: readonly import("./movement.ts").PendingReactionMovement[];
   readonly lastCompletedSupportTurn: number | null;
+  readonly trapSlots?: readonly import("./spells-traps.ts").PlayerTrapSlots[];
+  readonly resolutionZone?: readonly import("./spells-traps.ts").ResolutionCardState[];
+  readonly pendingSpellActivations?: readonly import("./spells-traps.ts").PendingSpellActivation[];
+  readonly pendingTrapActivations?: readonly import("./spells-traps.ts").PendingTrapActivation[];
 }
 
 export interface CoreEngine {

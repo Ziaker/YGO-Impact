@@ -199,19 +199,42 @@ export function resolvePlannedBasicAttack(
     spatial.bases,
     nextSpatialUnits,
   );
+  const allDestroyedCards: Array<{
+    ownerPlayerId: string;
+    instanceId: string;
+    definitionId: string;
+    name: string;
+    kind: CardKind;
+  }> = [];
+  for (const monster of destroyed) {
+    allDestroyedCards.push({
+      ownerPlayerId: monster.ownerPlayerId,
+      instanceId: monster.cardInstanceId,
+      definitionId: monster.definitionId,
+      name: monster.name,
+      kind: monsterCardKind(monster),
+    });
+    if (monster.equippedCards && monster.equippedCards.length > 0) {
+      for (const equip of monster.equippedCards) {
+        const firstSegment = equip.instanceId.split(":")[0];
+        const ownerId = (equip.instanceId.includes(":") && firstSegment ? firstSegment : monster.ownerPlayerId);
+        allDestroyedCards.push({
+          ownerPlayerId: ownerId,
+          instanceId: equip.instanceId,
+          definitionId: equip.definitionId,
+          name: equip.name,
+          kind: equip.kind,
+        });
+      }
+    }
+  }
   return deepFreeze({
     monsters: survivors,
     spatial: nextSpatial,
     combat,
     destroyedUnitIds: deepFreeze(destroyed.map((monster) => monster.unitId)),
     destroyedCardInstanceIds: deepFreeze(destroyed.map((monster) => monster.cardInstanceId)),
-    destroyedCards: deepFreeze(destroyed.map((monster) => ({
-      ownerPlayerId: monster.ownerPlayerId,
-      instanceId: monster.cardInstanceId,
-      definitionId: monster.definitionId,
-      name: monster.name,
-      kind: monsterCardKind(monster),
-    }))),
+    destroyedCards: deepFreeze(allDestroyedCards),
   }) as BattleResolution;
 }
 

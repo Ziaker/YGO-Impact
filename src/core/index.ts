@@ -37,6 +37,7 @@ export * from "./keywords.ts";
 export * from "./reanimate.ts";
 export * from "./terrain.ts";
 export * from "./fusion.ts";
+export * from "./spells-traps.ts";
 export type * from "./types.ts";
 
 

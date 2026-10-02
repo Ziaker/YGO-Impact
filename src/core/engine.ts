@@ -11,11 +11,13 @@ import {
   addChainElement,
   confirmChainResponse,
   createChainSystem,
+  negateChainElement,
   openChain,
   openChainWindow,
   passChainPriority,
   resolveNextChain,
 } from "./chain.ts";
+import { recoverVital } from "./vitals.ts";
 import { createMonsterCatalog, type MonsterCatalog } from "./content.ts";
 import { hasKeyword } from "./keywords.ts";
 import { resolveReanimate } from "./reanimate.ts";
@@ -40,6 +42,20 @@ import { resolveNormalSummon } from "./summon.ts";
 import { resolveTributeSummon } from "./tribute.ts";
 import { resolveRitualSummon, type RitualProcedure } from "./ritual.ts";
 import { resolveFusionSummon, type FusionProcedure } from "./fusion.ts";
+import {
+  createInitialTrapSlots,
+  findSpellTrapDefinition,
+  applyEquipModifiers,
+  removeEquipModifiers,
+  type PlayerTrapSlots,
+  type ResolutionCardState,
+  type PendingSpellActivation,
+  type PendingTrapActivation,
+  type SpellTrapDefinition,
+  type TrapSlotState,
+  MAX_EQUIPMENT_PER_MONSTER,
+} from "./spells-traps.ts";
+import { addCardToGraveyard, removeCardFromHand } from "./zones.ts";
 import { calculateSharedVisibility } from "./visibility.ts";
 import type { MonsterDefinition } from "./monster.ts";
 import { changeMonsterBattlePosition, recoverMonstersAtSupport } from "./monster.ts";
@@ -152,6 +168,31 @@ function hashableEngine(engine: Omit<CoreEngine, "stateHash">): JsonValue {
                 fusionDefinitionId: proc.fusionDefinitionId,
                 materialDefinitionIds: [...proc.materialDefinitionIds],
               })),
+              ...(engine.state.content.spellTrapDefinitions && engine.state.content.spellTrapDefinitions.length > 0
+                ? {
+                    spellTrapDefinitions: engine.state.content.spellTrapDefinitions.map((def) => ({
+                      definitionId: def.definitionId,
+                      name: def.name,
+                      kind: def.kind,
+                      subtype: def.subtype,
+                      description: def.description,
+                      actionCost: def.actionCost ?? null,
+                      reactionCost: def.reactionCost ?? null,
+                      targetsEnemy: def.targetsEnemy ?? false,
+                      isImmediate: def.isImmediate ?? false,
+                      effectKind: def.effectKind,
+                      statModifiers: def.statModifiers
+                        ? {
+                            atk: def.statModifiers.atk ?? 0,
+                            def: def.statModifiers.def ?? 0,
+                            spd: def.statModifiers.spd ?? 0,
+                            vis: def.statModifiers.vis ?? 0,
+                          }
+                        : null,
+                      value: def.value ?? null,
+                    })),
+                  }
+                : {}),
             },
       spatial:
         engine.state.spatial === null
@@ -168,13 +209,30 @@ function hashableEngine(engine: Omit<CoreEngine, "stateHash">): JsonValue {
               })),
             },
       monsters: engine.state.monsters.map((monster) => ({
-        ...monster,
+        unitId: monster.unitId,
+        cardInstanceId: monster.cardInstanceId,
+        ownerPlayerId: monster.ownerPlayerId,
+        definitionId: monster.definitionId,
+        name: monster.name,
+        level: monster.level,
+        type: monster.type,
         structuralElements: [...monster.structuralElements],
         structuralRaces: [...monster.structuralRaces],
         position: { ...monster.position },
+        battlePosition: monster.battlePosition,
         hp: { ...monster.hp },
         mp: { ...monster.mp },
+        vis: monster.vis,
         spd: { ...monster.spd },
+        atk: monster.atk,
+        def: monster.def,
+        attackRange: monster.attackRange,
+        usedEffectSinceLastSupport: monster.usedEffectSinceLastSupport,
+        ...(monster.keywords && monster.keywords.length > 0 ? { keywords: [...monster.keywords] } : {}),
+        ...(monster.description !== undefined ? { description: monster.description } : {}),
+        ...(monster.equippedCards && monster.equippedCards.length > 0
+          ? { equippedCards: monster.equippedCards.map((c) => ({ ...c })) }
+          : {}),
       })),
       fogKnowledge: engine.state.fogKnowledge.map((knowledge) => ({
         playerId: knowledge.playerId,
@@ -205,6 +263,65 @@ function hashableEngine(engine: Omit<CoreEngine, "stateHash">): JsonValue {
         path: movement.path.map((position) => ({ ...position })),
       })),
       lastCompletedSupportTurn: engine.state.lastCompletedSupportTurn,
+      ...(engine.state.trapSlots && engine.state.trapSlots.some((p) => p.slots.some((s) => s.card !== null))
+        ? {
+            trapSlots: engine.state.trapSlots.map((p) => ({
+              playerId: p.playerId,
+              slots: p.slots.map((s) => ({
+                slotIndex: s.slotIndex,
+                card: s.card ? { ...s.card } : null,
+                isFieldTrap: s.isFieldTrap,
+                revealed: s.revealed,
+                fieldRegion: s.fieldRegion ? s.fieldRegion.map((pos) => ({ ...pos })) : null,
+              })),
+            })),
+          }
+        : {}),
+      ...(engine.state.resolutionZone && engine.state.resolutionZone.length > 0
+        ? {
+            resolutionZone: engine.state.resolutionZone.map((r) => ({
+              card: { ...r.card },
+              controllerPlayerId: r.controllerPlayerId,
+              chainId: r.chainId ?? null,
+              elementId: r.elementId ?? null,
+              isEquip: r.isEquip ?? false,
+              targetUnitId: r.targetUnitId ?? null,
+            })),
+          }
+        : {}),
+      ...(engine.state.pendingSpellActivations && engine.state.pendingSpellActivations.length > 0
+        ? {
+            pendingSpellActivations: engine.state.pendingSpellActivations.map((a) => ({
+              elementId: a.elementId,
+              cardInstanceId: a.cardInstanceId,
+              controllerPlayerId: a.controllerPlayerId,
+              effectKind: a.effectKind,
+              targetUnitIds: [...a.targetUnitIds],
+              statModifiers: a.statModifiers
+                ? {
+                    atk: a.statModifiers.atk ?? 0,
+                    def: a.statModifiers.def ?? 0,
+                    spd: a.statModifiers.spd ?? 0,
+                    vis: a.statModifiers.vis ?? 0,
+                  }
+                : null,
+              value: a.value ?? null,
+            })),
+          }
+        : {}),
+      ...(engine.state.pendingTrapActivations && engine.state.pendingTrapActivations.length > 0
+        ? {
+            pendingTrapActivations: engine.state.pendingTrapActivations.map((a) => ({
+              elementId: a.elementId,
+              cardInstanceId: a.cardInstanceId,
+              controllerPlayerId: a.controllerPlayerId,
+              effectKind: a.effectKind,
+              targetUnitIds: [...a.targetUnitIds],
+              targetElementId: a.targetElementId ?? null,
+              value: a.value ?? null,
+            })),
+          }
+        : {}),
     },
     pendingCommands: engine.pendingCommands.map((command) => ({
       sequence: command.sequence,
@@ -253,6 +370,10 @@ export function createEngine(seed: string, playerIds: readonly string[]): CoreEn
       pendingBaseAttacks: deepFreeze([]),
       pendingReactionMovements: deepFreeze([]),
       lastCompletedSupportTurn: null,
+      trapSlots: deepFreeze(playerIds.map(createInitialTrapSlots)),
+      resolutionZone: deepFreeze([]),
+      pendingSpellActivations: deepFreeze([]),
+      pendingTrapActivations: deepFreeze([]),
     }),
     pendingCommands: deepFreeze([]),
     nextCommandSequence: 0,
@@ -288,6 +409,7 @@ export function createGameEngine(
   monsterDefinitions: readonly MonsterDefinition[],
   ritualProcedures: readonly RitualProcedure[] = [],
   fusionProcedures: readonly FusionProcedure[] = [],
+  spellTrapDefinitions: readonly SpellTrapDefinition[] = [],
 ): CoreEngine {
   const engine = createConfiguredEngine(seed, players);
   const content: MonsterCatalog = createMonsterCatalog(
@@ -295,6 +417,7 @@ export function createGameEngine(
     players.map((player) => player.decks),
     ritualProcedures,
     fusionProcedures,
+    spellTrapDefinitions,
   );
   const spatial = createInitialSpatialState(
     players.map((player) => player.playerId.trim()),
@@ -500,6 +623,10 @@ function applyCommand(
     let pendingBaseAttacks = state.pendingBaseAttacks;
     let pendingReactionMovements = state.pendingReactionMovements;
     let lastCompletedSupportTurn = state.lastCompletedSupportTurn;
+    let trapSlots = state.trapSlots ?? deepFreeze(state.turn.players.map((p) => createInitialTrapSlots(p.playerId)));
+    let resolutionZone = state.resolutionZone ?? deepFreeze([]);
+    let pendingSpellActivations = state.pendingSpellActivations ?? deepFreeze([]);
+    let pendingTrapActivations = state.pendingTrapActivations ?? deepFreeze([]);
     const isUnitCommitted = (unitId: string): boolean =>
       pendingBasicAttacks.some(
         (attack) => attack.attackerUnitId === unitId || attack.defenderUnitId === unitId,
@@ -1220,6 +1347,17 @@ function applyCommand(
                   return false;
                 }
               }
+              const pendingSpell = pendingSpellActivations.find((s) => s.elementId === element.elementId);
+              if (pendingSpell !== undefined) {
+                if (pendingSpell.targetUnitIds.length === 0) return true;
+                return pendingSpell.targetUnitIds.every((id) => battleState.monsters.some((m) => m.unitId === id));
+              }
+              const pendingTrap = pendingTrapActivations.find((t) => t.elementId === element.elementId);
+              if (pendingTrap !== undefined) {
+                if (pendingTrap.targetElementId) return true;
+                if (pendingTrap.targetUnitIds.length === 0) return true;
+                return pendingTrap.targetUnitIds.every((id) => battleState.monsters.some((m) => m.unitId === id));
+              }
               const pending = pendingBasicAttacks.find(
                 (attack) => attack.elementId === element.elementId,
               );
@@ -1299,6 +1437,115 @@ function applyCommand(
                   pendingMovement.path,
                 );
                 return { ...battleState, monsters: movement.monsters, spatial: movement.spatial };
+              }
+              const pendingSpell = pendingSpellActivations.find((s) => s.elementId === element.elementId);
+              if (pendingSpell !== undefined) {
+                if (pendingSpell.effectKind === "destroy_monster") {
+                  const targetMonster = battleState.monsters.find((m) => pendingSpell.targetUnitIds.includes(m.unitId));
+                  if (targetMonster) {
+                    const nextMonsters = battleState.monsters.filter((m) => m.unitId !== targetMonster.unitId);
+                    const nextSpatialUnits = battleState.spatial.units.filter((u) => u.unitId !== targetMonster.unitId);
+                    const updatedSpatial = { ...battleState.spatial, units: deepFreeze(nextSpatialUnits) };
+                    const ownerIdx = battleState.cardStates.findIndex((p) => p.playerId === targetMonster.ownerPlayerId);
+                    let nextCardStates = [...battleState.cardStates];
+                    const existingOwner = ownerIdx >= 0 ? nextCardStates[ownerIdx] : undefined;
+                    if (existingOwner) {
+                      let owner = addCardToGraveyard(existingOwner, {
+                        definitionId: targetMonster.definitionId,
+                        instanceId: targetMonster.cardInstanceId,
+                        name: targetMonster.name,
+                        kind: targetMonster.type === "normal" ? "normal_monster" : "effect_monster",
+                      });
+                      if (targetMonster.equippedCards && targetMonster.equippedCards.length > 0) {
+                        for (const equip of targetMonster.equippedCards) {
+                          owner = addCardToGraveyard(owner, equip);
+                        }
+                      }
+                      nextCardStates[ownerIdx] = owner;
+                    }
+                    return {
+                      ...battleState,
+                      monsters: deepFreeze(nextMonsters),
+                      spatial: deepFreeze(updatedSpatial),
+                      cardStates: deepFreeze(nextCardStates),
+                    };
+                  }
+                } else if (pendingSpell.effectKind === "damage") {
+                  const targetMonster = battleState.monsters.find((m) => pendingSpell.targetUnitIds.includes(m.unitId));
+                  if (targetMonster) {
+                    const dmg = pendingSpell.value ?? 2;
+                    const nextHp = Math.max(0, targetMonster.hp.current - dmg);
+                    if (nextHp === 0) {
+                      const nextMonsters = battleState.monsters.filter((m) => m.unitId !== targetMonster.unitId);
+                      const nextSpatialUnits = battleState.spatial.units.filter((u) => u.unitId !== targetMonster.unitId);
+                      const updatedSpatial = { ...battleState.spatial, units: deepFreeze(nextSpatialUnits) };
+                      const ownerIdx = battleState.cardStates.findIndex((p) => p.playerId === targetMonster.ownerPlayerId);
+                      let nextCardStates = [...battleState.cardStates];
+                      const existingOwner = ownerIdx >= 0 ? nextCardStates[ownerIdx] : undefined;
+                      if (existingOwner) {
+                        let owner = addCardToGraveyard(existingOwner, {
+                          definitionId: targetMonster.definitionId,
+                          instanceId: targetMonster.cardInstanceId,
+                          name: targetMonster.name,
+                          kind: targetMonster.type === "normal" ? "normal_monster" : "effect_monster",
+                        });
+                        if (targetMonster.equippedCards && targetMonster.equippedCards.length > 0) {
+                          for (const equip of targetMonster.equippedCards) {
+                            owner = addCardToGraveyard(owner, equip);
+                          }
+                        }
+                        nextCardStates[ownerIdx] = owner;
+                      }
+                      return {
+                        ...battleState,
+                        monsters: deepFreeze(nextMonsters),
+                        spatial: deepFreeze(updatedSpatial),
+                        cardStates: deepFreeze(nextCardStates),
+                      };
+                    } else {
+                      const nextMonsters = battleState.monsters.map((m) =>
+                        m.unitId === targetMonster.unitId ? deepFreeze({ ...m, hp: { ...m.hp, current: nextHp } }) : m,
+                      );
+                      return { ...battleState, monsters: deepFreeze(nextMonsters) };
+                    }
+                  }
+                }
+                return battleState;
+              }
+              const pendingTrap = pendingTrapActivations.find((t) => t.elementId === element.elementId);
+              if (pendingTrap !== undefined) {
+                if (pendingTrap.effectKind === "destroy_monster") {
+                  const targetMonster = battleState.monsters.find((m) => pendingTrap.targetUnitIds.includes(m.unitId));
+                  if (targetMonster) {
+                    const nextMonsters = battleState.monsters.filter((m) => m.unitId !== targetMonster.unitId);
+                    const nextSpatialUnits = battleState.spatial.units.filter((u) => u.unitId !== targetMonster.unitId);
+                    const updatedSpatial = { ...battleState.spatial, units: deepFreeze(nextSpatialUnits) };
+                    const ownerIdx = battleState.cardStates.findIndex((p) => p.playerId === targetMonster.ownerPlayerId);
+                    let nextCardStates = [...battleState.cardStates];
+                    const existingOwner = ownerIdx >= 0 ? nextCardStates[ownerIdx] : undefined;
+                    if (existingOwner) {
+                      let owner = addCardToGraveyard(existingOwner, {
+                        definitionId: targetMonster.definitionId,
+                        instanceId: targetMonster.cardInstanceId,
+                        name: targetMonster.name,
+                        kind: targetMonster.type === "normal" ? "normal_monster" : "effect_monster",
+                      });
+                      if (targetMonster.equippedCards && targetMonster.equippedCards.length > 0) {
+                        for (const equip of targetMonster.equippedCards) {
+                          owner = addCardToGraveyard(owner, equip);
+                        }
+                      }
+                      nextCardStates[ownerIdx] = owner;
+                    }
+                    return {
+                      ...battleState,
+                      monsters: deepFreeze(nextMonsters),
+                      spatial: deepFreeze(updatedSpatial),
+                      cardStates: deepFreeze(nextCardStates),
+                    };
+                  }
+                }
+                return battleState;
               }
               const pending = pendingBasicAttacks.find(
                 (attack) => attack.elementId === element.elementId,
@@ -1399,6 +1646,25 @@ function applyCommand(
         match = resolution.state.match;
         randomAudit = resolution.state.randomAudit;
         cardSetup = deepFreeze({ ...cardSetup, players: resolution.state.cardStates });
+        const chainResCards = resolutionZone.filter((r) => r.chainId === nextChain.chainId);
+        if (chainResCards.length > 0) {
+          let updatedCardStates = [...cardSetup.players];
+          for (const res of chainResCards) {
+            const playerIdx = updatedCardStates.findIndex((p) => p.playerId === res.controllerPlayerId);
+            const targetPlayerCardState = playerIdx >= 0 ? updatedCardStates[playerIdx] : undefined;
+            if (targetPlayerCardState) {
+              updatedCardStates[playerIdx] = addCardToGraveyard(targetPlayerCardState, res.card);
+            }
+          }
+          cardSetup = deepFreeze({ ...cardSetup, players: deepFreeze(updatedCardStates) });
+          resolutionZone = deepFreeze(resolutionZone.filter((r) => r.chainId !== nextChain.chainId));
+        }
+        pendingSpellActivations = deepFreeze(
+          pendingSpellActivations.filter((s) => !resolvedElementIds.has(s.elementId)),
+        );
+        pendingTrapActivations = deepFreeze(
+          pendingTrapActivations.filter((t) => !resolvedElementIds.has(t.elementId)),
+        );
         if (match.status === "finished") {
           chainSystem = deepFreeze({ ...chainSystem, pendingChains: deepFreeze([]) });
           chainWindows = deepFreeze([]);
@@ -1449,6 +1715,450 @@ function applyCommand(
           baseAttackResolutionsPayload(command),
         ).state;
         break;
+      case "trap.set": {
+        if (cardSetup === null) throw new TurnInvariantError("Setting a trap requires configured cards.");
+        const cardInstanceId = stringPayload(command, "cardInstanceId");
+        const slotIndex = numericPayload(command, "slotIndex");
+        if (slotIndex < 0 || slotIndex >= 3) {
+          throw new TurnInvariantError("Trap slot index must be 0, 1, or 2.");
+        }
+        const playerCardIndex = cardSetup.players.findIndex((p) => p.playerId === command.issuer);
+        if (playerCardIndex < 0) throw new TurnInvariantError(`Unknown player ${command.issuer}.`);
+        const playerCardState = cardSetup.players[playerCardIndex];
+        if (!playerCardState) throw new TurnInvariantError(`Unknown player ${command.issuer}.`);
+        const cardInHand = playerCardState.hand.find((c) => c.instanceId === cardInstanceId);
+        if (!cardInHand) {
+          throw new TurnInvariantError(`Card ${cardInstanceId} is not in hand.`);
+        }
+        if (cardInHand.kind !== "trap") {
+          throw new TurnInvariantError(`Card ${cardInHand.name} is not a Trap card.`);
+        }
+        const playerTrapIndex = trapSlots.findIndex((p) => p.playerId === command.issuer);
+        const existingPlayerTraps = playerTrapIndex >= 0 ? trapSlots[playerTrapIndex] : undefined;
+        const playerTraps = existingPlayerTraps ?? createInitialTrapSlots(command.issuer);
+        const targetSlot = playerTraps.slots[slotIndex];
+        if (!targetSlot || targetSlot.card !== null) {
+          throw new TurnInvariantError(`Trap slot ${slotIndex} is already occupied.`);
+        }
+        const removed = removeCardFromHand(playerCardState, cardInstanceId);
+        const updatedPlayers = cardSetup.players.map((p, idx) =>
+          idx === playerCardIndex ? removed.state : p,
+        );
+        cardSetup = deepFreeze({ ...cardSetup, players: deepFreeze(updatedPlayers) });
+
+        const isFieldTrap = Boolean(command.payload?.isFieldTrap);
+        const fieldRegion = Array.isArray(command.payload?.fieldRegion)
+          ? deepFreeze((command.payload.fieldRegion as Position[]).map((pos) => ({ x: Number(pos.x), y: Number(pos.y) })))
+          : undefined;
+
+        const updatedSlots: [TrapSlotState, TrapSlotState, TrapSlotState] = [
+          playerTraps.slots[0],
+          playerTraps.slots[1],
+          playerTraps.slots[2],
+        ];
+        updatedSlots[slotIndex] = deepFreeze({
+          slotIndex,
+          card: cardInHand,
+          isFieldTrap,
+          revealed: false,
+          ...(fieldRegion !== undefined ? { fieldRegion } : {}),
+        });
+
+        const updatedPlayerTraps = deepFreeze({
+          playerId: command.issuer,
+          slots: deepFreeze(updatedSlots) as readonly [TrapSlotState, TrapSlotState, TrapSlotState],
+        });
+        trapSlots = deepFreeze(
+          playerTrapIndex >= 0
+            ? trapSlots.map((p, idx) => (idx === playerTrapIndex ? updatedPlayerTraps : p))
+            : [...trapSlots, updatedPlayerTraps],
+        );
+        break;
+      }
+      case "spell.equip": {
+        if (state.turn.phase !== "action") {
+          throw new TurnInvariantError("A spell can only be equipped during the action phase.");
+        }
+        if (cardSetup === null || spatial === null) {
+          throw new TurnInvariantError("Equipping a spell requires configured cards and map.");
+        }
+        const cardInstanceId = stringPayload(command, "cardInstanceId");
+        const targetUnitId = stringPayload(command, "targetUnitId");
+        const playerCardIndex = cardSetup.players.findIndex((p) => p.playerId === command.issuer);
+        if (playerCardIndex < 0) throw new TurnInvariantError(`Unknown player ${command.issuer}.`);
+        const playerCardState = cardSetup.players[playerCardIndex]!;
+        const cardInHand = playerCardState.hand.find((c) => c.instanceId === cardInstanceId);
+        if (!cardInHand) {
+          throw new TurnInvariantError(`Card ${cardInstanceId} is not in hand.`);
+        }
+        if (cardInHand.kind !== "spell") {
+          throw new TurnInvariantError(`Card ${cardInHand.name} is not a Spell card.`);
+        }
+        const targetMonster = monsters.find((m) => m.unitId === targetUnitId);
+        if (!targetMonster) {
+          throw new TurnInvariantError(`Target monster ${targetUnitId} is not on the battlefield.`);
+        }
+        if (targetMonster.ownerPlayerId !== command.issuer) {
+          throw new TurnInvariantError(`Player ${command.issuer} does not control target monster ${targetUnitId}.`);
+        }
+        const currentEquipped = targetMonster.equippedCards ?? [];
+        if (currentEquipped.length >= MAX_EQUIPMENT_PER_MONSTER) {
+          throw new TurnInvariantError(`Monster ${targetUnitId} already has the maximum of 3 Equip Spells.`);
+        }
+        const spellDef = findSpellTrapDefinition(
+          cardInHand.definitionId,
+          state.content?.spellTrapDefinitions,
+        );
+        if (spellDef && spellDef.subtype !== "equip") {
+          throw new TurnInvariantError(`Spell ${cardInHand.name} is not an Equip Spell.`);
+        }
+        turn = confirmResourceUse(turn, command.issuer, "action");
+        const removed = removeCardFromHand(playerCardState, cardInstanceId);
+        const updatedPlayers = cardSetup.players.map((p, idx) =>
+          idx === playerCardIndex ? removed.state : p,
+        );
+        cardSetup = deepFreeze({ ...cardSetup, players: deepFreeze(updatedPlayers) });
+
+        let updatedMonster: import("./monster.ts").MonsterState = deepFreeze({
+          ...targetMonster,
+          equippedCards: deepFreeze([...currentEquipped, cardInHand]),
+        });
+        if (spellDef?.statModifiers) {
+          updatedMonster = applyEquipModifiers(updatedMonster, spellDef.statModifiers);
+        }
+        monsters = deepFreeze(
+          monsters.map((m) => (m.unitId === targetUnitId ? updatedMonster : m)),
+        );
+        break;
+      }
+      case "spell.transfer_equip": {
+        if (state.turn.phase !== "action") {
+          throw new TurnInvariantError("An equip spell can only be transferred during the action phase.");
+        }
+        if (spatial === null) throw new TurnInvariantError("Transferring an equip requires a map.");
+        const cardInstanceId = stringPayload(command, "cardInstanceId");
+        const sourceUnitId = stringPayload(command, "sourceUnitId");
+        const targetUnitId = stringPayload(command, "targetUnitId");
+        if (sourceUnitId === targetUnitId) {
+          throw new TurnInvariantError("Source and target monsters must be different.");
+        }
+        const sourceMonster = monsters.find((m) => m.unitId === sourceUnitId);
+        const targetMonster = monsters.find((m) => m.unitId === targetUnitId);
+        if (!sourceMonster || !targetMonster) {
+          throw new TurnInvariantError("Both monsters must be on the battlefield.");
+        }
+        if (sourceMonster.ownerPlayerId !== command.issuer || targetMonster.ownerPlayerId !== command.issuer) {
+          throw new TurnInvariantError("Both monsters must belong to the issuing player.");
+        }
+        const sourceEquips = sourceMonster.equippedCards ?? [];
+        const cardToTransfer = sourceEquips.find((c) => c.instanceId === cardInstanceId);
+        if (!cardToTransfer) {
+          throw new TurnInvariantError(`Card ${cardInstanceId} is not equipped to ${sourceUnitId}.`);
+        }
+        const targetEquips = targetMonster.equippedCards ?? [];
+        if (targetEquips.length >= MAX_EQUIPMENT_PER_MONSTER) {
+          throw new TurnInvariantError(`Target monster ${targetUnitId} already has the maximum of 3 Equip Spells.`);
+        }
+        turn = confirmResourceUse(turn, command.issuer, "action");
+        const spellDef = findSpellTrapDefinition(
+          cardToTransfer.definitionId,
+          state.content?.spellTrapDefinitions,
+        );
+
+        let newSource: import("./monster.ts").MonsterState = deepFreeze({
+          ...sourceMonster,
+          equippedCards: deepFreeze(sourceEquips.filter((c) => c.instanceId !== cardInstanceId)),
+        });
+        if (spellDef?.statModifiers) {
+          newSource = removeEquipModifiers(newSource, spellDef.statModifiers);
+        }
+
+        let newTarget: import("./monster.ts").MonsterState = deepFreeze({
+          ...targetMonster,
+          equippedCards: deepFreeze([...targetEquips, cardToTransfer]),
+        });
+        if (spellDef?.statModifiers) {
+          newTarget = applyEquipModifiers(newTarget, spellDef.statModifiers);
+        }
+
+        monsters = deepFreeze(
+          monsters.map((m) => {
+            if (m.unitId === sourceUnitId) return newSource;
+            if (m.unitId === targetUnitId) return newTarget;
+            return m;
+          }),
+        );
+        break;
+      }
+      case "spell.activate": {
+        if (state.turn.phase !== "action") {
+          throw new TurnInvariantError("A spell can only be activated during the action phase.");
+        }
+        if (cardSetup === null) throw new TurnInvariantError("Activating a spell requires configured cards.");
+        const cardInstanceId = stringPayload(command, "cardInstanceId");
+        const playerCardIndex = cardSetup.players.findIndex((p) => p.playerId === command.issuer);
+        if (playerCardIndex < 0) throw new TurnInvariantError(`Unknown player ${command.issuer}.`);
+        const playerCardState = cardSetup.players[playerCardIndex]!;
+        const cardInHand = playerCardState.hand.find((c) => c.instanceId === cardInstanceId);
+        if (!cardInHand) throw new TurnInvariantError(`Card ${cardInstanceId} is not in hand.`);
+        if (cardInHand.kind !== "spell") {
+          throw new TurnInvariantError(`Card ${cardInHand.name} is not a Spell card.`);
+        }
+        const spellDef = findSpellTrapDefinition(
+          cardInHand.definitionId,
+          state.content?.spellTrapDefinitions,
+        );
+        const actionCost = spellDef?.actionCost ?? 1;
+        if (actionCost > 0) {
+          turn = confirmResourceUse(turn, command.issuer, "action");
+        }
+        const removed = removeCardFromHand(playerCardState, cardInstanceId);
+        const updatedPlayers = cardSetup.players.map((p, idx) =>
+          idx === playerCardIndex ? removed.state : p,
+        );
+        cardSetup = deepFreeze({ ...cardSetup, players: deepFreeze(updatedPlayers) });
+
+        const targetUnitIds = Array.isArray(command.payload?.targetUnitIds)
+          ? (command.payload?.targetUnitIds as string[]).map(String)
+          : [];
+        const targetsEnemy = spellDef?.targetsEnemy ?? targetUnitIds.some((id) => {
+          const m = monsters.find((mon) => mon.unitId === id);
+          return m !== undefined && m.ownerPlayerId !== command.issuer;
+        });
+
+        const elementId = `spell:${command.sequence}`;
+        const inputChainId = typeof command.payload?.chainId === "string" ? command.payload.chainId : undefined;
+
+        if (targetsEnemy) {
+          if (inputChainId) {
+            const chain = chainSystem.pendingChains.find((c) => c.chainId === inputChainId);
+            if (!chain) throw new TurnInvariantError(`Unknown Chain ${inputChainId}.`);
+            const windowIndex = chainWindows.findIndex((w) => w.chainId === inputChainId);
+            const window = chainWindows[windowIndex];
+            if (!window || window.priorityPlayerId !== command.issuer) {
+              throw new TurnInvariantError(`Player ${command.issuer} does not have priority in Chain ${inputChainId}.`);
+            }
+            const opponent = cardSetup.players.find((p) => p.playerId !== command.issuer);
+            const nextWindow = confirmChainResponse(window, command.issuer, opponent?.playerId ?? command.issuer);
+            chainSystem = addChainElement(chainSystem, inputChainId, {
+              elementId,
+              controllerId: command.issuer,
+              kind: "action",
+              targetIds: targetUnitIds,
+              requiresAllTargets: true,
+              negated: false,
+            });
+            chainWindows = deepFreeze(
+              chainWindows.map((w, idx) => (idx === windowIndex ? nextWindow : w)),
+            );
+            resolutionZone = deepFreeze([
+              ...resolutionZone,
+              { card: cardInHand, controllerPlayerId: command.issuer, chainId: inputChainId, elementId },
+            ]);
+            pendingSpellActivations = deepFreeze([
+              ...pendingSpellActivations,
+              {
+                elementId,
+                cardInstanceId,
+                controllerPlayerId: command.issuer,
+                effectKind: spellDef?.effectKind ?? "stat_buff",
+                targetUnitIds,
+                ...(spellDef?.statModifiers !== undefined ? { statModifiers: spellDef.statModifiers } : {}),
+                ...(spellDef?.value !== undefined ? { value: spellDef.value } : {}),
+              },
+            ]);
+          } else {
+            const chainId = `chain:${command.sequence}`;
+            const opponent = cardSetup.players.find((p) => p.playerId !== command.issuer);
+            if (!opponent) throw new TurnInvariantError("A Chain requires an opposing player.");
+            chainSystem = openChain(chainSystem, chainId, "normal", {
+              elementId,
+              controllerId: command.issuer,
+              kind: "action",
+              targetIds: targetUnitIds,
+              requiresAllTargets: true,
+              negated: false,
+            });
+            chainWindows = deepFreeze([
+              ...chainWindows,
+              openChainWindow(chainId, command.issuer, opponent.playerId),
+            ]);
+            resolutionZone = deepFreeze([
+              ...resolutionZone,
+              { card: cardInHand, controllerPlayerId: command.issuer, chainId, elementId },
+            ]);
+            pendingSpellActivations = deepFreeze([
+              ...pendingSpellActivations,
+              {
+                elementId,
+                cardInstanceId,
+                controllerPlayerId: command.issuer,
+                effectKind: spellDef?.effectKind ?? "stat_buff",
+                targetUnitIds,
+                ...(spellDef?.statModifiers !== undefined ? { statModifiers: spellDef.statModifiers } : {}),
+                ...(spellDef?.value !== undefined ? { value: spellDef.value } : {}),
+              },
+            ]);
+          }
+        } else {
+          if (spellDef?.effectKind === "heal" && targetUnitIds.length > 0) {
+            const targetUnitId = targetUnitIds[0]!;
+            const targetMonster = monsters.find((m) => m.unitId === targetUnitId);
+            if (targetMonster) {
+              const healed = recoverVital(targetMonster.hp, spellDef.value ?? 3);
+              monsters = deepFreeze(
+                monsters.map((m) => (m.unitId === targetUnitId ? { ...m, hp: healed.pool } : m)),
+              );
+            }
+          }
+          const ownerState = cardSetup.players[playerCardIndex]!;
+          const updatedOwner = addCardToGraveyard(ownerState, cardInHand);
+          cardSetup = deepFreeze({
+            ...cardSetup,
+            players: deepFreeze(cardSetup.players.map((p, idx) => (idx === playerCardIndex ? updatedOwner : p))),
+          });
+        }
+        break;
+      }
+      case "trap.activate": {
+        const slotIndex = numericPayload(command, "slotIndex");
+        if (slotIndex < 0 || slotIndex >= 3) {
+          throw new TurnInvariantError("Trap slot index must be 0, 1, or 2.");
+        }
+        const playerTrapIndex = trapSlots.findIndex((p) => p.playerId === command.issuer);
+        const playerTraps = playerTrapIndex >= 0 ? trapSlots[playerTrapIndex] : null;
+        if (!playerTraps || playerTraps.slots[slotIndex] === undefined || playerTraps.slots[slotIndex].card === null) {
+          throw new TurnInvariantError(`Trap slot ${slotIndex} has no prepared trap.`);
+        }
+        const trapCard = playerTraps.slots[slotIndex].card;
+        const trapDef = findSpellTrapDefinition(
+          trapCard.definitionId,
+          state.content?.spellTrapDefinitions,
+        );
+        const reactionCost = trapDef?.reactionCost ?? 1;
+        if (reactionCost > 0) {
+          turn = confirmResourceUse(turn, command.issuer, "reaction");
+        }
+        const updatedSlots: [TrapSlotState, TrapSlotState, TrapSlotState] = [
+          playerTraps.slots[0],
+          playerTraps.slots[1],
+          playerTraps.slots[2],
+        ];
+        updatedSlots[slotIndex] = deepFreeze({
+          slotIndex,
+          card: null,
+          isFieldTrap: false,
+          revealed: false,
+        });
+        trapSlots = deepFreeze(
+          trapSlots.map((p, idx) =>
+            idx === playerTrapIndex
+              ? deepFreeze({ playerId: command.issuer, slots: deepFreeze(updatedSlots) as readonly [TrapSlotState, TrapSlotState, TrapSlotState] })
+              : p,
+          ),
+        );
+
+        const inputChainId = typeof command.payload?.chainId === "string" ? command.payload.chainId : undefined;
+        const targetElementId = typeof command.payload?.targetElementId === "string" ? command.payload.targetElementId : undefined;
+        const targetUnitIds = Array.isArray(command.payload?.targetUnitIds)
+          ? (command.payload?.targetUnitIds as string[]).map(String)
+          : [];
+        const elementId = `trap:${command.sequence}`;
+
+        if (!inputChainId) {
+          throw new TurnInvariantError("Activating a reaction/counter trap requires an open Chain window.");
+        }
+        const chain = chainSystem.pendingChains.find((c) => c.chainId === inputChainId);
+        if (!chain) throw new TurnInvariantError(`Unknown Chain ${inputChainId}.`);
+        const windowIndex = chainWindows.findIndex((w) => w.chainId === inputChainId);
+        const window = chainWindows[windowIndex];
+        if (!window || window.priorityPlayerId !== command.issuer) {
+          throw new TurnInvariantError(`Player ${command.issuer} does not have priority in Chain ${inputChainId}.`);
+        }
+        const opponent = state.turn.players.find((p) => p.playerId !== command.issuer);
+        const nextWindow = confirmChainResponse(window, command.issuer, opponent?.playerId ?? command.issuer);
+
+        if (trapDef?.subtype === "counter" || trapDef?.effectKind === "negate_chain_element") {
+          if (!targetElementId) throw new TurnInvariantError("Counter trap requires a targetElementId to negate.");
+          chainSystem = negateChainElement(chainSystem, inputChainId, targetElementId);
+        }
+        chainSystem = addChainElement(chainSystem, inputChainId, {
+          elementId,
+          controllerId: command.issuer,
+          kind: "reaction",
+          targetIds: targetElementId ? [targetElementId] : targetUnitIds,
+          requiresAllTargets: true,
+          negated: false,
+        });
+        chainWindows = deepFreeze(
+          chainWindows.map((w, idx) => (idx === windowIndex ? nextWindow : w)),
+        );
+        resolutionZone = deepFreeze([
+          ...resolutionZone,
+          { card: trapCard, controllerPlayerId: command.issuer, chainId: inputChainId, elementId },
+        ]);
+        pendingTrapActivations = deepFreeze([
+          ...pendingTrapActivations,
+          {
+            elementId,
+            cardInstanceId: trapCard.instanceId,
+            controllerPlayerId: command.issuer,
+            effectKind: trapDef?.effectKind ?? "destroy_monster",
+            targetUnitIds,
+            ...(targetElementId !== undefined ? { targetElementId } : {}),
+            ...(trapDef?.value !== undefined ? { value: trapDef.value } : {}),
+          },
+        ]);
+        break;
+      }
+      case "trap.destroy_preventive": {
+        if (cardSetup === null) throw new TurnInvariantError("Destroying a trap requires configured cards.");
+        const targetPlayerId = stringPayload(command, "targetPlayerId");
+        const slotIndex = numericPayload(command, "slotIndex");
+        if (slotIndex < 0 || slotIndex >= 3) {
+          throw new TurnInvariantError("Trap slot index must be 0, 1, or 2.");
+        }
+        if (targetPlayerId === command.issuer) {
+          throw new TurnInvariantError("Preventive trap destruction targets an opponent's trap slot.");
+        }
+        const targetPlayerTrapIndex = trapSlots.findIndex((p) => p.playerId === targetPlayerId);
+        if (targetPlayerTrapIndex < 0) throw new TurnInvariantError(`Unknown player ${targetPlayerId}.`);
+        const targetTraps = trapSlots[targetPlayerTrapIndex]!;
+        const slot = targetTraps.slots[slotIndex];
+        if (slot && slot.card !== null) {
+          const destroyedCard = slot.card;
+          const targetCardStateIndex = cardSetup.players.findIndex((p) => p.playerId === targetPlayerId);
+          if (targetCardStateIndex >= 0) {
+            const updatedTargetCardState = addCardToGraveyard(
+              cardSetup.players[targetCardStateIndex]!,
+              destroyedCard,
+            );
+            cardSetup = deepFreeze({
+              ...cardSetup,
+              players: deepFreeze(cardSetup.players.map((p, idx) => (idx === targetCardStateIndex ? updatedTargetCardState : p))),
+            });
+          }
+          const updatedSlots: [TrapSlotState, TrapSlotState, TrapSlotState] = [
+            targetTraps.slots[0],
+            targetTraps.slots[1],
+            targetTraps.slots[2],
+          ];
+          updatedSlots[slotIndex] = deepFreeze({
+            slotIndex,
+            card: null,
+            isFieldTrap: false,
+            revealed: false,
+          });
+          trapSlots = deepFreeze(
+            trapSlots.map((p, idx) =>
+              idx === targetPlayerTrapIndex
+                ? deepFreeze({ playerId: targetPlayerId, slots: deepFreeze(updatedSlots) as readonly [TrapSlotState, TrapSlotState, TrapSlotState] })
+                : p,
+            ),
+          );
+        }
+        break;
+      }
       default:
         return [state, rejectedEvent(command, step, `Unknown command kind ${command.kind}.`)];
     }
@@ -1471,6 +2181,10 @@ function applyCommand(
         pendingBaseAttacks,
         pendingReactionMovements,
         lastCompletedSupportTurn,
+        trapSlots,
+        resolutionZone,
+        pendingSpellActivations,
+        pendingTrapActivations,
       }) as SimulationState,
       acceptedEvent(command, step),
     ];

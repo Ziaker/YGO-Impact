@@ -11,6 +11,8 @@ import {
 } from "./vitals.ts";
 import { getKeywordParameter } from "./keywords.ts";
 
+import type { CardInstance } from "./draw.ts";
+
 export const MONSTER_ELEMENTS = ["fire", "earth", "water", "wind", "light", "dark"] as const;
 export type MonsterElement = (typeof MONSTER_ELEMENTS)[number];
 export type MonsterBattlePosition = "attack" | "defense";
@@ -54,6 +56,7 @@ export interface MonsterState {
   readonly usedEffectSinceLastSupport: boolean;
   readonly keywords?: readonly string[];
   readonly description?: string;
+  readonly equippedCards?: readonly CardInstance[];
 }
 
 export interface SupportRecoveryResult {
