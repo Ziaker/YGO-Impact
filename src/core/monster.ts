@@ -182,11 +182,13 @@ export function changeMonsterBattlePosition(
 export function recoverMonsterAtSupport(monster: MonsterState): SupportRecoveryResult {
   const hp = recoverVital(monster.hp, 1);
   const mp = recoverVital(monster.mp, monster.usedEffectSinceLastSupport ? 1 : 2);
+  const spd = recoverVital(monster.spd, monster.spd.maximum);
   return deepFreeze({
     monster: deepFreeze({
       ...monster,
       hp: hp.pool,
       mp: mp.pool,
+      spd: spd.pool,
       usedEffectSinceLastSupport: false,
     }) as MonsterState,
     hpRecovered: hp.amountChanged,

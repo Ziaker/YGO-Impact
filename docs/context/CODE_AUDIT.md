@@ -74,17 +74,17 @@ cobertura atual: movement.test.mjs testa apenas caminhos com custo unitário de 
 correção recomendada: Adicionar matriz de terreno em SpatialState, tipar terrenos (plano, difícil, intransponível) e calcular o consumo de SPD por passo baseado no bloco de destino.
 ```
 
-### ISSUE-006: Inexistência de Game Loop Headless Fechado (Simulador de Partida Completa)
+### ISSUE-006: Game Loop Headless Fechado (Simulador de Partida Completa) — RESOLVIDO
 ```text
 ID: ISSUE-006
-prioridade: P1
-arquivo: src/core/ (ausência de runner/harness em src/headless/ ou src/core/)
-linhas: N/A
-problema: Não existe harness ou runner capaz de inicializar dois Decks, executar a preparação conjunta, transicionar as 5 fases automaticamente e simular uma partida inteira do início ao fim (vitória por 5 impactos ou Deck Out). O motor só é avançado passo a passo manualmente em testes unitários.
-impacto: Impossibilidade de realizar testes de integração ponta a ponta, fuzzing determinístico ou validar a integridade de hashes em replays de partidas completas.
+prioridade: P1 (RESOLVIDO)
+arquivo: src/core/headless.ts, tests/core/headless.test.mjs
+linhas: src/core/headless.ts:1-640, tests/core/headless.test.mjs:1-120
+problema: Não existia runner capaz de inicializar dois Decks, executar a preparação conjunta, transicionar as 5 fases automaticamente e simular uma partida inteira do início ao fim (vitória por 5 impactos ou Deck Out).
+impacto: Sanado integralmente. O simulador headless executa partidas completas, avança passos de forma autoritativa, grava ReplayFile e valida 100% de paridade lógica bit-a-bit via verifyReplay.
 regra do GDD relacionada: Visão Geral / P32, Seção 18 (Arquitetura e Testabilidade).
-cobertura atual: 36 suítes unitárias cobrem passos isolados; 0 testes de partida completa.
-correção recomendada: Implementar harness de simulação headless que instancie partida com o micro-roster de Normais vanilla, execute fluxo de comandos até o encerramento e valide o determinismo completo de ponta a ponta.
+cobertura atual: 4 testes em tests/core/headless.test.mjs cobrindo vitória por 5 impactos de base, deck out simples por assimetria, simultaneous deck out, determinismo idêntico entre seeds e verificação de replay sem divergência.
+correção implementada: Desenvolvido src/core/headless.ts (HeadlessPolicy, createPassivePolicy, createAggressivePolicy, runHeadlessMatch) e re-exportado em src/core/index.ts.
 ```
 
 ### ISSUE-007: Inexistência de IA Adversária de Gameplay
@@ -195,16 +195,16 @@ correção recomendada: Implementar suíte de testes de estresse / property test
 
 ## 3. Matriz de Priorização Real Reclassificada
 
-### Prioridade P0 (Integridade e Baseline) — CORRIGIDOS LOCALMENTE
+### Prioridade P0 (Integridade e Baseline) — CORRIGIDOS
 1. `ISSUE-001`: Correção definitiva de `verify_context_sources.py` e `.gitattributes` para CI verde cross-platform.
 2. `ISSUE-002`: Eliminação total do byte `\x07` de `DEC-001` e `ROADMAP.md`.
 3. `NORMAL_MONSTER_CONTENT_BASELINE`: Micro-roster canônico de 20 Monstros Normais (todas as 17 raças, 11 Nv 5+, 10 com Keywords, 10 vanillas, Tributo para Nv 5+).
+4. `ISSUE-006`: Game Loop Headless Fechado (`src/core/headless.ts` + `tests/core/headless.test.mjs`, simulador de partida completa de ponta a ponta com replay verificado bit-a-bit).
 
 ### Prioridade P1 (Próximos Passos do Jogo Funcional)
-1. `ISSUE-006` (Game Loop Headless): Harness básico com Normais vanilla (provar setup, turnos, movimento, combate, 5 impactos, determinismo e replay).
-2. Integração das Keywords Aprovadas: Implementar individualmente as Keywords do lote com testes de regressão.
-3. `ISSUE-004` (Terreno e Custo de SPD): Movimento contínuo e geografia tática.
-4. `ISSUE-007` (IA Adversária): IA consumindo o core jogável com informação justa.
+1. Integração das Keywords Aprovadas: Implementar individualmente as Keywords do lote com testes de regressão.
+2. `ISSUE-004` (Terreno e Custo de SPD): Movimento contínuo e geografia tática.
+3. `ISSUE-007` (IA Adversária): IA consumindo o core jogável com informação justa.
 
 ### Bloqueado por Definição de Conteúdo (`BLOCKED_BY_CONTENT_DESIGN`)
 - `ISSUE-003` (Magias e Armadilhas)
@@ -223,12 +223,11 @@ correção recomendada: Implementar suíte de testes de estresse / property test
 ## 4. Ordem Real de Implementação
 
 ```text
-1. Aprovação do micro-roster de 8–12 Monstros Normais pelo autor (PARADA OBRIGATÓRIA).
-2. Registro estruturado do conteúdo canônico dos Normais aprovados.
-3. Criação de harness headless básico com os Normais vanilla (provar determinismo, 5 impactos, encerramento).
+1. [CONCLUÍDO] Aprovação do micro-roster de 20 Monstros Normais pelo autor.
+2. [CONCLUÍDO] Registro estruturado do conteúdo canônico dos Normais (content.ts + assets-local).
+3. [CONCLUÍDO] Criação de harness headless com 5 fases, 5 impactos, deck out e replay bit-a-bit (ISSUE-006).
 4. Implementação pontual das Keywords aprovadas no motor (com testes dedicados).
-5. Ampliação do harness headless incluindo os Normais com Keyword.
-6. Terreno e SPD contínuo.
-7. IA adversária inicial operando sob a fila pública.
-8. Somente após essa base funcional: desbloqueio e implementação de Magias/Armadilhas/Efeito/Fusão definidos pelo autor.
+5. Terreno e SPD contínuo (ISSUE-004).
+6. IA adversária inicial operando sob a fila pública (ISSUE-007).
+7. Somente após essa base funcional: desbloqueio e implementação de Magias/Armadilhas/Efeito/Fusão definidos pelo autor.
 ```
