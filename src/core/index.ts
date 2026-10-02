@@ -35,5 +35,7 @@ export * from "./zones.ts";
 export * from "./headless.ts";
 export * from "./keywords.ts";
 export * from "./reanimate.ts";
+export * from "./terrain.ts";
 export type * from "./types.ts";
+
 

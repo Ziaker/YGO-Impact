@@ -7,6 +7,8 @@ import {
   resolveBasicMovement,
   resolveMonsterMovement,
   createMonsterState,
+  createTerrainTile,
+  createTerrainLookup,
 } from "../../src/core/index.ts";
 
 const bases = [
@@ -169,3 +171,133 @@ test("monster movement rejects ownership and monster/spatial mismatches", () => 
     /inconsistent monster and spatial state/,
   );
 });
+
+test("movement spends variable SPD cost based on terrain lookup", () => {
+  const terrainLookup = createTerrainLookup([
+    createTerrainTile({ x: 3, y: 8 }, "rough", 2),
+    createTerrainTile({ x: 4, y: 8 }, "plain", 1),
+  ]);
+
+  const result = resolveBasicMovement(
+    spatial(),
+    "moving",
+    4,
+    [
+      { x: 3, y: 8 },
+      { x: 4, y: 8 },
+    ],
+    { terrainLookup },
+  );
+
+  assert.equal(result.stopReason, "completed");
+  // Spent 2 (rough) + 1 (plain) = 3 SPD out of 4 -> 1 remaining
+  assert.equal(result.remainingSpd, 1);
+  assert.deepEqual(result.spatial.units[0].position, { x: 4, y: 8 });
+});
+
+test("movement allows entering high-cost terrain with positive SPD, resulting in negative SPD", () => {
+  const terrainLookup = createTerrainLookup([
+    createTerrainTile({ x: 3, y: 8 }, "rough", 2),
+  ]);
+
+  // Starting with 1 SPD. Entering rough terrain (cost 2) leaves remainingSpd = 1 - 2 = -1.
+  const entered = resolveBasicMovement(
+    spatial(),
+    "moving",
+    1,
+    [{ x: 3, y: 8 }],
+    { terrainLookup },
+  );
+
+  assert.equal(entered.stopReason, "completed");
+  assert.equal(entered.remainingSpd, -1);
+  assert.deepEqual(entered.spatial.units[0].position, { x: 3, y: 8 });
+
+  // While SPD is negative (-1 < 1), subsequent movement cannot begin and is blocked with insufficient_spd
+  const blocked = resolveBasicMovement(
+    entered.spatial,
+    "moving",
+    entered.remainingSpd,
+    [{ x: 4, y: 8 }],
+    { terrainLookup },
+  );
+
+  assert.equal(blocked.stopReason, "insufficient_spd");
+  assert.equal(blocked.traversedPath.length, 0);
+  assert.equal(blocked.remainingSpd, -1);
+});
+
+test("movement blocks non-GLIDER units from entering impassable terrain", () => {
+  const terrainLookup = createTerrainLookup([
+    createTerrainTile({ x: 3, y: 8 }, "impassable"),
+  ]);
+
+  const result = resolveBasicMovement(
+    spatial(),
+    "moving",
+    4,
+    [
+      { x: 3, y: 8 },
+      { x: 4, y: 8 },
+    ],
+    { terrainLookup, isGlider: false },
+  );
+
+  assert.equal(result.stopReason, "blocked");
+  assert.deepEqual(result.spatial.units[0].position, { x: 2, y: 8 });
+  assert.equal(result.remainingSpd, 4);
+});
+
+test("movement allows GLIDER to traverse impassable terrain but blocks ending on it", () => {
+  const terrainLookup = createTerrainLookup([
+    createTerrainTile({ x: 3, y: 8 }, "impassable"),
+  ]);
+
+  // Traversing across impassable terrain to a plain tile at {x: 4, y: 8}
+  const crossed = resolveBasicMovement(
+    spatial(),
+    "moving",
+    4,
+    [
+      { x: 3, y: 8 },
+      { x: 4, y: 8 },
+    ],
+    { terrainLookup, isGlider: true },
+  );
+
+  assert.equal(crossed.stopReason, "completed");
+  assert.deepEqual(crossed.spatial.units[0].position, { x: 4, y: 8 });
+  // Glider pays standard 1 SPD per step: 4 - 2 = 2
+  assert.equal(crossed.remainingSpd, 2);
+
+  // Attempting to stop directly on the impassable tile is blocked
+  const stoppedOnImpassable = resolveBasicMovement(
+    spatial(),
+    "moving",
+    4,
+    [{ x: 3, y: 8 }],
+    { terrainLookup, isGlider: true },
+  );
+
+  assert.equal(stoppedOnImpassable.stopReason, "blocked");
+  assert.deepEqual(stoppedOnImpassable.spatial.units[0].position, { x: 2, y: 8 });
+});
+
+test("GLIDER ignores rough terrain extra cost and pays standard 1 SPD", () => {
+  const terrainLookup = createTerrainLookup([
+    createTerrainTile({ x: 3, y: 8 }, "rough", 3),
+  ]);
+
+  const result = resolveBasicMovement(
+    spatial(),
+    "moving",
+    4,
+    [{ x: 3, y: 8 }],
+    { terrainLookup, isGlider: true },
+  );
+
+  assert.equal(result.stopReason, "completed");
+  // Ignores cost 3, pays 1 SPD -> 3 remaining
+  assert.equal(result.remainingSpd, 3);
+});
+

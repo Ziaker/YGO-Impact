@@ -1,4 +1,5 @@
 import { deepFreeze } from "./freeze.ts";
+import { hasKeyword } from "./keywords.ts";
 import type { MonsterState } from "./monster.ts";
 import {
   createSpatialState,
@@ -9,6 +10,11 @@ import {
 } from "./spatial.ts";
 
 export type MovementStopReason = "completed" | "insufficient_spd" | "blocked";
+
+export interface MovementOptions {
+  readonly isGlider?: boolean;
+  readonly terrainLookup?: (pos: Position) => { readonly spdCost: number; readonly impassable: boolean };
+}
 
 export interface BasicMovementResult {
   readonly spatial: SpatialState;
@@ -46,6 +52,7 @@ export function resolveBasicMovement(
   unitId: string,
   currentSpd: number,
   path: readonly Position[],
+  options?: MovementOptions,
 ): BasicMovementResult {
   if (!Number.isSafeInteger(currentSpd)) {
     throw new MovementInvariantError("currentSpd must be a safe integer.");
@@ -106,9 +113,24 @@ export function resolveBasicMovement(
       break;
     }
 
+    const terrain = options?.terrainLookup
+      ? options.terrainLookup(destination)
+      : { spdCost: 1, impassable: false };
+
+    const isGlider = options?.isGlider ?? false;
+
+    if (terrain.impassable) {
+      if (!isGlider || isFinalStep) {
+        stopReason = "blocked";
+        break;
+      }
+    }
+
+    const stepCost = isGlider ? 1 : terrain.spdCost;
+
     position = clonePosition(destination);
     traversedPath.push(position);
-    remainingSpd -= 1;
+    remainingSpd -= stepCost;
   }
 
   if (traversedPath.length === 0) {
@@ -137,6 +159,7 @@ export function resolveMonsterMovement(
   unitId: string,
   playerId: string,
   path: readonly Position[],
+  options?: MovementOptions,
 ): MonsterMovementResult {
   const monster = monsters.find((entry) => entry.unitId === unitId);
   if (monster === undefined) throw new MovementInvariantError(`Unknown moving monster ${unitId}.`);
@@ -152,7 +175,11 @@ export function resolveMonsterMovement(
   ) {
     throw new MovementInvariantError(`Unit ${unitId} has inconsistent monster and spatial state.`);
   }
-  const movement = resolveBasicMovement(spatial, unitId, monster.spd.current, path);
+  const isGlider = options?.isGlider ?? hasKeyword(monster, "GLIDER");
+  const movement = resolveBasicMovement(spatial, unitId, monster.spd.current, path, {
+    ...options,
+    isGlider,
+  });
   const finalPosition = movement.spatial.units.find((entry) => entry.unitId === unitId)?.position;
   if (finalPosition === undefined) throw new MovementInvariantError(`Moving unit ${unitId} disappeared.`);
   const updated = monsters.map((entry) =>
