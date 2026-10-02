@@ -87,14 +87,12 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 
 ### Artes e conteúdo
 
-- Downloader `image_url_cropped`: **Implementado e testado**.
-- Seleção versionada: **Implementada**.
-- Sincronização por GitHub Actions: **Implementada**.
-- `DEC-001-initial-card-pool.md` define a política automática atual em **136 cartas**: 106 monstros, 20 Magias e 10 Armadilhas.
-- O snapshot atualmente versionado em `assets-local/card-art/selection.json` ainda registra **96 cartas**: 66 monstros, 20 Magias e 10 Armadilhas. Portanto, esse artefato está atrás da política atual e não deve ser descrito como se já fosse o pool de 136 materializado.
-- Seleção real do pool de 136: **Validada em modo de simulação**, usando RushCard somente como suplemento Psychic e a exceção autoral restrita a `Psychic Musician` e `Shaman Bandit`.
-- Artes do pool de 136: **128 prontas/planejadas e 8 pendentes**. O RushCard oferece cartas montadas, não ilustrações limpas; essas oito entradas são marcadas como pendentes e não podem ser baixadas como falso `image_url_cropped`.
-- Seleção final das 88 cartas (ou redução deliberada para 40): **Pendente de conteúdo**, sem inventar lista por conta própria.
+- **Biblioteca Física de Ativos (ssets-local/card-art/):** **Materializada com 407 artes recortadas (.jpg), 407 sidecars de metadados (.txt) e 92 sidecars de efeito (.effect.txt)**. Todas as 17 RACE prioritárias possuem pelo menos 15 Monstros Normais catalogados com ilustrações limpas e dados oficiais da carta-fonte. Zero arquivos órfãos.
+- **Segurança da Biblioteca:** A automação destrutiva de poda no GitHub Actions (sync-card-art.yml) foi desativada e eliminada. A biblioteca física é estritamente aditiva e nunca é podada com base em seleções parciais.
+- **Candidate Pool / Seleção Curada Auxiliar (DEC-001):** **136 cartas** (Beast, Psychic, Fiend, Spellcaster + Magias e Armadilhas) definido para testes de amostragem e geração de decks.
+- **Expansão Pré-2005 de Magias e Armadilhas (DEC-004):** **Definida pelo autor e implementada em scripts** (10 por subtipo com filtro temporal estrito a feitiços e armadilhas).
+- **Proposta Formal para GDD v0.44:** Registrada em PROPOSTA_GDD_v0.44_ERA_E_EXCECAO_PSYCHIC.md, formalizando a exceção estrutural da era para a raça Psíquico mantendo o banimento de Synchro/Xyz/Pendulum/Link.
+- **Escopo Jogável Canônico (GDD v0.43 P77-P80):** Meta de 88 cartas (ou fallback para 40) para o jogo funcional (1 mapa, 2 decks de 20 cartas, 1 IA): **Em estruturação no núcleo**.
 
 ### Testes e CI
 

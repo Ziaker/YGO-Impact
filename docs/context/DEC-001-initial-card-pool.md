@@ -1,7 +1,18 @@
-# DEC-001 — Pool de cartas do primeiro protótipo
+# DEC-001 — Seleção Curada Auxiliar / Candidate Pool de 136 Cartas
 
-**Status:** definido pelo autor  
-**Data:** 2026-09-29
+**Status:** definido pelo autor (esclarecida a natureza de Candidate Pool auxiliar)  
+**Data:** 2026-09-29  
+**Retificação de escopo:** 2026-10-01  
+
+## Relação com o GDD v0.43 e Definição de Escopo
+
+Esta decisão define um **Candidate Pool automatizado de 136 cartas** (seleção curada para testes, amostragem e geração de decks). Ela **não substitui** o escopo canônico do GDD v0.43 (P77-P80), que estabelece como meta inicial jogável 88 cartas (com fallback deliberado para 40 cartas, formando 2 decks de 20 cartas contra 1 IA em 1 mapa).
+
+A distinção conceitual rigorosa adotada no projeto é:
+1. **Biblioteca Física de Ativos (ssets-local/card-art/):** Todo o acervo de artes e sidecars TXT baixados (407+ cartas abrangendo todas as 17 RACE prioritárias, Magias e Armadilhas). Nunca é podada por automações.
+2. **Candidate Pool / Seleção Curada (DEC-001):** Conjunto algorítmico de 136 cartas (4 raças ativas + Magias + Armadilhas) registrado em selection.json.
+3. **Escopo Jogável do Primeiro Protótipo (GDD P77-P80):** Conjunto fechado de 88 cartas (ou fallback de 40 cartas) implementadas com regras ativas de gameplay.
+4. **Decks de Partida:** Listas de 20 cartas para duelo.
 
 ## Decisão
 

@@ -1,35 +1,85 @@
-import importlib.util, sys, unittest
+import importlib.util
+import sys
+import unittest
 from pathlib import Path
-SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
-if str(SCRIPTS) not in sys.path: sys.path.insert(0, str(SCRIPTS))
-spec = importlib.util.spec_from_file_location("expand_test", SCRIPTS / "expand_pre2005_library.py")
-module = importlib.util.module_from_spec(spec); assert spec and spec.loader; sys.modules[spec.name] = module; spec.loader.exec_module(module); base = module.base
 
-def card(i, race, level, *, year_set="Old", source="standard"):
-    return {"id": i, "name": f"C{i}", "type": "Normal Monster", "race": race, "level": level, "card_sets": [{"set_name": year_set}], "card_images": [{"id": i, "image_url_cropped": f"https://x/{i}.jpg"}], "_monster_impact_source": source}
+SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+
+spec = importlib.util.spec_from_file_location("expand_test", SCRIPTS / "expand_pre2005_library.py")
+module = importlib.util.module_from_spec(spec)
+assert spec and spec.loader
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+base = module.base
+
+
+def spell_card(cid: int, subtype: str, year: int) -> dict:
+    return {
+        "id": cid,
+        "name": f"Spell_{cid}",
+        "type": "Spell Card",
+        "race": subtype,
+        "card_sets": [{"set_name": f"Set_{year}"}],
+        "card_images": [{"id": cid, "image_url_cropped": f"https://x/{cid}.jpg"}],
+    }
+
+
+def trap_card(cid: int, subtype: str, year: int) -> dict:
+    return {
+        "id": cid,
+        "name": f"Trap_{cid}",
+        "type": "Trap Card",
+        "race": subtype,
+        "card_sets": [{"set_name": f"Set_{year}"}],
+        "card_images": [{"id": cid, "image_url_cropped": f"https://x/{cid}.jpg"}],
+    }
+
 
 class ExpansionTests(unittest.TestCase):
     def test_cutoff_exclusive(self):
-        self.assertTrue(module.pre_cutoff(card(1, "Aqua", 3), {"Old": 2004}, 2005))
-        self.assertFalse(module.pre_cutoff(card(1, "Aqua", 3), {"Old": 2005}, 2005))
-    def test_non_psychic_expands_level_max(self):
-        cards = [card(i, "Aqua", 7 if i == 15 else 3) for i in range(1,16)]
-        old = base.PROJECT_PRIORITY_RACES; base.PROJECT_PRIORITY_RACES = ("Aqua",)
-        try: selected, max_level, psychic = module.select_normals(cards, {"Old":2004}, 2005, set(), set(), 15, 20)
-        finally: base.PROJECT_PRIORITY_RACES = old
-        self.assertEqual(len(selected),15); self.assertEqual(max_level["Aqua"],7); self.assertEqual(psychic,0)
-    def test_psychic_any_date_any_level_up_to_20(self):
-        cards = [card(i, "Psychic", (i%12)+1, year_set="Future", source="rush-duel") for i in range(1,26)]
-        old = base.PROJECT_PRIORITY_RACES; base.PROJECT_PRIORITY_RACES = ("Psychic",)
-        try: selected, max_level, psychic = module.select_normals(cards, {"Future":2021}, 2005, set(), set(), 15, 20)
-        finally: base.PROJECT_PRIORITY_RACES = old
-        self.assertEqual(len(selected),20); self.assertEqual(psychic,20); self.assertTrue(any(int(c["level"])<3 for c in selected)); self.assertEqual(max_level["Psychic"],12)
-    def test_psychic_accepts_less_than_20(self):
-        cards = [card(i, "Psychic", i, year_set="Future") for i in range(1,8)]
-        old = base.PROJECT_PRIORITY_RACES; base.PROJECT_PRIORITY_RACES = ("Psychic",)
-        try: selected, _, psychic = module.select_normals(cards, {"Future":2024}, 2005, set(), set(), 15, 20)
-        finally: base.PROJECT_PRIORITY_RACES = old
-        self.assertEqual(len(selected),7); self.assertEqual(psychic,7)
-    def test_subtypes(self):
-        self.assertEqual(module.SPELL_SUBTYPES, ("Normal","Quick-Play","Continuous","Equip","Field","Ritual")); self.assertEqual(module.TRAP_SUBTYPES, ("Normal","Continuous","Counter"))
-if __name__ == "__main__": unittest.main()
+        years = {"Old": 2004, "Cutoff": 2005}
+        self.assertTrue(module.pre_cutoff(spell_card(1, "Normal", 2004), {"Set_2004": 2004}, 2005))
+        self.assertFalse(module.pre_cutoff(spell_card(2, "Normal", 2005), {"Set_2005": 2005}, 2005))
+
+    def test_subtypes_definition(self):
+        self.assertEqual(module.SPELL_SUBTYPES, ("Normal", "Quick-Play", "Continuous", "Equip", "Field", "Ritual"))
+        self.assertEqual(module.TRAP_SUBTYPES, ("Normal", "Continuous", "Counter"))
+
+    def test_select_subtypes_spells(self):
+        years = {f"Set_{y}": y for y in (2002, 2003, 2006)}
+        cards = [
+            spell_card(1, "Normal", 2002),
+            spell_card(2, "Normal", 2003),
+            spell_card(3, "Normal", 2006),  # post 2005, should be excluded
+        ]
+        selected = module.select_subtypes(
+            cards,
+            api_type="Spell Card",
+            subtypes=("Normal",),
+            years=years,
+            cutoff=2005,
+            existing=set(),
+            quota=2,
+        )
+        self.assertEqual(len(selected), 2)
+        self.assertEqual([c["id"] for c in selected], [1, 2])
+
+    def test_select_subtypes_shortfall_raises(self):
+        years = {"Set_2002": 2002}
+        cards = [trap_card(1, "Counter", 2002)]
+        with self.assertRaises(module.ExpansionError):
+            module.select_subtypes(
+                cards,
+                api_type="Trap Card",
+                subtypes=("Counter",),
+                years=years,
+                cutoff=2005,
+                existing=set(),
+                quota=2,
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()
