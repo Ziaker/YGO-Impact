@@ -147,17 +147,14 @@ resolução: Lógica de sincronização consolidada no script canônico scripts/
 cobertura: Testes unitários expandidos em tests/test_sync_prototype_pool.py cobrindo filtragem de candidatos RushCard, marcação de art_status, exclusão de imagens pendentes de recorte e delegação semântica do shim retrocompatível (100% de aprovação).
 ```
 
-### ISSUE-011: Inexistência de Workflow de Publicação para GitHub Pages
+### ISSUE-011: Inexistência de Workflow de Publicação para GitHub Pages — RESOLVIDO
 ```text
 ID: ISSUE-011
-prioridade: P3
-arquivo: .github/workflows/
-linhas: N/A
-problema: O repositório contém apenas ci.yml e sync-card-art.yml. Não existe nenhum workflow para compilar e publicar a versão jogável no GitHub Pages.
-impacto: A build jogável não pode ser disponibilizada publicamente via Pages até que a pipeline seja estruturada.
-regra do GDD relacionada: P25 ("Disponível em uma versão jogável pelo GitHub Pages").
-cobertura atual: Inexistente.
-correção recomendada: Desenvolver .github/workflows/deploy-pages.yml quando o marco de integração da build web jogável for aprovado pelo autor.
+prioridade: P3 (RESOLVIDO)
+arquivo: .github/workflows/deploy-pages.yml
+linhas: 1-47
+resolução: Workflow de deploy automático para GitHub Pages implementado sob autorização expressa do autor. O pipeline compila a build web com TypeScript em Node 24.21.0, empacota index.html e dist/ no diretório _site/, e realiza o deploy via actions/configure-pages@v5, actions/upload-pages-artifact@v3 e actions/deploy-pages@v4 no ambiente oficial github-pages a cada push na branch main ou via workflow_dispatch manual.
+cobertura: Validação sintática e integridade do bundle em CI.
 ```
 
 ### ISSUE-012: Ausência de Testes de Fuzzing e Invariantes de Longa Duração — RESOLVIDO
@@ -187,10 +184,10 @@ cobertura: Suíte completa em tests/core/fuzz.test.mjs com 100% de aprovação.
 10. `ISSUE-008`: Catálogo unificado de conteúdo (`ContentCatalog` em `src/core/content.ts`).
 11. `ISSUE-012`: Fuzzing e endurance tests (`tests/core/fuzz.test.mjs`).
 
-### Prioridade P2 / P3 (Governança e Tooling)
+### Prioridade P2 / P3 (Governança e Tooling) — TODOS RESOLVIDOS
 - `ISSUE-009`: Alinhamento documental de protótipos em `ROADMAP.md` (Sanado localmente).
 - `ISSUE-010`: Consolidação de scripts de pool (RESOLVIDO).
-- `ISSUE-011`: Pipeline de GitHub Pages (aguardando confirmação do autor).
+- `ISSUE-011`: Pipeline de GitHub Pages (RESOLVIDO).
 
 ---
 
@@ -207,4 +204,5 @@ cobertura: Suíte completa em tests/core/fuzz.test.mjs com 100% de aprovação.
 8. [CONCLUÍDO] Marco 6: Conexão Web e Build Jogável (humano vs IA no navegador com Fog of War e replay determinístico).
 9. [CONCLUÍDO] Fuzzing adversarial e invariantes de longa duração (ISSUE-012).
 10. [CONCLUÍDO] Consolidação de tooling de sincronização de pool (ISSUE-010).
+11. [CONCLUÍDO] Pipeline de publicação automática no GitHub Pages (ISSUE-011).
 ```

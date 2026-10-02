@@ -98,7 +98,7 @@ Este arquivo registra o **estado real do repositório** e a ordem recomendada de
 ### Web e publicação
 
 - Build jogável integrada: **Implementada e testada (`index.html`, `src/web/client.ts`, `src/web/app.ts`, `tests/core/web.test.mjs`)**.
-- GitHub Pages: **Pendente / aguardando confirmação explícita do autor**.
+- GitHub Pages: **Implementado e ativo via `.github/workflows/deploy-pages.yml` sob autorização expressa do autor**.
 
 ### IA, replay e telemetria
 
