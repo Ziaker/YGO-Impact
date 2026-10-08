@@ -1,22 +1,44 @@
 # VIS-CARD-IN-GAME-001 — núcleo da unidade e inspeção flutuante
 
-**Estado:** em avaliação. Nenhuma das novas variações C está aprovada.
+**Estado:** **A e C aprovados como opções selecionáveis nas configurações.**
+
+## Decisão vigente
+
+O autor aprovou simultaneamente:
+
+- **A — Prisma de Retrato**
+- **C — Lente de Combate**
+
+As duas direções devem coexistir como alternativas selecionáveis pelo jogador nas configurações.
+
+**B — Faixa de Comando** permanece preservado apenas para possível revisita futura.
+
+As variações **C1 — Halo de Foco**, **C2 — Faixa Contextual** e **C3 — Microdock de Foco** permanecem experimentais e não substituem automaticamente a C aprovada.
 
 ## Histórico preservado
 
-As três direções anteriores foram preservadas integralmente em `archive/` para revisita futura:
+As três direções anteriores permanecem integralmente em `archive/`:
 
-- `archive/a-prisma-de-retrato.html`
-- `archive/b-faixa-de-comando.html`
-- `archive/c-lente-de-combate.html`
+- `archive/a-prisma-de-retrato.html` — **APROVADO**
+- `archive/b-faixa-de-comando.html` — preservado para revisita
+- `archive/c-lente-de-combate.html` — **APROVADO**
 
-A nova rodada não substitui nem apaga essas direções.
+Nenhuma dessas direções deve ser apagada por esta decisão.
 
-## Contrato da nova rodada
+## Contrato visual
 
-O núcleo visual da unidade contém arte, efeito, RACE, Nível, ELEM e Keywords. HP, MP, VIS, SPD, ATK e DEF pertencem à interface externa de inspeção.
+O núcleo visual da unidade contém:
 
-As cores semânticas dos seis stats permanecem as usadas no Card Studio:
+- arte;
+- efeito;
+- RACE com iconografia;
+- Nível com iconografia;
+- ELEM com iconografia;
+- Keywords com iconografia.
+
+HP, MP, VIS, SPD, ATK e DEF pertencem à interface externa de inspeção, preservando ícone, texto e cor semântica.
+
+As cores semânticas atualmente usadas pelos protótipos são:
 
 - HP `#ff7474`
 - MP `#72b1ff`
@@ -25,11 +47,15 @@ As cores semânticas dos seis stats permanecem as usadas no Card Studio:
 - ATK `#ff8f6d`
 - DEF `#80b7e3`
 
-## Variações da Opção C
+## Variações experimentais da C
 
-- `c-variants/c1-halo-de-foco.html`: inspeção radial junto da unidade.
-- `c-variants/c2-faixa-contextual.html`: cápsula contextual compacta que acompanha a unidade.
-- `c-variants/c3-microdock-de-foco.html`: foco por zoom + microdock inferior de baixa altura.
-- `c-variants/index.html`: comparador C1/C2/C3.
+- `c-variants/c1-halo-de-foco.html`
+- `c-variants/c2-faixa-contextual.html`
+- `c-variants/c3-microdock-de-foco.html`
+- `c-variants/index.html`
 
-Todas permitem seleção direta de múltiplas unidades presentes no campo, feedback animado de seleção, troca por teclado e zoom exclusivamente de apresentação. Nenhum zoom ou overlay deste protótipo altera regra ou estado autoritativo.
+Elas permanecem úteis como referência para seleção direta de múltiplas unidades, feedback animado, troca por teclado, zoom de apresentação e compactação da inspeção.
+
+## Próxima etapa
+
+A integração das duas opções aprovadas com o Card Studio/editor será tratada separadamente. Esta decisão não define ainda o formato persistido da preferência, o padrão inicial nem a UI final da configuração.
