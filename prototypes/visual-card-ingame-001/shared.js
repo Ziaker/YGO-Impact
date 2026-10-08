@@ -1,0 +1,36 @@
+const STAT_PATHS={
+ hp:"M16 28 C12 24 3 18 3 10 C3 2 13 1 16 8 C19 1 29 2 29 10 C29 18 20 24 16 28 Z",
+ mp:"M16 2 C13 8 5 15 5 21 C5 34 27 34 27 21 C27 15 19 8 16 2 Z M12 19 Q9 25 16 26",
+ vis:"M2 16 Q16 -3 30 16 Q16 35 2 16 Z M21 16 A5 5 0 1 1 11 16 A5 5 0 1 1 21 16 Z",
+ atk:"M25 2 L29 3 L30 7 L15 22 L10 17 Z M7 15 L18 26 M5 27 L11 21 M3 29 L7 25",
+ def:"M16 2 L28 7 L26 21 Q23 27 16 30 Q9 27 6 21 L4 7 Z M16 7 L16 24",
+ spd:"M12 3 L23 5 L20 18 L29 23 L29 28 L8 28 L8 20 Z M2 9 L8 9 M1 15 L6 15"
+};
+const RACE_PATHS={
+ Spellcaster:"M5 20 L16 9 M15 4 L16 7 L19 8 L16 9 L15 12 L14 9 L11 8 L14 7 Z M4 16 L8 20",
+ Psychic:"M2 12 C6 5 18 5 22 12 C18 19 6 19 2 12 Z M8 12 A4 4 0 1 0 16 12 A4 4 0 1 0 8 12 M12 10 L14 12 L12 14 L10 12 Z",
+ Warrior:"M7 3 L17 13 M17 3 L7 13 M12 8 L12 21 M8 21 L16 21",
+ Beast:"M7 10 A2 2 0 1 0 7 6 A2 2 0 1 0 7 10 M12 8 A2 2 0 1 0 12 4 A2 2 0 1 0 12 8 M17 10 A2 2 0 1 0 17 6 A2 2 0 1 0 17 10 M12 11 C8 11 6 14 7 17 C8 20 10 21 12 19 C14 21 16 20 17 17 C18 14 16 11 12 11 Z"
+};
+const ELEMENTS={earth:{label:"TERRA",glyph:"▲",color:"#d97706"},light:{label:"LUZ",glyph:"✦",color:"#eab308"},dark:{label:"TREVAS",glyph:"☾",color:"#a855f7"},wind:{label:"VENTO",glyph:"≋",color:"#10b981"}};
+const TYPES={normal:{label:"NORMAL",color:"#dbba5e"},effect:{label:"EFEITO",color:"#cc7744"},ritual:{label:"RITUAL",color:"#5174a8"},fusion:{label:"FUSION",color:"#7c4a93"}};
+const UNITS=[
+ {id:"gemini",name:"Gemini Elf",team:"ally",x:31,y:66,art:"../../../assets-local/card-art/Monstros/Spellcaster/Normal/gemini-elf__69140098.jpg",race:"Spellcaster",raceLabel:"Mago",level:4,element:"earth",type:"normal",stats:{hp:4,mp:0,vis:4,spd:3,atk:11,def:6},keywords:[["◉","SIGHT 1",""],["⌛","PREPARATION","sustain"]],effect:"Keywords estruturais permitem reconhecimento e preparação sem adicionar uma habilidade acionada."},
+ {id:"chalice",name:"Chosen by the World Chalice",team:"ally",x:42,y:42,art:"../../../assets-local/card-art/Monstros/Psychic/Normal/chosen-by-the-world-chalice__22916281.jpg",race:"Psychic",raceLabel:"Psíquico",level:3,element:"light",type:"effect",stats:{hp:3,mp:5,vis:6,spd:3,atk:8,def:6},keywords:[["≈","PSYWAVE","offense"],["↩","RECALL 1",""]],effect:"Ao ser invocado, PSYWAVE reduz MP de inimigos dentro da VIS. RECALL permite retorno imediato conforme seu timing."},
+ {id:"judge",name:"Judge Man",team:"ally",x:48,y:72,art:"../../../assets-local/card-art/Monstros/Warrior/Normal/judge-man__30113682.jpg",race:"Warrior",raceLabel:"Guerreiro",level:6,element:"earth",type:"ritual",stats:{hp:9,mp:6,vis:4,spd:3,atk:14,def:10},keywords:[["⛨","BULWARK","def"],["➤","CHARGE 2",""]],effect:"BULWARK pode alterar a posição antes do cálculo. CHARGE permite avanço reto ao declarar Ataque Básico."},
+ {id:"enemy1",name:"Vanguarda inimiga",team:"enemy",x:67,y:38,art:"../../../assets-local/card-art/Monstros/Warrior/Normal/judge-man__30113682.jpg",race:"Warrior",raceLabel:"Guerreiro",level:5,element:"dark",type:"effect",stats:{hp:5,mp:4,vis:4,spd:4,atk:12,def:8},keywords:[["▼","INTIMIDATE 1","offense"]],effect:"Aura hostil de curta distância. Unidade incluída para testar seleção e leitura de lado adversário."},
+ {id:"enemy2",name:"Sentinela inimiga",team:"enemy",x:75,y:63,art:"../../../assets-local/card-art/Monstros/Spellcaster/Normal/gemini-elf__69140098.jpg",race:"Spellcaster",raceLabel:"Mago",level:4,element:"wind",type:"fusion",stats:{hp:6,mp:5,vis:5,spd:4,atk:10,def:9},keywords:[["◉","SIGHT 2",""],["⤢","EVASIVE","def"]],effect:"Visão elevada e evasão imediata quando o requisito de SPD for satisfeito."}
+];
+function iconSvg(kind,klass="icon"){const path=STAT_PATHS[kind];return `<span class="${klass} stat-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="${path}" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`}
+function raceSvg(race,klass="icon"){const p=RACE_PATHS[race]||RACE_PATHS.Beast;return `<span class="${klass}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${p}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`}
+function statChip(key,val){return `<div class="stat-chip ${key}">${iconSvg(key)}<span class="numbers"><span class="stat-label">${key.toUpperCase()}</span><span class="stat-value">${val}</span></span></div>`}
+function keywordHtml([glyph,name,cls]){return `<span class="kw ${cls||""}"><b>${glyph}</b>${name}</span>`}
+function populateBoard(){const board=document.querySelector(".board");UNITS.forEach(u=>{const b=document.createElement("button");b.className=`unit ${u.team}`;b.dataset.unit=u.id;b.style.left=u.x+"%";b.style.top=u.y+"%";b.style.setProperty("--unit-accent",TYPES[u.type].color);b.setAttribute("aria-label",`Selecionar ${u.name}`);b.setAttribute("aria-pressed","false");b.innerHTML=`<span class="disc"><img src="${u.art}" alt=""></span><span class="level-mini">${u.level}</span><span class="team"></span>`;board.appendChild(b)});board.addEventListener("click",e=>{const b=e.target.closest(".unit");if(b)selectUnit(b.dataset.unit)})}
+let selected=null;
+function selectUnit(id){const u=UNITS.find(x=>x.id===id);if(!u)return;selected=u;document.documentElement.style.setProperty("--accent",TYPES[u.type].color);document.documentElement.style.setProperty("--elem",ELEMENTS[u.element].color);document.querySelectorAll(".unit").forEach(b=>{const active=b.dataset.unit===id;b.setAttribute("aria-pressed",String(active));if(active){b.classList.remove("selecting");void b.offsetWidth;b.classList.add("selecting");setTimeout(()=>b.classList.remove("selecting"),800)}});const board=document.querySelector(".board");board.classList.add("focusing");board.style.transformOrigin=`${u.x}% ${u.y}%`;renderInspector(u);requestAnimationFrame(()=>{board.style.transform=`scale(${document.body.dataset.zoom||1.08})`});document.querySelector(".overlay")?.classList.add("shown")}
+function clearSelection(){selected=null;document.querySelectorAll(".unit").forEach(b=>b.setAttribute("aria-pressed","false"));const board=document.querySelector(".board");board.classList.remove("focusing");board.style.transform="scale(1)";document.querySelector(".overlay")?.classList.remove("shown")}
+function coreBadges(u){return `<span class="core-badge race">${raceSvg(u.race)}<b>${u.raceLabel}</b></span><span class="core-badge level">${u.level}</span><span class="core-badge elem" style="--elem:${ELEMENTS[u.element].color}" title="${ELEMENTS[u.element].label}">${ELEMENTS[u.element].glyph}</span>`}
+function nameMeta(u){return `<div><div class="name">${u.name}</div><div class="meta">${TYPES[u.type].label} · ${u.raceLabel} · ${ELEMENTS[u.element].label}</div></div>`}
+function effectBlock(u){return `<div class="effect-copy"><b>EFEITO</b> ${u.effect}</div><div class="kw-row">${u.keywords.map(keywordHtml).join("")}</div>`}
+function renderInspector(u){if(window.renderVariant)window.renderVariant(u)}
+window.addEventListener("DOMContentLoaded",()=>{populateBoard();selectUnit(UNITS[0].id);document.addEventListener("keydown",e=>{if(e.key==="Escape")clearSelection();const idx=Math.max(0,UNITS.findIndex(x=>x.id===selected?.id));if(e.key==="ArrowRight"||e.key==="ArrowDown")selectUnit(UNITS[(idx+1)%UNITS.length].id);if(e.key==="ArrowLeft"||e.key==="ArrowUp")selectUnit(UNITS[(idx-1+UNITS.length)%UNITS.length].id)})});

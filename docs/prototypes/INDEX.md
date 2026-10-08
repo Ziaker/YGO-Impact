@@ -17,6 +17,7 @@ Este índice acompanha o inventário visual obrigatório do GDD v0.43. **Existir
 | VIS-ENV-001 | Revisão da Câmera 3D e do Ambiente-Base (Palco Visual) | Protótipo visual 3D comparativo (A/B/C) de ângulo, ergonomia, iluminação, terreno e integração da grade | **Aprovado como palco de referência pelo autor em 2026-10-01 (câmera e ambiente congelados)** | `VIS-ENV-001-camera-3d-base-environment.md` + `../../prototypes/visual-env-001-board-camera/index.html` |
 | VIS-007 | Identidade visual do combate e resolução de batalha | Microprotótipos atômicos por elemento visual (EL-1 a EL-7, 3 opções A/B/C cada) | **Em avaliação pelo autor (Opções A, B e C para EL-1 a EL-7)** | `VIS-007-combat-resolution.md` + `../../prototypes/visual-007-combat/index.html` |
 | VIS-008 | Identidade visual de destruição, base e correntes | Microprotótipos atômicos por elemento visual (EL-8 a EL-10, 3 opções A/B/C cada) | **Em avaliação pelo autor (Opções A, B e C para EL-8 a EL-10)** | `VIS-008-chains-activation-visual.md` + `../../prototypes/visual-008-chains/index.html` |
+| VIS-CARD-IN-GAME-001 | Representação in-game de unidade e inspeção flutuante | HTML interativo com histórico A/B/C + rodada C1/C2/C3 | **Em avaliação — A/B/C preservados; C1/C2/C3 em avaliação** | `VIS-CARD-IN-GAME-001.md` + `../../prototypes/visual-card-ingame-001/c-variants/index.html` |
 
 
 
